@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: git@github.com:blogdoft/k3s-apps.git
-    path: platform
+    path: artifacts/flagr
     targetRevision: HEAD
   destination:
     server: https://kubernetes.default.svc
