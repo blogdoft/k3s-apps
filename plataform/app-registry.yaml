@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: registry
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: git@github.com:blogdoft/k3s-apps.git
+    path: artifacts/registry
+    targetRevision: HEAD
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: docker-registry
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      enabled: true
+    syncOptions:
+      - CreateNamespace=true
