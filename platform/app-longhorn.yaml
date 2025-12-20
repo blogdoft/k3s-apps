@@ -10,11 +10,11 @@ spec:
       chart: longhorn
       targetRevision: 1.10.1
       helm:
-      valueFiles:
-        - $values/artifacts/longhorn/values.yaml
+        valueFiles:
+          - $values/artifacts/longhorn/helm-values/values.yaml
 
     - repoURL: git@github.com:blogdoft/k3s-apps.git
-      path: artifacts/longhorn
+      path: artifacts/longhorn/manifests
       targetRevision: HEAD
       ref: values
 
