@@ -1,0 +1,53 @@
+server:
+  # Habilitar a UI
+  ui:
+    enabled: true
+    serviceType: ClusterIP
+  
+  # Configuração standalone com UI habilitada
+  standalone:
+    enabled: true
+    config: |
+      ui = true
+      
+      listener "tcp" {
+        tls_disable = 0
+        address = "[::]:8200"
+        cluster_address = "[::]:8201"
+        tls_cert_file = "/vault/userconfig/wildcard-home-arpa/tls.crt"
+        tls_key_file = "/vault/userconfig/wildcard-home-arpa/tls.key"
+      }
+      
+      storage "file" {
+        path = "/vault/data"
+      }
+  
+  # Volume para montar o certificado TLS
+  volumes:
+    - name: wildcard-cert
+      secret:
+        secretName: wildcard-home-arpa
+  
+  volumeMounts:
+    - name: wildcard-cert
+      mountPath: /vault/userconfig/wildcard-home-arpa
+      readOnly: true
+  
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    annotations:
+      traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+      traefik.ingress.kubernetes.io/router.middlewares: openbao-redirect-https@kubernetescrd
+    hosts:
+      - host: openbao.home.arpa
+        paths:
+          - /
+    tls:
+      - hosts:
+          - openbao.home.arpa
+        secretName: wildcard-home-arpa
+
+# Desabilitar TLS global (gerenciado pelo Ingress)
+global:
+  tlsDisable: false
