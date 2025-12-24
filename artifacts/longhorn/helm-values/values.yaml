@@ -16,7 +16,6 @@ persistence:
 defaultSettings:
   defaultDataPath: "/storage01"
 
-settings:
-  service:
-    ui:
-      type: "ClusterIP"
+service:
+  ui:
+    type: "ClusterIP"
