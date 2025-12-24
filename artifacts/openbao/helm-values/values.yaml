@@ -51,3 +51,7 @@ server:
 # Desabilitar TLS global (gerenciado pelo Ingress)
 global:
   tlsDisable: false
+
+server:
+  dataStorage:
+    storageClass: "longhorn-fast"
