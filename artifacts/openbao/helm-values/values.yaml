@@ -48,10 +48,10 @@ server:
           - openbao.home.arpa
         secretName: wildcard-home-arpa
 
+  dataStorage:
+    storageClass: "longhorn-fast"
+
+# Desabilitar TLS global (gerenciado pelo Ingress)
 # Desabilitar TLS global (gerenciado pelo Ingress)
 global:
   tlsDisable: true
-
-server:
-  dataStorage:
-    storageClass: "longhorn-fast"
