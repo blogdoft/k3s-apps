@@ -88,6 +88,76 @@ kubectl apply -n argocd -f platform/app-plataform.yaml
 
 ---
 
+## 🟦 Argo CD Sync Waves (Deployment Order)
+
+This repository relies on **Argo CD sync waves** to guarantee a deterministic and safe deployment order, both **between Applications (App of Apps)** and **inside each Application**.
+
+Sync waves are defined using the annotation:
+
+```yaml
+argocd.argoproj.io/sync-wave: "<integer>"
+```
+
+Lower numbers are applied first. Resources without an explicit wave default to `0`.
+
+---
+
+### Application-level waves (App of Apps)
+
+The root application (`platform/app-plataform.yaml`) manages multiple child Applications.
+Their synchronization order is explicitly controlled using sync waves:
+
+| Wave | Application  | Purpose                                      |
+| ---- | ------------ | -------------------------------------------- |
+| `0`  | **longhorn** | Storage foundation (required by PVCs)        |
+| `10` | **openbao**  | Secrets management (uses persistent storage) |
+| `20` | **redis**    | Stateful workload backed by Longhorn         |
+| `30` | **flagr**    | Application layer                            |
+
+This ensures that **infrastructure and platform services are always ready before application workloads**.
+
+---
+
+### Resource-level waves (inside Applications)
+
+Within each Application, sync waves are also used to express **hard dependencies between Kubernetes resources**.
+
+#### Standard convention used in this repository
+
+| Wave  | Resource type                                                       |
+| ----- | ------------------------------------------------------------------- |
+| `-10` | Namespaces, CRDs                                                    |
+| `0`   | Base resources (PVCs, ServiceAccounts, ConfigMaps, Secrets)         |
+| `10`  | Workloads (Deployments, StatefulSets, Jobs)                         |
+| `20`  | Exposure (Services, Ingress, HTTPRoutes)                            |
+| `30+` | Integrations and post-install resources                             |
+| `50`  | Post-Helm add-ons (e.g. StorageClasses created after chart install) |
+
+#### Examples
+
+* **Redis**
+
+  * Namespace → PVC → Deployment → Service
+* **Flagr**
+
+  * Deployment → Service → Traefik Middleware → Ingress
+* **Longhorn**
+
+  * Helm chart → post-install `StorageClass`
+
+This approach avoids race conditions, improves observability in the Argo CD UI, and makes deployment intent explicit.
+
+---
+
+### Design principles
+
+* Sync waves are used **only when real dependencies exist**
+* Numbers are spaced (`10`, `20`, `30`) to allow future insertion
+* Waves express **contracts**, not cosmetic ordering
+* Hooks (`PreSync` / `PostSync`) are preferred for one-off tasks such as migrations or seeding
+
+---
+
 ## Application details
 
 ### `platform/app-longhorn.yaml`
