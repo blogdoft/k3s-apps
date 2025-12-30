@@ -129,8 +129,8 @@ spec:
                   operator: NotIn
                   values:
                   - windows
-        nodeSelector:
-          rancher-node: "primary"
+      nodeSelector:
+        rancher-node: "primary"
       tolerations: 
         - key: "cattle.io/os"
           value: "linux"
@@ -195,9 +195,8 @@ metadata:
     heritage: Helm
     release: rancher
   annotations:
-    nginx.ingress.kubernetes.io/proxy-connect-timeout: "30"
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "1800"
-    nginx.ingress.kubernetes.io/proxy-send-timeout: "1800"
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    traefik.ingress.kubernetes.io/router.middlewares: cattle-system-redirect-https@kubernetescrd
 spec:
   rules:
   - host: rancher.home.arpa  # hostname to access rancher server
@@ -213,7 +212,7 @@ spec:
   tls:
   - hosts:
     - rancher.home.arpa
-    secretName: tls-rancher-ingress
+    secretName: wildcard-home-arpa
 ---
 # Source: rancher/templates/post-delete-hook-service-account.yaml
 apiVersion: v1
