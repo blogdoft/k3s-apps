@@ -8,14 +8,8 @@ metadata:
 spec:
   project: default
   sources:
-    - repoURL: https://openbao.github.io/openbao-helm
-      chart: openbao
-      targetRevision: 0.21.2
-      helm:
-        valueFiles:
-          - $values/artifacts/openbao/helm-values/values.yaml
-
     - repoURL: git@github.com:blogdoft/k3s-apps.git
+      path: artifacts/openbao/manifests
       targetRevision: HEAD
       ref: values
 
