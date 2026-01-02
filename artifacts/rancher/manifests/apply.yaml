@@ -99,7 +99,7 @@ spec:
   strategy:
     rollingUpdate:
       maxSurge: 1
-      maxUnavailable: 1
+      maxUnavailable: 0
     type: RollingUpdate
   template:
     metadata:
@@ -129,8 +129,6 @@ spec:
                   operator: NotIn
                   values:
                   - windows
-      nodeSelector:
-        rancher-node: "primary"
       tolerations: 
         - key: "cattle.io/os"
           value: "linux"
@@ -156,6 +154,11 @@ spec:
           value: cattle-system
         - name: CATTLE_PEER_SERVICE
           value: rancher
+        - name: CATTLE_BOOTSTRAP_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: "bootstrap-secret"
+              key: "bootstrapPassword"
         - name: IMPERATIVE_API_DIRECT
           value: "true"
         - name: IMPERATIVE_API_APP_SELECTOR
@@ -198,6 +201,7 @@ metadata:
     traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
     traefik.ingress.kubernetes.io/router.middlewares: cattle-system-redirect-https@kubernetescrd
 spec:
+  ingressClassName: traefik
   rules:
   - host: rancher.home.arpa  # hostname to access rancher server
     http:
@@ -212,7 +216,7 @@ spec:
   tls:
   - hosts:
     - rancher.home.arpa
-    secretName: wildcard-home-arpa
+    secretName: tls-rancher-ingress
 ---
 # Source: rancher/templates/post-delete-hook-service-account.yaml
 apiVersion: v1
@@ -245,6 +249,20 @@ metadata:
     "helm.sh/hook": pre-upgrade
     "helm.sh/hook-weight": "-1"
     "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+---
+# Source: rancher/templates/secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: "bootstrap-secret"
+  namespace: cattle-system
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/resource-policy": keep
+type: Opaque
+data:
+  bootstrapPassword: "YWRtaW4="
 ---
 # Source: rancher/templates/post-delete-hook-config-map.yaml
 apiVersion: v1
