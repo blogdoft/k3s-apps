@@ -2,11 +2,6 @@ hostname: rancher.home.arpa
 bootstrapPassword: "admin"
 replicas: 1
 ingress:
-  ingressClassName: traefik
-  includeDefaultExtraAnnotations: false
-  extraAnnotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
-    traefik.ingress.kubernetes.io/router.middlewares: cattle-system-redirect-https@kubernetescrd
   tls:
     source: secret
   
