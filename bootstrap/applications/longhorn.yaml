@@ -6,12 +6,11 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "0"  
 spec:
-  project: default
+  project: platform
   sources:
     - repoURL: git@github.com:blogdoft/k3s-apps.git
-      path: artifacts/longhorn/manifests
+      path: artifacts/platform/longhorn/manifests
       targetRevision: HEAD
-
   destination:
     server: https://kubernetes.default.svc
     namespace: longhorn-system

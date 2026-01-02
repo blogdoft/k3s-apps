@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: databases
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "50"    
+spec:
+  description: Databases e Message Brokers (Redis, Kafka, etc.)
+  sourceRepos:
+    - git@github.com:blogdoft/k3s-apps.git
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: redis-server
+  clusterResourceWhitelist:
+    - group: "*"
+      kind: "*"
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"

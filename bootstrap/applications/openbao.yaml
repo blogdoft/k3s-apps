@@ -6,13 +6,11 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "10"
 spec:
-  project: default
+  project: security
   sources:
     - repoURL: git@github.com:blogdoft/k3s-apps.git
-      path: artifacts/openbao/manifests
+      path: artifacts/security/openbao/manifests
       targetRevision: HEAD
-      ref: values
-
   destination:
     server: https://kubernetes.default.svc
     namespace: openbao

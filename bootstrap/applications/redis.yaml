@@ -1,19 +1,19 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: keycloak
+  name: redis
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "30"
+    argocd.argoproj.io/sync-wave: "0"
 spec:
-  project: default
+  project: databases
   source:
     repoURL: git@github.com:blogdoft/k3s-apps.git
-    path: artifacts/keycloak/manifests
+    path: artifacts/databases/redis
     targetRevision: HEAD
   destination:
     server: https://kubernetes.default.svc
-    namespace: keycloak
+    namespace: redis-server
   syncPolicy:
     automated:
       prune: true

@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: apps
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "50"    
+spec:
+  description: Apps e serviços (Flagr, registry, APIs, etc.)
+  sourceRepos:
+    - git@github.com:blogdoft/k3s-apps.git
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: flagr
+    - server: https://kubernetes.default.svc
+      namespace: redis-server
+  clusterResourceWhitelist: []
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"

@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: flagr
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "30"
+spec:
+  project: apps
+  source:
+    repoURL: git@github.com:blogdoft/k3s-apps.git
+    path: artifacts/apps/flagr
+    targetRevision: HEAD
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: flagr
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      enabled: true
+    syncOptions:
+      - CreateNamespace=true

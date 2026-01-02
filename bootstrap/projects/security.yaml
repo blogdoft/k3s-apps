@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: security
+  namespace: argocd  
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+spec:
+  description: Segurança e identidade (Keycloak/OpenBao/etc.)
+  sourceRepos:
+    - git@github.com:blogdoft/k3s-apps.git
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: keycloak
+    - server: https://kubernetes.default.svc
+      namespace: openbao
+  # Zero cluster-scoped por padrão
+  clusterResourceWhitelist: 
+    - group: "*"
+      kind: "*"
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"

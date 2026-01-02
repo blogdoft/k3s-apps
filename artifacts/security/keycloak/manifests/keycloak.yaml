@@ -86,7 +86,7 @@ spec:
             - name: KC_CACHE_EMBEDDED_NETWORK_BIND_ADDRESS
               value: '$(POD_IP)'
             - name: KC_DB_URL
-              value: 'jdbc:postgresql://192.168.1.212/kc-db'
+              value: 'jdbc:postgresql://192.168.1.212/kc-cluster'
             # - name: 'KC_DB_URL_DATABASE'
             #   value: 'keycloak'
             # - name: 'KC_DB_URL_HOST'
