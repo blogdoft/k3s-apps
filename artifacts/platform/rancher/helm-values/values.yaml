@@ -1,6 +1,7 @@
 hostname: rancher.home.arpa
 bootstrapPassword: "admin"
 replicas: 1
+privateCA: true
 ingress:
   tls:
     source: secret

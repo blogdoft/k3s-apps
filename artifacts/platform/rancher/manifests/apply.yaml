@@ -144,8 +144,7 @@ spec:
         - containerPort: 6666
           protocol: TCP
         args:
-        # Public trusted CA - clear ca certs
-        - "--no-cacerts"
+        # Private CA - don't clear ca certs
         - "--http-listen-port=80"
         - "--https-listen-port=443"
         - "--add-local=true"
@@ -185,7 +184,16 @@ spec:
           periodSeconds: 30
           failureThreshold: 5
         volumeMounts:
+        # Pass CA cert into rancher for private CA
+        - mountPath: /etc/rancher/ssl/cacerts.pem
+          name: tls-ca-volume
+          subPath: cacerts.pem
+          readOnly: true
       volumes:
+      - name: tls-ca-volume
+        secret:
+          defaultMode: 0400
+          secretName: tls-ca
 ---
 # Source: rancher/templates/ingress.yaml
 apiVersion: networking.k8s.io/v1
