@@ -99,12 +99,9 @@ metadata:
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
     traefik.ingress.kubernetes.io/router.middlewares: flagr-redirect-https@kubernetescrd
+    traefik.ingress.kubernetes.io/router.tls: "true"
 spec:
   ingressClassName: traefik
-  tls:
-  - hosts:
-    - flagr.home.arpa
-    secretName: wildcard-home-arpa
   rules:
   - host: flagr.home.arpa
     http:
