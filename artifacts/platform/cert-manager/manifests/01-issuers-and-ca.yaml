@@ -1,0 +1,33 @@
+# SelfSigned issuer used only to bootstrap a local CA
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: selfsigned-bootstrap
+spec:
+  selfSigned: {}
+---
+# Local CA certificate (stored as a Secret in the cert-manager namespace)
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: home-arpa-ca
+  namespace: cert-manager
+spec:
+  isCA: true
+  commonName: home.arpa Local Root CA
+  secretName: home-arpa-ca
+  privateKey:
+    algorithm: RSA
+    size: 4096
+  issuerRef:
+    name: selfsigned-bootstrap
+    kind: ClusterIssuer
+---
+# ClusterIssuer backed by the CA Secret above
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: home-arpa-ca
+spec:
+  ca:
+    secretName: home-arpa-ca

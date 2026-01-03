@@ -18,6 +18,8 @@ spec:
       namespace: kube-system
     - server: https://kubernetes.default.svc
       namespace: cattle-system
+    - server: https://kubernetes.default.svc
+      namespace: cert-manager
   # Permite cluster-scoped necessários para infra (ajuste conforme sua stack)
   clusterResourceWhitelist:
     - group: "*"
