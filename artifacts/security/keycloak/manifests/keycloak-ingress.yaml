@@ -3,12 +3,9 @@ kind: Ingress
 metadata:
   name: keycloak
   annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure  
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
 spec:
-  tls:
-    - hosts:
-        - keycloak.home.arpa
-      secretName: wildcard-home-arpa
   rules:
     - host: keycloak.home.arpa
       http:
