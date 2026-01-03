@@ -4580,10 +4580,6 @@ spec:
               name: longhorn-frontend
               port:
                 number: 80
-  tls:
-  - hosts:
-    - longhorn.home.arpa
-    secretName: wildcard-home-arpa
 ---
 # Source: longhorn/templates/validate-psp-install.yaml
 #
