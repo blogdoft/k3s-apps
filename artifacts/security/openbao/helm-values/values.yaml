@@ -25,14 +25,11 @@ server:
     ingressClassName: traefik
     annotations:
       traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+      traefik.ingress.kubernetes.io/router.tls: "true"
     hosts:
       - host: openbao.home.arpa
         paths:
           - /
-    tls:
-      - hosts:
-          - openbao.home.arpa
-        secretName: wildcard-home-arpa
 
   dataStorage:
     storageClass: "longhorn-fast"

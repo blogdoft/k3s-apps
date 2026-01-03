@@ -519,11 +519,8 @@ metadata:
     app.kubernetes.io/managed-by: Helm
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
 spec:
-  tls:
-    - hosts:
-        - "openbao.home.arpa"
-      secretName: wildcard-home-arpa
   ingressClassName: traefik
   rules:
     - host: "openbao.home.arpa"
