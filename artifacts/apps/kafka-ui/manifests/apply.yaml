@@ -1,0 +1,112 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kafbat-ui-config
+  namespace: kafka-ui
+data:
+  dynamic_config.yaml: |
+    # (vazio) - corresponde ao ./kui/config.yaml atual
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafbat-ui
+  namespace: kafka-ui
+  labels:
+    app: kafbat-ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafbat-ui
+  template:
+    metadata:
+      labels:
+        app: kafbat-ui
+    spec:
+      containers:
+        - name: kafbat-ui
+          image: ghcr.io/kafbat/kafka-ui:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: KAFKA_CLUSTERS_0_NAME
+              value: "local"
+            - name: KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS
+              value: "kafka-bootstrap.home.arpa:9092"
+            - name: KAFKA_CLUSTERS_0_METRICS_PORT
+              value: "9997"
+            - name: DYNAMIC_CONFIG_ENABLED
+              value: "true"
+            - name: KAFKA_CLUSTERS_0_AUDIT_TOPICAUDITENABLED
+              value: "true"
+            - name: KAFKA_CLUSTERS_0_AUDIT_CONSOLEAUDITENABLED
+              value: "true"
+            - name: JAVA_TOOL_OPTIONS
+              value: "-Xms128m -Xmx320m"
+          resources:
+            limits:
+              memory: "512Mi"
+            requests:
+              memory: "128Mi"
+          volumeMounts:
+            - name: kafbat-ui-config
+              mountPath: /etc/kafkaui/dynamic_config.yaml
+              subPath: dynamic_config.yaml
+      volumes:
+        - name: kafbat-ui-config
+          configMap:
+            name: kafbat-ui-config
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafbat-ui
+  namespace: kafka-ui
+  labels:
+    app: kafbat-ui
+spec:
+  selector:
+    app: kafbat-ui
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 8081
+      targetPort: 8080
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: redirect-to-https
+  namespace: kafka-ui
+spec:
+  redirectScheme:
+    scheme: https
+    permanent: true
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kafbat-ui
+  namespace: kafka-ui
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.middlewares: kafka-ui-redirect-to-https@kubernetescrd
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: kafka-ui.home.arpa
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: kafbat-ui
+                port:
+                  number: 8081
