@@ -110,9 +110,9 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: flagr
+            name: oauth2-proxy
             port:
-              number: 18000
+              number: 4180
 ---
 apiVersion: traefik.io/v1alpha1
 kind: Middleware

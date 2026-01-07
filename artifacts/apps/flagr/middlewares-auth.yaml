@@ -1,0 +1,18 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: forward-auth-keycloak
+  namespace: flagr
+spec:
+  forwardAuth:
+    address: http://oauth2-proxy.flagr.svc.cluster.local:4180/oauth2/auth
+    trustForwardHeader: true
+    authRequestHeaders:
+      - Cookie
+      - X-Forwarded-Proto
+      - X-Forwarded-Host
+      - X-Forwarded-Uri    
+    authResponseHeaders:
+      - X-Auth-Request-User
+      - X-Auth-Request-Email
+      - Authorization

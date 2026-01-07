@@ -1,0 +1,132 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: oauth2-proxy-secrets
+  namespace: flagr
+type: Opaque
+stringData:
+  # Gere um cookie secret de 32 bytes (base64). Ex:
+  # python -c "import os,base64; print(base64.b64encode(os.urandom(32)).decode())"
+  OAUTH2_PROXY_COOKIE_SECRET: "O6J2OPd6cpTUWRXUp1a4eX/D4SAK1Yoq"
+
+  # Do client do Keycloak:
+  OAUTH2_PROXY_CLIENT_ID: "flagr"
+  OAUTH2_PROXY_CLIENT_SECRET: "GPI0ebJL1Cwg6WXusBx40DkvcE6o3zFP"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oauth2-proxy
+  namespace: flagr
+  labels:
+    app: oauth2-proxy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: oauth2-proxy
+  template:
+    metadata:
+      labels:
+        app: oauth2-proxy
+    spec:
+      containers:
+        - name: oauth2-proxy
+          image: quay.io/oauth2-proxy/oauth2-proxy:v7.7.1
+          ports:
+            - name: http
+              containerPort: 4180
+          env:
+            - name: OAUTH2_PROXY_OIDC_AUDIENCE_CLAIM
+              value: "azp"          
+            - name: OAUTH2_PROXY_PROVIDER
+              value: "keycloak-oidc"
+            - name: OAUTH2_PROXY_OIDC_ISSUER_URL
+              value: "https://keycloak.home.arpa/realms/k8s"
+            - name: OAUTH2_PROXY_REDIRECT_URL
+              value: "https://flagr.home.arpa/oauth2/callback"
+            - name: OAUTH2_PROXY_SSL_INSECURE_SKIP_VERIFY
+              value: "true"
+            - name: OAUTH2_PROXY_HTTP_ADDRESS
+              value: "0.0.0.0:4180"
+            - name: OAUTH2_PROXY_CODE_CHALLENGE_METHOD
+              value: "S256"
+            - name: OAUTH2_PROXY_EMAIL_DOMAINS
+              value: "*"
+            - name: OAUTH2_PROXY_WHITELIST_DOMAINS
+              value: ".home.arpa"
+            - name: OAUTH2_PROXY_COOKIE_SECURE
+              value: "true"
+            - name: OAUTH2_PROXY_UPSTREAMS
+              value: "http://flagr.flagr.svc.cluster.local:18000/"
+            - name: OAUTH2_PROXY_SET_XAUTHREQUEST
+              value: "true"
+            - name: OAUTH2_PROXY_PASS_ACCESS_TOKEN
+              value: "true"
+            - name: OAUTH2_PROXY_SET_AUTHORIZATION_HEADER
+              value: "true"
+            - name: OAUTH2_PROXY_AUTH_LOGGING
+              value: "true"
+            - name: OAUTH2_PROXY_STANDARD_LOGGING
+              value: "true"
+            - name: OAUTH2_PROXY_REQUEST_LOGGING
+              value: "true"
+            - name: OAUTH2_PROXY_REVERSE_PROXY
+              value: "true"
+            - name: OAUTH2_PROXY_PASS_HOST_HEADER
+              value: "true"
+            - name: OAUTH2_PROXY_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: oauth2-proxy-secrets
+                  key: OAUTH2_PROXY_CLIENT_ID
+            - name: OAUTH2_PROXY_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: oauth2-proxy-secrets
+                  key: OAUTH2_PROXY_CLIENT_SECRET
+            - name: OAUTH2_PROXY_COOKIE_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: oauth2-proxy-secrets
+                  key: OAUTH2_PROXY_COOKIE_SECRET
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: oauth2-proxy
+  namespace: flagr
+spec:
+  type: ClusterIP
+  selector:
+    app: oauth2-proxy
+  ports:
+    - name: http
+      port: 4180
+      targetPort: 4180
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: oauth2-proxy
+  namespace: flagr
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.middlewares: flagr-redirect-to-https@kubernetescrd
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: flagr.home.arpa
+      http:
+        paths:
+          - path: /oauth2
+            pathType: Prefix
+            backend:
+              service:
+                name: oauth2-proxy
+                port:
+                  number: 4180
