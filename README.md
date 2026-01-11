@@ -1,12 +1,42 @@
 # k3s-apps
 
-This repository contains the **desired state** (GitOps) of the services running in my **k3s** cluster, all managed by **Argo CD**.
-The idea is straightforward: everything that is running in the cluster is declared here, and Argo CD continuously reconciles the cluster with this repository.
+**GitOps repository for K3s cluster management using ArgoCD App of Apps pattern**
 
-The structure is organized as follows:
+## 📖 Table of Contents
 
-* `platform/`: **Argo CD Applications**, including the *root app* (App of Apps pattern)
-* `artifacts/`: raw Kubernetes manifests and **Helm values** per service
+- [Overview](#-overview)
+- [Repository Structure](#-repository-structure)
+- [Deployed Services](#-deployed-services)
+- [Prerequisites](#-prerequisites)
+- [Installation & Configuration](#-installation--configuration)
+- [Post-Installation Steps](#-post-installation-steps)
+- [Sync Waves & Deployment Order](#-sync-waves--deployment-order)
+- [Secrets Management](#-secrets-management)
+- [Operations & Troubleshooting](#-operations--troubleshooting)
+- [Roadmap](#-roadmap)
+
+---
+
+## 🎯 Overview
+
+This repository contains the **complete desired state** (GitOps) of services running in a **K3s Kubernetes cluster**, managed by **ArgoCD** using the **App of Apps pattern**.
+
+### Purpose
+
+- **Single source of truth** for cluster configuration
+- **Automated deployment** and reconciliation via ArgoCD
+- **Declarative infrastructure** - everything is defined in Git
+- **Deterministic deployment order** using ArgoCD sync waves
+
+### What's Inside
+
+The repository deploys and manages:
+
+- **Platform Services**: cert-manager, Longhorn storage, Rancher
+- **Security Services**: OpenBao (secrets management), Keycloak (identity provider)
+- **Application Services**: Flagr (feature flags), Kafka UI
+- **Database Services**: Redis
+- **Infrastructure**: TLS certificates, ingress controllers, storage classes
 
 ---
 
@@ -46,16 +76,19 @@ Before applying anything from this repository, the cluster must meet the followi
    (`git@github.com:blogdoft/k3s-apps.git`).
 3. **Traefik as the Ingress Controller**
    (Ingress manifests rely on `ingressClassName: traefik` and Traefik annotations).
-4. **Wildcard TLS certificate**
-   A Secret named `wildcard-home-arpa` must exist in the namespaces where HTTPS is required (Longhorn, OpenBao, Flagr).
-5. **Internal DNS** resolving `*.home.arpa` to the Traefik entrypoint (Ingress / LoadBalancer IP).
-6. **Longhorn disk and node labeling**
+4. **Internal DNS** resolving `*.home.arpa` to the Traefik entrypoint (Ingress / LoadBalancer IP).
+5. **Longhorn disk and node labeling**
    This repo defines a custom StorageClass `longhorn-fast` with:
 
    * `numberOfReplicas: "1"`
    * `diskSelector: ssd`
    * `nodeSelector: ssd`
      Nodes and disks must be labeled accordingly.
+
+**Note on TLS Certificates:** The wildcard certificate `wildcard-home-arpa` is automatically created by cert-manager in the `kube-system` namespace (see `artifacts/platform/cert-manager/manifests/10-wildcard-certificate.yaml`). This certificate is then configured as Traefik's **default TLS certificate** via a TLSStore resource (`20-traefik-tlsstore-default.yaml`), which means:
+- ✅ All Ingress resources automatically get TLS without specifying the secret in each namespace
+- ✅ No need to copy the secret across namespaces
+- ✅ Automatic HTTPS for all `*.home.arpa` domains handled by Traefik
 
 ---
 
@@ -64,10 +97,12 @@ Before applying anything from this repository, the cluster must meet the followi
 The main entry point is the **root application** defined in:
 
 ```
-platform/app-plataform.yaml
+bootstrap/root-app.yaml
 ```
 
-This application points back to the `platform/` directory in this repository and automatically creates and manages all child applications (Longhorn, OpenBao, Flagr, Redis).
+This application points to the `bootstrap/` directory in this repository and automatically creates and manages all child applications through the App of Apps pattern. The bootstrap directory contains:
+- **Projects**: ArgoCD project definitions (`bootstrap/projects/`)
+- **Applications**: Individual application definitions (`bootstrap/applications/`)
 
 Recommended flow:
 
@@ -75,16 +110,17 @@ Recommended flow:
 2. Apply the root application:
 
 ```bash
-kubectl apply -n argocd -f platform/app-plataform.yaml
+kubectl apply -n argocd -f bootstrap/root-app.yaml
 ```
 
-3. Argo CD will automatically create and synchronize all child applications.
-   All of them use:
-
-   * automated sync
-   * `prune: true`
-   * `selfHeal: true`
-   * `CreateNamespace: true`
+3. Argo CD will automatically:
+   - Create all ArgoCD Projects (platform, security, apps, databases)
+   - Deploy all applications in the correct order (using sync waves)
+   - Manage all child applications with:
+     * automated sync
+     * `prune: true`
+     * `selfHeal: true`
+     * `CreateNamespace: true`
 
 ---
 
@@ -104,15 +140,19 @@ Lower numbers are applied first. Resources without an explicit wave default to `
 
 ### Application-level waves (App of Apps)
 
-The root application (`platform/app-plataform.yaml`) manages multiple child Applications.
+The root application (`bootstrap/root-app.yaml`) manages multiple child Applications via the `bootstrap/applications/` directory.
 Their synchronization order is explicitly controlled using sync waves:
 
-| Wave | Application  | Purpose                                      |
-| ---- | ------------ | -------------------------------------------- |
-| `0`  | **longhorn** | Storage foundation (required by PVCs)        |
-| `10` | **openbao**  | Secrets management (uses persistent storage) |
-| `20` | **redis**    | Stateful workload backed by Longhorn         |
-| `30` | **flagr**    | Application layer                            |
+| Wave  | Application      | Purpose                                              |
+| ----- | ---------------- | ---------------------------------------------------- |
+| `-10` | **rancher**      | Cluster management UI (optional)                     |
+| `0`   | **cert-manager** | TLS certificate management (required for HTTPS)      |
+| `10`  | **longhorn**     | Storage foundation (required by PVCs)                |
+| `10`  | **openbao**      | Secrets management (uses persistent storage)         |
+| `20`  | **redis**        | Stateful workload backed by Longhorn                 |
+| `30`  | **keycloak**     | Identity provider (uses database)                    |
+| `40`  | **flagr**        | Feature flags application (with OAuth2 via Keycloak) |
+| `40`  | **kafka-ui**     | Kafka management UI                                  |
 
 This ensures that **infrastructure and platform services are always ready before application workloads**.
 
@@ -237,12 +277,4 @@ Additionally, `ALLOW_EMPTY_PASSWORD="yes"` is set, which is usually unnecessary 
   ```bash
   kubectl -n redis-server get svc redis-server
   ```
-
----
-
-## Suggested improvements / roadmap
-
-* Remove hardcoded Redis credentials and standardize secret management.
-* Ensure the `wildcard-home-arpa` TLS Secret exists in all required namespaces.
-* Document and standardize node and disk labeling for Longhorn (`ssd` selectors).
-* Optionally add a small `README.md` per service under `artifacts/<service>/` describing configuration, backup, and restore procedures.
+  
