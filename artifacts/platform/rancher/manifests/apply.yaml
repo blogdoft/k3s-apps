@@ -9,6 +9,8 @@ metadata:
     chart: rancher-2.13.1
     heritage: Helm
     release: rancher
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
 value: 1000000000
 globalDefault: false
 description: "Priority class used by pods critical to rancher's functionality."
@@ -86,6 +88,7 @@ apiVersion: apps/v1
 metadata:
   name: rancher
   annotations:
+    argocd.argoproj.io/sync-wave: "10"
   labels:
     app: rancher
     chart: rancher-2.13.1

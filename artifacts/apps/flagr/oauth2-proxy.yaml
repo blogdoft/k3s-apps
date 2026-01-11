@@ -11,7 +11,7 @@ stringData:
 
   # Do client do Keycloak:
   OAUTH2_PROXY_CLIENT_ID: "flagr"
-  OAUTH2_PROXY_CLIENT_SECRET: "GPI0ebJL1Cwg6WXusBx40DkvcE6o3zFP"
+  OAUTH2_PROXY_CLIENT_SECRET: "Zs7nemVXFzz9FnKlqYy8W1ja0lZMtVOW"
 
 ---
 apiVersion: apps/v1
