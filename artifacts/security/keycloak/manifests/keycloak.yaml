@@ -49,7 +49,7 @@ spec:
       containers:
         - name: keycloak
           image: quay.io/keycloak/keycloak:26.4.7
-          args: ["start", "--verbose"]
+          args: ["start", "--verbose", "--import-realm"]
           env:
             - name: KC_BOOTSTRAP_ADMIN_USERNAME
               value: "admin"
@@ -104,6 +104,10 @@ spec:
                 secretKeyRef:
                   name: keycloak-database-secret
                   key: KC_DB_USERNAME
+          volumeMounts:
+            - name: keycloak-realm-import
+              mountPath: /opt/keycloak/data/import
+              readOnly: true
           ports:
             - name: http
               containerPort: 8080
@@ -136,3 +140,8 @@ spec:
             requests:
               cpu: 500m
               memory: 1700Mi
+
+      volumes:
+        - name: keycloak-realm-import
+          configMap:
+            name: keycloak-realm-import

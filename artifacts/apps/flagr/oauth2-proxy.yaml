@@ -39,7 +39,7 @@ spec:
               containerPort: 4180
           env:
             - name: OAUTH2_PROXY_OIDC_AUDIENCE_CLAIM
-              value: "azp"          
+              value: "azp"
             - name: OAUTH2_PROXY_PROVIDER
               value: "keycloak-oidc"
             - name: OAUTH2_PROXY_OIDC_ISSUER_URL

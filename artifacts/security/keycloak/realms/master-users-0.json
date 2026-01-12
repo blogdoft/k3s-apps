@@ -1,0 +1,27 @@
+{
+  "realm" : "master",
+  "users" : [ {
+    "id" : "89edf630-83cf-4bf2-9e67-ba9a808f076b",
+    "username" : "sauron",
+    "firstName" : "Francisco Thiago",
+    "lastName" : "de Almeida",
+    "email" : "admin@blogdoft.com.br",
+    "emailVerified" : true,
+    "enabled" : true,
+    "createdTimestamp" : 1768145297222,
+    "totp" : false,
+    "credentials" : [ {
+      "id" : "c490735f-4a3c-4425-9221-09f1e9c3aea7",
+      "type" : "password",
+      "userLabel" : "My password",
+      "createdDate" : 1768145309716,
+      "secretData" : "{\"value\":\"rm784qOP9nyEkiFuch4mpE3CzClp4OZeg1U3Z6DuNCA=\",\"salt\":\"YyXgPZtYXHQqaLICbcKTWA==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":5,\"algorithm\":\"argon2\",\"additionalParameters\":{\"hashLength\":[\"32\"],\"memory\":[\"7168\"],\"type\":[\"id\"],\"version\":[\"1.3\"],\"parallelism\":[\"1\"]}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "admin", "default-roles-master" ],
+    "notBefore" : 0,
+    "groups" : [ ]
+  } ]
+}
