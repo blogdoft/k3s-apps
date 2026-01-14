@@ -38,12 +38,14 @@ spec:
             - name: http
               containerPort: 4180
           env:
-            - name: OAUTH2_PROXY_OIDC_AUDIENCE_CLAIM
-              value: "azp"
             - name: OAUTH2_PROXY_PROVIDER
-              value: "keycloak-oidc"
+              value: "oidc"
             - name: OAUTH2_PROXY_OIDC_ISSUER_URL
               value: "https://keycloak.home.arpa/realms/k8s"
+            - name: OAUTH2_PROXY_SKIP_OIDC_DISCOVERY
+              value: "false"
+            - name: OAUTH2_PROXY_SKIP_CLAIMS_FROM_PROFILE_URL
+              value: "true"
             - name: OAUTH2_PROXY_REDIRECT_URL
               value: "https://flagr.home.arpa/oauth2/callback"
             - name: OAUTH2_PROXY_SSL_INSECURE_SKIP_VERIFY
