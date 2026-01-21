@@ -20,6 +20,8 @@ spec:
       namespace: cattle-system
     - server: https://kubernetes.default.svc
       namespace: cert-manager
+    - server: https://kubernetes.default.svc
+      namespace: argocd
   # Permite cluster-scoped necessários para infra (ajuste conforme sua stack)
   clusterResourceWhitelist:
     - group: "*"
