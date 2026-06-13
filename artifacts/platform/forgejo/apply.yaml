@@ -1,0 +1,102 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: forgejo-data-pvc
+  namespace: forgejo
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: forgejo
+  namespace: forgejo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: forgejo
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: forgejo
+    spec:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+
+      containers:
+        - name: forgejo
+          image: codeberg.org/forgejo/forgejo:15
+          imagePullPolicy: IfNotPresent
+
+          envFrom:
+            - configMapRef:
+                name: forgejo-config
+            - secretRef:
+                name: forgejo-secrets
+
+          ports:
+            - name: http
+              containerPort: 3000
+              hostPort: 3000
+            - name: ssh
+              containerPort: 2222
+              hostPort: 2222
+
+          volumeMounts:
+            - name: forgejo-data
+              mountPath: /data
+            - name: localtime
+              mountPath: /etc/localtime
+              readOnly: true
+
+      volumes:
+        - name: forgejo-data
+          persistentVolumeClaim:
+            claimName: forgejo-data-pvc
+        - name: localtime
+          hostPath:
+            path: /etc/localtime
+            type: File
+---            
+apiVersion: v1
+kind: Service
+metadata:
+  name: forgejo
+  namespace: forgejo
+spec:
+  type: ClusterIP
+  selector:
+    app: forgejo
+  ports:
+    - name: http
+      port: 3000
+      targetPort: 3000
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: forgejo-ingress
+  namespace: forgejo
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: forgejo.home.arpa
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: forgejo
+                port:
+                  number: 3000
