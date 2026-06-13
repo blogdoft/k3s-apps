@@ -28,12 +28,20 @@ spec:
     spec:
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch      
 
       containers:
         - name: forgejo
           image: codeberg.org/forgejo/forgejo:15
           imagePullPolicy: IfNotPresent
 
+          env:
+            - name: USER_UID
+              value: "1000"
+            - name: USER_GID
+              value: "1000"            
           envFrom:
             - configMapRef:
                 name: forgejo-config
