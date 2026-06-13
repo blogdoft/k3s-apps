@@ -6,7 +6,7 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "30"
 spec:
-  project: security
+  project: platform
   source:
     repoURL: git@github.com:blogdoft/k3s-apps.git
     path: artifacts/platform/forgejo/manifests

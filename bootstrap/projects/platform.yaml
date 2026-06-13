@@ -22,6 +22,8 @@ spec:
       namespace: cert-manager
     - server: https://kubernetes.default.svc
       namespace: argocd
+    - server: https://kubernetes.default.svc
+      namespace: forgejo
   # Permite cluster-scoped necessários para infra (ajuste conforme sua stack)
   clusterResourceWhitelist:
     - group: "*"
