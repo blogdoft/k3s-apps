@@ -1,0 +1,125 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: stremio-server-data-pvc
+  namespace: stremio
+spec:
+  storageClassName: longhorn-fast
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 50Gi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: stremio-server
+  namespace: stremio
+spec:
+  selector:
+    app: stremio-server
+  ports:
+    - name: http
+      port: 11470
+      targetPort: 11470
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: stremio-server
+  namespace: stremio
+spec:
+  serviceName: stremio-server
+  replicas: 1
+  selector:
+    matchLabels:
+      app: stremio-server
+  template:
+    metadata:
+      labels:
+        app: stremio-server
+    spec:
+      containers:
+        - name: stremio-server
+          image: stremio/server:latest
+          imagePullPolicy: Always
+
+          ports:
+            - name: http
+              containerPort: 11470
+
+          env:
+            - name: FFMPEG_BIN
+              value: /bin/ffmpeg
+            - name: FFPROBE_BIN
+              value: /bin/ffprobe
+            - name: NO_CORS
+              value: "0"
+
+          volumeMounts:
+            # Persistência do Stremio
+            - name: stremio-data
+              mountPath: /root/.stremio-server
+
+            # Binários do host
+            - name: ffmpeg
+              mountPath: /bin/ffmpeg
+              readOnly: true
+
+            - name: ffprobe
+              mountPath: /bin/ffprobe
+              readOnly: true
+
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: "2"
+              memory: 1Gi
+
+      volumes:
+        - name: stremio-data
+          persistentVolumeClaim:
+            claimName: stremio-server-data-pvc
+
+        - name: ffmpeg
+          hostPath:
+            path: /usr/bin/ffmpeg
+            type: File
+
+        - name: ffprobe
+          hostPath:
+            path: /usr/bin/ffprobe
+            type: File
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: stremio-server
+  namespace: stremio
+  annotations:
+    cert-manager.io/cluster-issuer: homelab-ca-cluster-issuer
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - stremio.home.arpa
+      secretName: stremio-home-arpa-tls
+
+  rules:
+    - host: stremio.home.arpa
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: stremio-server
+                port:
+                  number: 11470
