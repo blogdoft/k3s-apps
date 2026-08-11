@@ -1,0 +1,185 @@
+---
+# Source: open-webui/templates/service-account.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: open-webui-sa
+  namespace: open-webui
+  labels:
+    helm.sh/chart: open-webui-16.0.0
+    app.kubernetes.io/version: "0.11.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: open-webui
+    app.kubernetes.io/instance: open-webui
+    app.kubernetes.io/component: open-webui
+automountServiceAccountToken: false
+---
+# Source: open-webui/templates/pvc.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: open-webui
+  namespace: open-webui
+  labels:
+    app.kubernetes.io/instance: open-webui
+    app.kubernetes.io/component: open-webui
+spec:
+  accessModes:
+    - "ReadWriteOnce"
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: longhorn-fast
+---
+# Source: open-webui/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: open-webui
+  namespace: open-webui
+  labels:
+    helm.sh/chart: open-webui-16.0.0
+    app.kubernetes.io/version: "0.11.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: open-webui
+    app.kubernetes.io/instance: open-webui
+    app.kubernetes.io/component: open-webui
+spec:
+  selector:
+    app.kubernetes.io/instance: open-webui
+    app.kubernetes.io/component: open-webui
+  type: ClusterIP
+  ports:
+  - protocol: TCP
+    name: http
+    port: 80
+    targetPort: http
+---
+# Source: open-webui/templates/workload-manager.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: open-webui
+  namespace: open-webui
+  labels:
+    helm.sh/chart: open-webui-16.0.0
+    app.kubernetes.io/version: "0.11.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: open-webui
+    app.kubernetes.io/instance: open-webui
+    app.kubernetes.io/component: open-webui
+    
+spec:
+  replicas: 1
+  serviceName: open-webui
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: open-webui
+      app.kubernetes.io/component: open-webui
+  template:
+    metadata:
+      labels:
+        helm.sh/chart: open-webui-16.0.0
+        app.kubernetes.io/version: "0.11.0"
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: open-webui
+        app.kubernetes.io/instance: open-webui
+        app.kubernetes.io/component: open-webui
+    spec:
+      initContainers:
+      - name: copy-app-data
+        image: ghcr.io/open-webui/open-webui:0.11.0
+        imagePullPolicy: IfNotPresent
+        command:
+          - sh
+          - -c
+          - cp -R -n /app/backend/data/* /tmp/app-data/
+        volumeMounts:
+        - name: data
+          mountPath: /tmp/app-data
+      enableServiceLinks: false
+      automountServiceAccountToken: false
+      serviceAccountName: open-webui-sa
+      containers:
+      - name: open-webui
+        image: ghcr.io/open-webui/open-webui:0.11.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 8080
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /health/db
+            port: http
+          periodSeconds: 10
+        startupProbe:
+          failureThreshold: 30
+          httpGet:
+            path: /health
+            port: http
+          periodSeconds: 5
+        resources:
+          limits:
+            cpu: "1"
+            memory: 1Gi
+          requests:
+            cpu: 100m
+            memory: 256Mi
+        volumeMounts:
+        - name: data
+          mountPath: /app/backend/data
+        env:
+        - name: WEBUI_URL
+          value: "http://open-webui.home.arpa"
+        - name: "OLLAMA_BASE_URLS"
+          value: "http://192.168.1.212:11434"
+        # If only an OpenAI API value is set, set it to OPENAI_API_BASE_URL
+        - name: "OPENAI_API_BASE_URL"
+          value: "https://api.openai.com/v1"
+        - name: "OPENAI_API_KEY"
+          value: "0p3n-w3bu!"
+        - name: "ENABLE_WEBSOCKET_SUPPORT"
+          value: "True"
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              key: DATABASE_URL
+              name: open-webui-database
+        tty: true
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: open-webui
+---
+# Source: open-webui/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: open-webui
+  namespace: open-webui
+  labels:
+    helm.sh/chart: open-webui-16.0.0
+    app.kubernetes.io/version: "0.11.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: open-webui
+    app.kubernetes.io/instance: open-webui
+    app.kubernetes.io/component: open-webui
+spec:
+  ingressClassName: traefik
+  rules:
+  -
+    host: open-webui.home.arpa
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: open-webui
+            port:
+              name: http

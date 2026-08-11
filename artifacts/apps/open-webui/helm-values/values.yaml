@@ -1,0 +1,65 @@
+ollama:
+  enabled: false
+
+ollamaUrls:
+  - "http://192.168.1.212:11434"
+
+pipelines:
+  enabled: false
+
+replicaCount: 1
+
+websocket:
+  enabled: true
+  manager: ""
+
+  redis:
+    enabled: false
+
+persistence:
+  enabled: true
+  size: 5Gi
+  storageClass: longhorn-fast
+  accessModes:
+    - ReadWriteOnce
+
+ingress:
+  enabled: true
+  class: traefik
+  host: open-webui.home.arpa
+  tls: false
+
+extraEnvVars:
+  - name: DATABASE_URL
+    valueFrom:
+      secretKeyRef:
+        name: open-webui-database
+        key: DATABASE_URL
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+
+  limits:
+    cpu: "1"
+    memory: 1Gi
+
+startupProbe:
+  httpGet:
+    path: /health
+    port: http
+  periodSeconds: 5
+  failureThreshold: 30
+
+readinessProbe:
+  httpGet:
+    path: /health/db
+    port: http
+  periodSeconds: 10
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+  periodSeconds: 20

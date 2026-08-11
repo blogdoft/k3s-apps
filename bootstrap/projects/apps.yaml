@@ -16,6 +16,8 @@ spec:
       namespace: redis-server
     - server: https://kubernetes.default.svc
       namespace: kafka-ui
+    - server: https://kubernetes.default.svc
+      namespace: open-webui
   clusterResourceWhitelist:
     - group: "*"
       kind: "*"
