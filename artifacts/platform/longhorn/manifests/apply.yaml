@@ -6,14 +6,170 @@ metadata:
   name: "longhorn-critical"
   labels:
     app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.10.1
+    helm.sh/chart: longhorn-1.12.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.10.1
+    app.kubernetes.io/version: v1.12.1
 description: "Ensure Longhorn pods have the highest priority to prevent any unexpected eviction by the Kubernetes scheduler under node pressure"
 globalDefault: false
 preemptionPolicy: PreemptLowerPriority
 value: 1000000000
+---
+# Source: longhorn/templates/network-policies/backing-image-data-source-network-policy.yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: backing-image-data-source
+  namespace: longhorn-system
+spec:
+  podSelector:
+    matchLabels:
+      longhorn.io/component: backing-image-data-source
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: longhorn-manager
+    - podSelector:
+        matchLabels:
+          longhorn.io/component: instance-manager
+    - podSelector:
+        matchLabels:
+          longhorn.io/component: backing-image-manager
+    - podSelector:
+        matchLabels:
+          longhorn.io/component: backing-image-data-source
+---
+# Source: longhorn/templates/network-policies/backing-image-manager-network-policy.yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: backing-image-manager
+  namespace: longhorn-system
+spec:
+  podSelector:
+    matchLabels:
+      longhorn.io/component: backing-image-manager
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: longhorn-manager
+    - podSelector:
+        matchLabels:
+          longhorn.io/component: instance-manager
+    - podSelector:
+        matchLabels:
+          longhorn.io/component: backing-image-manager
+    - podSelector:
+        matchLabels:
+          longhorn.io/component: backing-image-data-source
+---
+# Source: longhorn/templates/network-policies/instance-manager-networking.yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: instance-manager
+  namespace: longhorn-system
+spec:
+  podSelector:
+    matchLabels:
+      longhorn.io/component: instance-manager
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: longhorn-manager
+    - podSelector:
+        matchLabels:
+          longhorn.io/component: instance-manager
+    - podSelector:
+        matchLabels:
+          longhorn.io/component: backing-image-manager
+    - podSelector:
+        matchLabels:
+          longhorn.io/component: backing-image-data-source
+---
+# Source: longhorn/templates/network-policies/manager-network-policy.yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: longhorn-manager
+  namespace: longhorn-system
+spec:
+  podSelector:
+    matchLabels:
+      app: longhorn-manager
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: longhorn-manager
+    - podSelector:
+        matchLabels:
+          app: longhorn-ui
+    - podSelector:
+        matchLabels:
+          app: longhorn-csi-plugin
+    - podSelector:
+        matchLabels:
+          longhorn.io/managed-by: longhorn-manager
+        matchExpressions:
+          - { key: recurring-job.longhorn.io, operator: Exists }
+    - podSelector:
+        matchExpressions:
+          - { key: longhorn.io/job-task, operator: Exists }
+    - podSelector:
+        matchLabels:
+          app: longhorn-driver-deployer
+---
+# Source: longhorn/templates/network-policies/recovery-backend-network-policy.yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: longhorn-recovery-backend
+  namespace: longhorn-system
+spec:
+  podSelector:
+    matchLabels:
+      longhorn.io/recovery-backend: longhorn-recovery-backend
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          longhorn.io/component: share-manager
+    ports:
+    - protocol: TCP
+      port: 9503
+---
+# Source: longhorn/templates/network-policies/webhook-network-policy.yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: longhorn-webhook
+  namespace: longhorn-system
+spec:
+  podSelector:
+    matchLabels:
+      longhorn.io/admission-webhook: longhorn-admission-webhook
+  policyTypes:
+  - Ingress
+  ingress:
+  - ports:
+    - protocol: TCP
+      port: 9501
+    - protocol: TCP
+      port: 9502
 ---
 # Source: longhorn/templates/serviceaccount.yaml
 apiVersion: v1
@@ -23,10 +179,10 @@ metadata:
   namespace: longhorn-system
   labels:
     app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.10.1
+    helm.sh/chart: longhorn-1.12.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.10.1
+    app.kubernetes.io/version: v1.12.1
 ---
 # Source: longhorn/templates/serviceaccount.yaml
 apiVersion: v1
@@ -36,10 +192,10 @@ metadata:
   namespace: longhorn-system
   labels:
     app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.10.1
+    helm.sh/chart: longhorn-1.12.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.10.1
+    app.kubernetes.io/version: v1.12.1
 ---
 # Source: longhorn/templates/serviceaccount.yaml
 apiVersion: v1
@@ -49,10 +205,10 @@ metadata:
   namespace: longhorn-system
   labels:
     app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.10.1
+    helm.sh/chart: longhorn-1.12.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.10.1
+    app.kubernetes.io/version: v1.12.1
 ---
 # Source: longhorn/templates/default-resource.yaml
 apiVersion: v1
@@ -62,10 +218,10 @@ metadata:
   namespace: longhorn-system
   labels:
     app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.10.1
+    helm.sh/chart: longhorn-1.12.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.10.1
+    app.kubernetes.io/version: v1.12.1
 data:
   default-resource.yaml: |-
 ---
@@ -77,10 +233,10 @@ metadata:
   namespace: longhorn-system
   labels:
     app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.10.1
+    helm.sh/chart: longhorn-1.12.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.10.1
+    app.kubernetes.io/version: v1.12.1
 data:
   default-setting.yaml: |-
     default-data-path: "/storage01"
@@ -95,10 +251,10 @@ metadata:
   namespace: longhorn-system
   labels:
     app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.10.1
+    helm.sh/chart: longhorn-1.12.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.10.1
+    app.kubernetes.io/version: v1.12.1
 data:
   storageclass.yaml: |
     kind: StorageClass
@@ -117,12 +273,12 @@ data:
       fromBackup: ""
       fsType: "ext4"
       dataLocality: "disabled"
+      diskSelector: "ssd"
+      nodeSelector: "ssd"
       unmapMarkSnapChainRemoved: "ignored"
       disableRevisionCounter: "true"
       dataEngine: "v1"
       backupTargetName: "default"
-      diskSelector: "ssd"
-      nodeSelector: "ssd"
 ---
 # Source: longhorn/templates/crds.yaml
 # Generated crds.yaml from github.com/longhorn/longhorn-manager/k8s/pkg/apis and the crds.yaml will be copied to longhorn/longhorn chart/templates and cannot be directly used by kubectl apply.
@@ -130,13 +286,13 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.17.1
+    controller-gen.kubebuilder.io/version: v0.19.0
   labels:
     app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.10.1
+    helm.sh/chart: longhorn-1.12.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.10.1
+    app.kubernetes.io/version: v1.12.1
     longhorn-manager: ""
   name: backingimagedatasources.longhorn.io
 spec:
@@ -269,13 +425,13 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.17.1
+    controller-gen.kubebuilder.io/version: v0.19.0
   labels:
     app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.10.1
+    helm.sh/chart: longhorn-1.12.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.10.1
+    app.kubernetes.io/version: v1.12.1
     longhorn-manager: ""
   name: backingimagemanagers.longhorn.io
 spec:
@@ -412,13 +568,13 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.17.1
+    controller-gen.kubebuilder.io/version: v0.19.0
   labels:
     app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.10.1
+    helm.sh/chart: longhorn-1.12.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.10.1
+    app.kubernetes.io/version: v1.12.1
     longhorn-manager: ""
   name: backingimages.longhorn.io
 spec:
@@ -597,13 +753,13 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.17.1
+    controller-gen.kubebuilder.io/version: v0.19.0
   labels:
     app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.10.1
+    helm.sh/chart: longhorn-1.12.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.10.1
+    app.kubernetes.io/version: v1.12.1
     longhorn-manager: ""
   name: backupbackingimages.longhorn.io
 spec:
@@ -770,13 +926,13 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.17.1
+    controller-gen.kubebuilder.io/version: v0.19.0
   labels:
     app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.10.1
+    helm.sh/chart: longhorn-1.12.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.10.1
+    app.kubernetes.io/version: v1.12.1
     longhorn-manager: ""
   name: backups.longhorn.io
 spec:
@@ -856,7 +1012,6 @@ spec:
                 enum:
                 - full
                 - incremental
-                - ""
                 type: string
               labels:
                 additionalProperties:
@@ -963,13 +1118,13 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.17.1
+    controller-gen.kubebuilder.io/version: v0.19.0
   labels:
     app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.10.1
+    helm.sh/chart: longhorn-1.12.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.10.1
+    app.kubernetes.io/version: v1.12.1
     longhorn-manager: ""
   name: backuptargets.longhorn.io
 spec:
@@ -1106,13 +1261,13 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.17.1
+    controller-gen.kubebuilder.io/version: v0.19.0
   labels:
     app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.10.1
+    helm.sh/chart: longhorn-1.12.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.10.1
+    app.kubernetes.io/version: v1.12.1
     longhorn-manager: ""
   name: backupvolumes.longhorn.io
 spec:
@@ -1254,13 +1409,257 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.17.1
+    controller-gen.kubebuilder.io/version: v0.19.0
   labels:
     app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.10.1
+    helm.sh/chart: longhorn-1.12.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.10.1
+    app.kubernetes.io/version: v1.12.1
+    longhorn-manager: ""
+  name: enginefrontends.longhorn.io
+spec:
+  group: longhorn.io
+  names:
+    kind: EngineFrontend
+    listKind: EngineFrontendList
+    plural: enginefrontends
+    shortNames:
+    - lhef
+    singular: enginefrontend
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: The data engine of the engine frontend
+      jsonPath: .spec.dataEngine
+      name: Data Engine
+      type: string
+    - description: The current state of the engine frontend
+      jsonPath: .status.currentState
+      name: State
+      type: string
+    - description: The node that the engine frontend is on
+      jsonPath: .spec.nodeID
+      name: Node
+      type: string
+    - description: The instance manager of the engine frontend
+      jsonPath: .status.instanceManagerName
+      name: InstanceManager
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta2
+    schema:
+      openAPIV3Schema:
+        description: EngineFrontend is where Longhorn stores engine frontend object
+          for v2 data engine initiator.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: EngineFrontendSpec defines the desired state of the Longhorn
+              engine frontend (v2 initiator)
+            properties:
+              active:
+                type: boolean
+              dataEngine:
+                enum:
+                - v1
+                - v2
+                type: string
+              desireState:
+                type: string
+              disableFrontend:
+                type: boolean
+              engineName:
+                description: EngineName is the name of the v2 engine target (required
+                  for EngineFrontend instance creation)
+                type: string
+              frontend:
+                enum:
+                - blockdev
+                - iscsi
+                - nvmf
+                - ublk
+                - ""
+                type: string
+              image:
+                type: string
+              logRequested:
+                type: boolean
+              nodeID:
+                type: string
+              salvageRequested:
+                type: boolean
+              size:
+                description: |-
+                  Size is the desired size of the frontend device in bytes, as requested
+                  by the volume owner. The EngineFrontend controller drives the frontend
+                  device toward this size independently of the engine's target size.
+                format: int64
+                type: string
+              targetIP:
+                description: TargetIP is the IP address of the v2 engine target
+                type: string
+              targetPort:
+                description: TargetPort is the port of the v2 engine target
+                type: integer
+              ublkNumberOfQueue:
+                description: ublkNumberOfQueue controls the number of queues for ublk
+                  frontend.
+                type: integer
+              ublkQueueDepth:
+                description: ublkQueueDepth controls the depth of each queue for ublk
+                  frontend.
+                type: integer
+              volumeName:
+                type: string
+              volumeSize:
+                format: int64
+                type: string
+            type: object
+          status:
+            description: EngineFrontendStatus defines the observed state of the Longhorn
+              engine frontend
+            properties:
+              activePath:
+                description: ActivePath is the currently active frontend path address.
+                type: string
+              conditions:
+                items:
+                  properties:
+                    lastProbeTime:
+                      description: Last time we probed the condition.
+                      type: string
+                    lastTransitionTime:
+                      description: Last time the condition transitioned from one status
+                        to another.
+                      type: string
+                    message:
+                      description: Human-readable message indicating details about
+                        last transition.
+                      type: string
+                    reason:
+                      description: Unique, one-word, CamelCase reason for the condition's
+                        last transition.
+                      type: string
+                    status:
+                      description: |-
+                        Status is the status of the condition.
+                        Can be True, False, Unknown.
+                      type: string
+                    type:
+                      description: Type is the type of the condition.
+                      type: string
+                  type: object
+                nullable: true
+                type: array
+              currentImage:
+                type: string
+              currentSize:
+                description: |-
+                  CurrentSize is the current size of the frontend device in bytes, as
+                  observed from the data plane. It is 0 while the engine frontend is not
+                  running.
+                format: int64
+                type: string
+              currentState:
+                type: string
+              endpoint:
+                description: Endpoint is the initiator endpoint (e.g., /dev/longhorn/vol-name)
+                type: string
+              instanceManagerName:
+                type: string
+              ip:
+                type: string
+              logFetched:
+                type: boolean
+              ownerID:
+                type: string
+              paths:
+                description: Paths describes the currently known frontend multipath
+                  state.
+                items:
+                  properties:
+                    anaState:
+                      type: string
+                    engineName:
+                      type: string
+                    nguid:
+                      type: string
+                    nqn:
+                      type: string
+                    targetIP:
+                      type: string
+                    targetPort:
+                      type: integer
+                  type: object
+                type: array
+              port:
+                type: integer
+              preferredPath:
+                description: PreferredPath is the preferred frontend path address.
+                type: string
+              salvageExecuted:
+                type: boolean
+              started:
+                type: boolean
+              starting:
+                type: boolean
+              storageIP:
+                type: string
+              switchoverPhase:
+                description: SwitchoverPhase is the last completed switchover phase
+                  reported by the data plane.
+                type: string
+              targetIP:
+                description: TargetIP is the currently connected IP address of the
+                  v2 engine target
+                type: string
+              targetPort:
+                description: TargetPort is the currently connected port of the v2
+                  engine target
+                type: integer
+              ublkID:
+                format: int32
+                type: integer
+              uuid:
+                type: string
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+---
+# Source: longhorn/templates/crds.yaml
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.19.0
+  labels:
+    app.kubernetes.io/name: longhorn
+    helm.sh/chart: longhorn-1.12.1
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: longhorn
+    app.kubernetes.io/version: v1.12.1
     longhorn-manager: ""
   name: engineimages.longhorn.io
 spec:
@@ -1408,13 +1807,13 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.17.1
+    controller-gen.kubebuilder.io/version: v0.19.0
   labels:
     app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.10.1
+    helm.sh/chart: longhorn-1.12.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.10.1
+    app.kubernetes.io/version: v1.12.1
     longhorn-manager: ""
   name: engines.longhorn.io
 spec:
@@ -1504,6 +1903,14 @@ spec:
                 type: boolean
               nodeID:
                 type: string
+              rebuildConcurrentSyncLimit:
+                description: |-
+                  RebuildConcurrentSyncLimit controls the maximum number of file synchronization operations that can run
+                  concurrently during a single replica rebuild.
+                  It is determined by the global setting or the volume spec field with the same name.
+                maximum: 5
+                minimum: 0
+                type: integer
               replicaAddressMap:
                 additionalProperties:
                   type: string
@@ -1521,6 +1928,14 @@ spec:
               snapshotMaxSize:
                 format: int64
                 type: string
+              ublkNumberOfQueue:
+                description: ublkNumberOfQueue controls the number of queues for ublk
+                  frontend.
+                type: integer
+              ublkQueueDepth:
+                description: ublkQueueDepth controls the depth of each queue for ublk
+                  frontend.
+                type: integer
               unmapMarkSnapChainRemovedEnabled:
                 type: boolean
               upgradedReplicaAddressMap:
@@ -1647,6 +2062,13 @@ spec:
                   type: object
                 nullable: true
                 type: object
+              rebuildConcurrentSyncLimit:
+                description: |-
+                  RebuildConcurrentSyncLimit controls the maximum number of file synchronization operations that can run
+                  concurrently during a single replica rebuild.
+                  It is determined by the global setting or the volume spec field with the same name.
+                minimum: 0
+                type: integer
               rebuildStatus:
                 additionalProperties:
                   properties:
@@ -1656,7 +2078,13 @@ spec:
                     error:
                       type: string
                     fromReplicaAddress:
+                      description: Deprecated. We are now using FromReplicaAddressList
+                        to list all source replicas.
                       type: string
+                    fromReplicaAddressList:
+                      items:
+                        type: string
+                      type: array
                     isRebuilding:
                       type: boolean
                     progress:
@@ -1763,13 +2191,13 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.17.1
+    controller-gen.kubebuilder.io/version: v0.19.0
   labels:
     app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.10.1
+    helm.sh/chart: longhorn-1.12.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.10.1
+    app.kubernetes.io/version: v1.12.1
     longhorn-manager: ""
   name: instancemanagers.longhorn.io
 spec:
@@ -1835,6 +2263,20 @@ spec:
                 properties:
                   v2:
                     properties:
+                      cpuIsolationEnabled:
+                        description: |-
+                          CPUIsolationEnabled overrides the cluster-wide
+                          data-engine-cpu-isolation-enabled setting for this instance manager.
+                          "true"  -> pass --enable-irq-affinity and --enable-workqueue-affinity
+                                     to start-spdk-tgt (steer host IRQs and unbound kernel
+                                     workqueues away from the SPDK reactor CPUs).
+                          "false" -> do not pass the flags.
+                          ""      -> inherit the global setting value.
+                        enum:
+                        - ""
+                        - "true"
+                        - "false"
+                        type: string
                       cpuMask:
                         type: string
                     type: object
@@ -1881,12 +2323,44 @@ spec:
                   type: object
                 nullable: true
                 type: object
+              conditions:
+                items:
+                  properties:
+                    lastProbeTime:
+                      description: Last time we probed the condition.
+                      type: string
+                    lastTransitionTime:
+                      description: Last time the condition transitioned from one status
+                        to another.
+                      type: string
+                    message:
+                      description: Human-readable message indicating details about
+                        last transition.
+                      type: string
+                    reason:
+                      description: Unique, one-word, CamelCase reason for the condition's
+                        last transition.
+                      type: string
+                    status:
+                      description: |-
+                        Status is the status of the condition.
+                        Can be True, False, Unknown.
+                      type: string
+                    type:
+                      description: Type is the type of the condition.
+                      type: string
+                  type: object
+                nullable: true
+                type: array
               currentState:
                 type: string
               dataEngineStatus:
                 properties:
                   v2:
                     properties:
+                      cpuCoreNumber:
+                        format: int64
+                        type: integer
                       cpuMask:
                         type: string
                       interruptModeEnabled:
@@ -1901,6 +2375,80 @@ spec:
                         type: string
                     type: object
                 type: object
+              instanceEngineFrontends:
+                additionalProperties:
+                  properties:
+                    spec:
+                      properties:
+                        dataEngine:
+                          type: string
+                        name:
+                          type: string
+                      type: object
+                    status:
+                      properties:
+                        activePath:
+                          type: string
+                        conditions:
+                          additionalProperties:
+                            type: boolean
+                          nullable: true
+                          type: object
+                        endpoint:
+                          type: string
+                        errorMsg:
+                          type: string
+                        frontend:
+                          type: string
+                        listen:
+                          type: string
+                        paths:
+                          items:
+                            properties:
+                              anaState:
+                                type: string
+                              engineName:
+                                type: string
+                              nguid:
+                                type: string
+                              nqn:
+                                type: string
+                              targetIP:
+                                type: string
+                              targetPort:
+                                type: integer
+                            type: object
+                          type: array
+                        portEnd:
+                          format: int32
+                          type: integer
+                        portStart:
+                          format: int32
+                          type: integer
+                        preferredPath:
+                          type: string
+                        resourceVersion:
+                          format: int64
+                          type: integer
+                        state:
+                          type: string
+                        targetPortEnd:
+                          format: int32
+                          type: integer
+                        targetPortStart:
+                          format: int32
+                          type: integer
+                        type:
+                          type: string
+                        ublkID:
+                          format: int32
+                          type: integer
+                        uuid:
+                          type: string
+                      type: object
+                  type: object
+                nullable: true
+                type: object
               instanceEngines:
                 additionalProperties:
                   properties:
@@ -1913,6 +2461,8 @@ spec:
                       type: object
                     status:
                       properties:
+                        activePath:
+                          type: string
                         conditions:
                           additionalProperties:
                             type: boolean
@@ -1922,14 +2472,35 @@ spec:
                           type: string
                         errorMsg:
                           type: string
+                        frontend:
+                          type: string
                         listen:
                           type: string
+                        paths:
+                          items:
+                            properties:
+                              anaState:
+                                type: string
+                              engineName:
+                                type: string
+                              nguid:
+                                type: string
+                              nqn:
+                                type: string
+                              targetIP:
+                                type: string
+                              targetPort:
+                                type: integer
+                            type: object
+                          type: array
                         portEnd:
                           format: int32
                           type: integer
                         portStart:
                           format: int32
                           type: integer
+                        preferredPath:
+                          type: string
                         resourceVersion:
                           format: int64
                           type: integer
@@ -1964,6 +2535,8 @@ spec:
                       type: object
                     status:
                       properties:
+                        activePath:
+                          type: string
                         conditions:
                           additionalProperties:
                             type: boolean
@@ -1973,14 +2546,35 @@ spec:
                           type: string
                         errorMsg:
                           type: string
+                        frontend:
+                          type: string
                         listen:
                           type: string
+                        paths:
+                          items:
+                            properties:
+                              anaState:
+                                type: string
+                              engineName:
+                                type: string
+                              nguid:
+                                type: string
+                              nqn:
+                                type: string
+                              targetIP:
+                                type: string
+                              targetPort:
+                                type: integer
+                            type: object
+                          type: array
                         portEnd:
                           format: int32
                           type: integer
                         portStart:
                           format: int32
                           type: integer
+                        preferredPath:
+                          type: string
                         resourceVersion:
                           format: int64
                           type: integer
@@ -2003,7 +2597,7 @@ spec:
                   type: object
                 nullable: true
                 type: object
-              instances:
+              instanceShardGroups:
                 additionalProperties:
                   properties:
                     spec:
@@ -2015,6 +2609,8 @@ spec:
                       type: object
                     status:
                       properties:
+                        activePath:
+                          type: string
                         conditions:
                           additionalProperties:
                             type: boolean
@@ -2024,14 +2620,35 @@ spec:
                           type: string
                         errorMsg:
                           type: string
+                        frontend:
+                          type: string
                         listen:
                           type: string
+                        paths:
+                          items:
+                            properties:
+                              anaState:
+                                type: string
+                              engineName:
+                                type: string
+                              nguid:
+                                type: string
+                              nqn:
+                                type: string
+                              targetIP:
+                                type: string
+                              targetPort:
+                                type: integer
+                            type: object
+                          type: array
                         portEnd:
                           format: int32
                           type: integer
                         portStart:
                           format: int32
                           type: integer
+                        preferredPath:
+                          type: string
                         resourceVersion:
                           format: int64
                           type: integer
@@ -2052,7 +2669,80 @@ spec:
                           type: string
                       type: object
                   type: object
-                description: 'Deprecated: Replaced by InstanceEngines and InstanceReplicas'
+                nullable: true
+                type: object
+              instanceShards:
+                additionalProperties:
+                  properties:
+                    spec:
+                      properties:
+                        dataEngine:
+                          type: string
+                        name:
+                          type: string
+                      type: object
+                    status:
+                      properties:
+                        activePath:
+                          type: string
+                        conditions:
+                          additionalProperties:
+                            type: boolean
+                          nullable: true
+                          type: object
+                        endpoint:
+                          type: string
+                        errorMsg:
+                          type: string
+                        frontend:
+                          type: string
+                        listen:
+                          type: string
+                        paths:
+                          items:
+                            properties:
+                              anaState:
+                                type: string
+                              engineName:
+                                type: string
+                              nguid:
+                                type: string
+                              nqn:
+                                type: string
+                              targetIP:
+                                type: string
+                              targetPort:
+                                type: integer
+                            type: object
+                          type: array
+                        portEnd:
+                          format: int32
+                          type: integer
+                        portStart:
+                          format: int32
+                          type: integer
+                        preferredPath:
+                          type: string
+                        resourceVersion:
+                          format: int64
+                          type: integer
+                        state:
+                          type: string
+                        targetPortEnd:
+                          format: int32
+                          type: integer
+                        targetPortStart:
+                          format: int32
+                          type: integer
+                        type:
+                          type: string
+                        ublkID:
+                          format: int32
+                          type: integer
+                        uuid:
+                          type: string
+                      type: object
+                  type: object
                 nullable: true
                 type: object
               ip:
@@ -2075,13 +2765,13 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.17.1
+    controller-gen.kubebuilder.io/version: v0.19.0
   labels:
     app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.10.1
+    helm.sh/chart: longhorn-1.12.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.10.1
+    app.kubernetes.io/version: v1.12.1
     longhorn-manager: ""
   name: nodes.longhorn.io
 spec:
@@ -2214,6 +2904,8 @@ spec:
                   type: object
                 nullable: true
                 type: array
+              cpuPolicy:
+                type: string
               diskStatus:
                 additionalProperties:
                   properties:
@@ -2257,6 +2949,63 @@ spec:
                     diskUUID:
                       type: string
                     filesystemType:
+                      type: string
+                    healthData:
+                      additionalProperties:
+                        properties:
+                          attributes:
+                            items:
+                              properties:
+                                id:
+                                  type: integer
+                                name:
+                                  type: string
+                                rawString:
+                                  type: string
+                                rawValue:
+                                  format: int64
+                                  type: integer
+                                threshold:
+                                  type: integer
+                                value:
+                                  type: integer
+                                whenFailed:
+                                  type: string
+                                worst:
+                                  type: integer
+                              type: object
+                            type: array
+                          capacity:
+                            format: int64
+                            type: integer
+                          diskName:
+                            type: string
+                          diskType:
+                            type: string
+                          firmwareVersion:
+                            type: string
+                          healthStatus:
+                            enum:
+                            - FAILED
+                            - PASSED
+                            - UNKNOWN
+                            - WARNING
+                            type: string
+                          modelName:
+                            type: string
+                          serialNumber:
+                            type: string
+                          source:
+                            enum:
+                            - SMART
+                            - SPDK
+                            type: string
+                          temperature:
+                            type: integer
+                        type: object
+                      type: object
+                    healthDataLastCollectedAt:
+                      format: date-time
                       type: string
                     instanceManagerName:
                       type: string
@@ -2306,13 +3055,13 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.17.1
+    controller-gen.kubebuilder.io/version: v0.19.0
   labels:
     app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.10.1
+    helm.sh/chart: longhorn-1.12.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.10.1
+    app.kubernetes.io/version: v1.12.1
     longhorn-manager: ""
   name: orphans.longhorn.io
 spec:
@@ -2431,13 +3180,13 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.17.1
+    controller-gen.kubebuilder.io/version: v0.19.0
   labels:
     app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.10.1
+    helm.sh/chart: longhorn-1.12.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.10.1
+    app.kubernetes.io/version: v1.12.1
     longhorn-manager: ""
   name: recurringjobs.longhorn.io
 spec:
@@ -2574,13 +3323,13 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.17.1
+    controller-gen.kubebuilder.io/version: v0.19.0
   labels:
     app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.10.1
+    helm.sh/chart: longhorn-1.12.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.10.1
+    app.kubernetes.io/version: v1.12.1
     longhorn-manager: ""
   name: replicas.longhorn.io
 spec:
@@ -2707,6 +3456,11 @@ spec:
                   later than the corresponding entry in an engine's replicaTransitionTimeMap because it is set when the volume
                   controller acknowledges the change.
                 type: string
+              linkedCloneSrcReplicaName:
+                description: |-
+                  LinkedCloneSrcReplicaName is the name of the src replica this clone replica is parented to.
+                  Immutable once set. Non-empty only for linked-clone replicas.
+                type: string
               logRequested:
                 type: boolean
               migrationEngineName:
@@ -2807,13 +3561,13 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.17.1
+    controller-gen.kubebuilder.io/version: v0.19.0
   labels:
     app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.10.1
+    helm.sh/chart: longhorn-1.12.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.10.1
+    app.kubernetes.io/version: v1.12.1
     longhorn-manager: ""
   name: settings.longhorn.io
 spec:
@@ -2889,13 +3643,448 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.17.1
+    controller-gen.kubebuilder.io/version: v0.19.0
   labels:
     app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.10.1
+    helm.sh/chart: longhorn-1.12.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.10.1
+    app.kubernetes.io/version: v1.12.1
+    longhorn-manager: ""
+  name: shardgroups.longhorn.io
+spec:
+  group: longhorn.io
+  names:
+    kind: ShardGroup
+    listKind: ShardGroupList
+    plural: shardgroups
+    shortNames:
+    - lhsg
+    singular: shardgroup
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: The volume that owns this ShardGroup
+      jsonPath: .spec.volumeName
+      name: Volume
+      type: string
+    - description: The aggregate health state of the EC array
+      jsonPath: .status.state
+      name: State
+      type: string
+    - description: The node hosting the ShardGroup process (typically co-located with
+        the engine)
+      jsonPath: .spec.nodeID
+      name: Node
+      type: string
+    - description: The number of failed slots
+      jsonPath: .status.failedCount
+      name: Failed
+      type: integer
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta2
+    schema:
+      openAPIV3Schema:
+        description: ShardGroup is where Longhorn stores ShardGroup object.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ShardGroupSpec defines the desired state of the Longhorn
+              ShardGroup
+            properties:
+              creationSize:
+                description: |-
+                  CreationSize is the volume size in bytes when the lvstore is first
+                  created. The lvstore metadata region is sized from it and never grows,
+                  so in-place expansion is limited to EcLvstoreMaxGrowthFactor (10x) of
+                  this size. Zero means the lvstore does not exist yet; the creation cap
+                  applies instead. Immutable once set.
+                format: int64
+                type: integer
+                x-kubernetes-validations:
+                - message: CreationSize is immutable once set
+                  rule: oldSelf == 0 || self == oldSelf
+              dataChunks:
+                description: DataChunks is the k parameter of the EC array. Immutable
+                  after creation.
+                minimum: 1
+                type: integer
+              nodeID:
+                description: |-
+                  NodeID identifies the node hosting the long-lived ShardGroup process that owns the
+                  EC volume's bdev_ec, lvol store, head lvol, and NVMe-oF export. It is typically equal
+                  to Engine.Spec.NodeID for engine-process co-location. The Volume controller is the
+                  sole writer and sets this field at first attach. NodeID is NOT cleared on volume
+                  detach (the ShardGroup process keeps running across detach to preserve the lvstore
+                  and head lvol on the encoded shard blocks for fast re-attach); it only changes on
+                  engine-node failover or volume deletion.
+                type: string
+              parityChunks:
+                description: |-
+                  ParityChunks is the m parameter of the EC array. The ShardGroup tolerates up to m
+                  simultaneous shard failures. Immutable after creation.
+                minimum: 1
+                type: integer
+              stripSizeKB:
+                description: |-
+                  StripSizeKB is the EC chunk size in KiB. Must be a power of two in the range [4, 1024].
+                  Immutable after creation.
+                maximum: 1024
+                minimum: 4
+                type: integer
+              volumeName:
+                description: VolumeName is the name of the owning Volume CR. Immutable
+                  after creation.
+                type: string
+            type: object
+          status:
+            description: ShardGroupStatus defines the observed state of the Longhorn
+              ShardGroup
+            properties:
+              conditions:
+                description: |-
+                  Conditions holds the latest observations of the ShardGroup's state, such as a
+                  degraded read that returned EIO.
+                items:
+                  properties:
+                    lastProbeTime:
+                      description: Last time we probed the condition.
+                      type: string
+                    lastTransitionTime:
+                      description: Last time the condition transitioned from one status
+                        to another.
+                      type: string
+                    message:
+                      description: Human-readable message indicating details about
+                        last transition.
+                      type: string
+                    reason:
+                      description: Unique, one-word, CamelCase reason for the condition's
+                        last transition.
+                      type: string
+                    status:
+                      description: |-
+                        Status is the status of the condition.
+                        Can be True, False, Unknown.
+                      type: string
+                    type:
+                      description: Type is the type of the condition.
+                      type: string
+                  type: object
+                nullable: true
+                type: array
+              ecShardAddressMap:
+                additionalProperties:
+                  type: string
+                description: |-
+                  ECShardAddressMap maps shard slot index (as string) to the NVMe-oF address ("ip:port")
+                  of each healthy shard instance (ShardStateNormal with a non-empty StorageIP and Port).
+                  It is the base-bdev list for the ShardGroup process's EC array, and acts as the readiness
+                  gate (together with every Shard CR being in ShardStateNormal) before the ShardGroup
+                  process is provisioned.
+                nullable: true
+                type: object
+              evictingSlots:
+                description: |-
+                  EvictingSlots is the ordered list of slot indices currently in the eviction
+                  pipeline (old Shard CR deleted, replacement not yet rebuilt). Tracked in
+                  status so VolumeEvictionController can observe progress without annotation parsing.
+                items:
+                  type: integer
+                nullable: true
+                type: array
+              failedCount:
+                description: |-
+                  FailedCount is the number of slots currently in the failed state. Slots being replaced
+                  (ShardStateReplacing) are not counted; an active rebuild is tracked separately via
+                  RebuildInProgress.
+                type: integer
+              growInProgress:
+                description: GrowInProgress indicates whether a capacity expansion
+                  is currently running.
+                type: boolean
+              headLvolUUID:
+                description: |-
+                  HeadLvolUUID is the UUID of the head lvol on the ShardGroup-process-owned lvol
+                  store. Surfaced for observability and debugging only.
+                type: string
+              instanceManagerName:
+                description: |-
+                  InstanceManagerName is the InstanceManager currently hosting the ShardGroup process,
+                  set during provisioning and cleared on teardown. During a re-bind to a new node it may
+                  still reference the previous InstanceManager until teardown completes, so consumers must
+                  validate it against Spec.NodeID before trusting the endpoint above.
+                type: string
+              intentionalDeleteSlots:
+                description: |-
+                  IntentionalDeleteSlots is the list of slot indices whose old Shard CR was
+                  deleted intentionally (admin kubectl delete, eviction, drain). The replacement
+                  Shard CR's failure-recovery debounce is bypassed for these slots so the
+                  replace+rebuild sequence runs immediately rather than after the full
+                  replica-replenishment-wait-interval. Cleared once the replacement reaches
+                  ShardStateNormal with StorageIP set, and defensively cleared on ShardGroup
+                  process re-bind.
+                items:
+                  type: integer
+                nullable: true
+                type: array
+              lvstoreUUID:
+                description: |-
+                  LvstoreUUID is reserved for the UUID of the lvol store created on bdev_ec inside the
+                  ShardGroup process. It is currently unpopulated: the ShardGroup instance does not surface
+                  the lvstore UUID over the instance-manager proto yet. Kept for forward-compatible
+                  observability; not on the engine data path.
+                type: string
+              nqn:
+                description: NQN is the NVMe-oF subsystem NQN of the ShardGroup process's
+                  exposed head lvol.
+                type: string
+              ownerID:
+                description: OwnerID is the ID of the node that owns this ShardGroup.
+                type: string
+              port:
+                description: Port is the NVMe-oF port allocated for the ShardGroup
+                  process's exposed head lvol.
+                format: int32
+                type: integer
+              processState:
+                description: ProcessState is the runtime state of the ShardGroup process
+                  owned by this CR.
+                type: string
+              rebuildInProgress:
+                description: RebuildInProgress indicates whether a background shard
+                  rebuild is currently running.
+                type: boolean
+              scrubInProgress:
+                description: ScrubInProgress indicates whether a background scrub
+                  is currently running.
+                type: boolean
+              shardRefs:
+                description: ShardRefs is an ordered list of Shard CR names, where
+                  the list index equals the EC slot index.
+                items:
+                  type: string
+                nullable: true
+                type: array
+              state:
+                description: State is the aggregate health state of the EC array.
+                enum:
+                - healthy
+                - degraded
+                - offline
+                - rebuilding
+                - growing
+                - ""
+                type: string
+              storageIP:
+                description: |-
+                  StorageIP is the storage-network IP of the InstanceManager pod hosting the ShardGroup
+                  process. Combined with Port and NQN, it forms the NVMe-oF endpoint that an EC volume's
+                  engine attaches to.
+                type: string
+              wibDirtyRegion:
+                description: WIBDirtyRegion is the number of dirty WIB regions reported
+                  by the EC bdev.
+                type: integer
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+---
+# Source: longhorn/templates/crds.yaml
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.19.0
+  labels:
+    app.kubernetes.io/name: longhorn
+    helm.sh/chart: longhorn-1.12.1
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: longhorn
+    app.kubernetes.io/version: v1.12.1
+    longhorn-manager: ""
+  name: shards.longhorn.io
+spec:
+  group: longhorn.io
+  names:
+    kind: Shard
+    listKind: ShardList
+    plural: shards
+    shortNames:
+    - lhsd
+    singular: shard
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: The ShardGroup that owns this Shard
+      jsonPath: .spec.shardGroupName
+      name: ShardGroup
+      type: string
+    - description: The EC slot index of this Shard
+      jsonPath: .spec.slotIndex
+      name: Slot
+      type: integer
+    - description: The node that the shard instance runs on
+      jsonPath: .spec.nodeID
+      name: Node
+      type: string
+    - description: The health state of this shard slot
+      jsonPath: .status.state
+      name: State
+      type: string
+    - description: The EC role of this shard slot (data or parity)
+      jsonPath: .status.role
+      name: Role
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta2
+    schema:
+      openAPIV3Schema:
+        description: Shard is where Longhorn stores Shard object.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ShardSpec defines the desired state of the Longhorn Shard
+            properties:
+              diskPath:
+                description: DiskPath is the path of the disk that hosts the shard
+                  lvol.
+                type: string
+              diskUUID:
+                description: DiskUUID is the UUID of the disk that hosts the shard
+                  lvol.
+                type: string
+              evictionRequested:
+                description: |-
+                  EvictionRequested indicates this shard should be relocated to a different node or disk.
+                  Set by the node controller when the shard's node is being drained or its disk is evicted.
+                type: boolean
+              nodeID:
+                description: NodeID is the node where this shard's lvol resides and
+                  its NVMe-oF target runs.
+                type: string
+              shardGroupName:
+                description: ShardGroupName is the name of the owning ShardGroup CR.
+                  Immutable after creation.
+                type: string
+              size:
+                description: |-
+                  Size is the shard lvol size in bytes. Set by the ShardGroup controller at creation time
+                  and used for idempotent reconciliation.
+                format: int64
+                type: string
+              slotIndex:
+                description: |-
+                  SlotIndex is the zero-based position of this shard in the EC base-bdev array.
+                  Determines the shard's role: indices 0..k-1 are DATA, k..k+m-1 are PARITY.
+                  Immutable after creation.
+                minimum: 0
+                type: integer
+            type: object
+          status:
+            description: ShardStatus defines the observed state of the Longhorn Shard
+            properties:
+              lastFailureTimestamp:
+                description: LastFailureTimestamp is the RFC3339 timestamp of the
+                  most recent shard failure.
+                type: string
+              ownerID:
+                description: OwnerID is the ID of the node that owns this Shard.
+                type: string
+              port:
+                description: Port is the NVMe-oF port of the shard's target export.
+                format: int32
+                type: integer
+              rebuildProgress:
+                description: RebuildProgress is the rebuild completion percentage
+                  (0-100).
+                type: integer
+              replaceTriggered:
+                description: |-
+                  ReplaceTriggered is set to true after shard replacement has been initiated, to prevent
+                  re-issuing the replace command on subsequent cycles while SPDK advances the slot state.
+                  Cleared when the slot state transitions away from Failed.
+                type: boolean
+              role:
+                description: |-
+                  Role is the EC role of this slot (data or parity). Derived from SlotIndex and the parent
+                  ShardGroup's DataChunks; stored here for informational purposes only.
+                enum:
+                - data
+                - parity
+                - ""
+                type: string
+              state:
+                description: State is the health state of this EC shard slot.
+                enum:
+                - normal
+                - failed
+                - replacing
+                - ""
+                type: string
+              storageIP:
+                description: |-
+                  StorageIP is the IP address of the NVMe-oF target exported by the shard's InstanceManager.
+                  Populated after the shard instance is running.
+                type: string
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+---
+# Source: longhorn/templates/crds.yaml
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.19.0
+  labels:
+    app.kubernetes.io/name: longhorn
+    helm.sh/chart: longhorn-1.12.1
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: longhorn
+    app.kubernetes.io/version: v1.12.1
     longhorn-manager: ""
   name: sharemanagers.longhorn.io
 spec:
@@ -2917,6 +4106,10 @@ spec:
     - description: The node that the share manager is owned by
       jsonPath: .status.ownerID
       name: Node
+      type: string
+    - description: The current image of the share manager
+      jsonPath: .status.currentImage
+      name: Image
       type: string
     - jsonPath: .metadata.creationTimestamp
       name: Age
@@ -2956,6 +4149,9 @@ spec:
             description: ShareManagerStatus defines the observed state of the Longhorn
               share manager
             properties:
+              currentImage:
+                description: The image currently used by the share manager pod
+                type: string
               endpoint:
                 description: NFS endpoint that can access the mounted filesystem of
                   the volume
@@ -2979,13 +4175,13 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.17.1
+    controller-gen.kubebuilder.io/version: v0.19.0
   labels:
     app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.10.1
+    helm.sh/chart: longhorn-1.12.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.10.1
+    app.kubernetes.io/version: v1.12.1
     longhorn-manager: ""
   name: snapshots.longhorn.io
 spec:
@@ -3072,6 +4268,11 @@ spec:
             properties:
               checksum:
                 type: string
+              checksumCalculatedAt:
+                description: |-
+                  ChecksumCalculatedAt is the RFC3339 timestamp indicating when the checksum
+                  for this snapshot was last calculated or updated.
+                type: string
               children:
                 additionalProperties:
                   type: boolean
@@ -3094,6 +4295,8 @@ spec:
                 type: string
               readyToUse:
                 type: boolean
+              requestedTime:
+                type: string
               restoreSize:
                 format: int64
                 type: integer
@@ -3114,13 +4317,13 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.17.1
+    controller-gen.kubebuilder.io/version: v0.19.0
   labels:
     app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.10.1
+    helm.sh/chart: longhorn-1.12.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.10.1
+    app.kubernetes.io/version: v1.12.1
     longhorn-manager: ""
   name: supportbundles.longhorn.io
 spec:
@@ -3251,13 +4454,13 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.17.1
+    controller-gen.kubebuilder.io/version: v0.19.0
   labels:
     app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.10.1
+    helm.sh/chart: longhorn-1.12.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.10.1
+    app.kubernetes.io/version: v1.12.1
     longhorn-manager: ""
   name: systembackups.longhorn.io
 spec:
@@ -3394,13 +4597,13 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.17.1
+    controller-gen.kubebuilder.io/version: v0.19.0
   labels:
     app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.10.1
+    helm.sh/chart: longhorn-1.12.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.10.1
+    app.kubernetes.io/version: v1.12.1
     longhorn-manager: ""
   name: systemrestores.longhorn.io
 spec:
@@ -3509,13 +4712,13 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.17.1
+    controller-gen.kubebuilder.io/version: v0.19.0
   labels:
     app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.10.1
+    helm.sh/chart: longhorn-1.12.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.10.1
+    app.kubernetes.io/version: v1.12.1
     longhorn-manager: ""
   name: volumeattachments.longhorn.io
 spec:
@@ -3659,13 +4862,13 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.17.1
+    controller-gen.kubebuilder.io/version: v0.19.0
   labels:
     app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.10.1
+    helm.sh/chart: longhorn-1.12.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.10.1
+    app.kubernetes.io/version: v1.12.1
     longhorn-manager: ""
   name: volumes.longhorn.io
 spec:
@@ -3704,6 +4907,11 @@ spec:
       jsonPath: .status.currentNodeID
       name: Node
       type: string
+    - description: The engine switchover state
+      jsonPath: .status.switchoverState
+      name: Switchover
+      priority: 1
+      type: string
     - jsonPath: .metadata.creationTimestamp
       name: Age
       type: date
@@ -3737,10 +4945,14 @@ spec:
               accessMode:
                 enum:
                 - rwo
+                - rwop
                 - rwx
                 type: string
               backingImage:
                 type: string
+                x-kubernetes-validations:
+                - message: BackingImage is immutable
+                  rule: self == oldSelf
               backupBlockSize:
                 description: BackupBlockSize indicate the block size to create backups.
                   The block size is immutable.
@@ -3770,6 +4982,52 @@ spec:
                 - v1
                 - v2
                 type: string
+              dataLayout:
+                description: |-
+                  DataLayout declares the user's intended data layout (topology type, protection mode, and EC parameters).
+                  The entire struct is immutable after creation.
+                properties:
+                  dataChunks:
+                    description: |-
+                      DataChunks is the number of data chunks (k) in the EC array.
+                      Required when Type is sharded; must be 0 for replicated volumes.
+                    minimum: 0
+                    type: integer
+                  mode:
+                    description: |-
+                      Mode describes the specific data protection mechanism in use.
+                      Empty for V1 volumes where no SPDK-level mode applies.
+                    enum:
+                    - raid1
+                    - erasureCoding
+                    - ""
+                    type: string
+                  parityChunks:
+                    description: |-
+                      ParityChunks is the number of parity chunks (m) in the EC array.
+                      The volume tolerates up to m simultaneous disk failures.
+                      Required when Type is sharded; must be 0 for replicated volumes.
+                    minimum: 0
+                    type: integer
+                  stripSizeKB:
+                    description: |-
+                      StripSizeKB is the chunk size in KiB used by the EC bdev.
+                      Must be a power of two in the range [4, 1024].
+                      Required when Type is sharded; must be 0 for replicated volumes.
+                    minimum: 0
+                    type: integer
+                  type:
+                    description: Type describes how volume data is distributed across
+                      nodes.
+                    enum:
+                    - replicated
+                    - sharded
+                    - ""
+                    type: string
+                type: object
+                x-kubernetes-validations:
+                - message: DataLayout is immutable
+                  rule: self == oldSelf
               dataLocality:
                 enum:
                 - disabled
@@ -3786,6 +5044,14 @@ spec:
                 type: array
               encrypted:
                 type: boolean
+                x-kubernetes-validations:
+                - message: Encrypted is immutable
+                  rule: self == oldSelf
+              engineNodeID:
+                description: |-
+                  engineNodeID defines the node where the backend engine (target) runs.
+                  If empty, falls back to NodeID.
+                type: string
               freezeFilesystemForSnapshot:
                 description: Setting that freezes the filesystem on the root partition
                   before a snapshot is created.
@@ -3813,6 +5079,8 @@ spec:
               migrationNodeID:
                 type: string
               nodeID:
+                description: nodeID defines the node where the volume is attached
+                  (where the frontend initiator runs).
                 type: string
               nodeSelector:
                 items:
@@ -3831,6 +5099,14 @@ spec:
                 - disabled
                 - enabled
                 type: string
+              rebuildConcurrentSyncLimit:
+                description: |-
+                  RebuildConcurrentSyncLimit controls the maximum number of file synchronization operations that can run
+                  concurrently during a single replica rebuild.
+                  When set to 0, it means following the global setting.
+                maximum: 5
+                minimum: 0
+                type: integer
               replicaAutoBalance:
                 enum:
                 - ignored
@@ -3888,12 +5164,29 @@ spec:
                 - enabled
                 - fast-check
                 type: string
+              snapshotHashingRequestedAt:
+                description: |-
+                  SnapshotHashingRequestedAt is the RFC3339 timestamp (e.g., "2026-03-16T10:30:00Z") when an on-demand snapshot checksum calculation is requested.
+                  When this value is set and is later than LastOnDemandSnapshotHashingCompleteAt, the system will calculate checksums
+                  for all user snapshots.
+
+                  If SnapshotHashingRequestedAt differs from LastOnDemandSnapshotHashingCompleteAt, it indicates that a hashing request
+                  is still in progress, and a new request will be rejected.
+                type: string
               snapshotMaxCount:
                 type: integer
               snapshotMaxSize:
                 format: int64
                 type: string
               staleReplicaTimeout:
+                type: integer
+              ublkNumberOfQueue:
+                description: ublkNumberOfQueue controls the number of queues for ublk
+                  frontend.
+                type: integer
+              ublkQueueDepth:
+                description: ublkQueueDepth controls the depth of each queue for ublk
+                  frontend.
                 type: integer
               unmapMarkSnapChainRemoved:
                 enum:
@@ -3950,6 +5243,10 @@ spec:
                   type: object
                 nullable: true
                 type: array
+              currentEngineNodeID:
+                description: the node that the engine (target) is currently running
+                  on.
+                type: string
               currentImage:
                 type: string
               currentMigrationNodeID:
@@ -3994,11 +5291,19 @@ spec:
                     nullable: true
                     type: array
                 type: object
+              lastAutoSalvagedAt:
+                type: string
               lastBackup:
                 type: string
               lastBackupAt:
                 type: string
               lastDegradedAt:
+                type: string
+              lastOnDemandSnapshotHashingCompleteAt:
+                description: |-
+                  LastOnDemandSnapshotHashingCompleteAt is the RFC3339 timestamp (e.g., "2026-03-16T10:30:00Z") when the
+                  most recent on-demand snapshot checksum calculation completed.
+                  When this value matches SnapshotHashingRequestedAt, the requested on-demand checksum calculation is considered complete.
                 type: string
               ownerID:
                 type: string
@@ -4016,6 +5321,11 @@ spec:
                 type: string
               state:
                 type: string
+              switchoverState:
+                description: |-
+                  SwitchoverState describes the current progress of a v2 engine live switchover.
+                  Empty when no switchover is in progress.
+                type: string
             type: object
         type: object
     served: true
@@ -4030,10 +5340,10 @@ metadata:
   name: longhorn-role
   labels:
     app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.10.1
+    helm.sh/chart: longhorn-1.12.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.10.1
+    app.kubernetes.io/version: v1.12.1
 rules:
 - apiGroups:
   - apiextensions.k8s.io
@@ -4066,20 +5376,21 @@ rules:
   resources: ["priorityclasses"]
   verbs: ["watch", "list"]
 - apiGroups: ["storage.k8s.io"]
-  resources: ["storageclasses", "volumeattachments", "volumeattachments/status", "csinodes", "csidrivers", "csistoragecapacities"]
+  resources: ["storageclasses", "volumeattachments", "volumeattachments/status", "volumeattributesclasses", "csinodes", "csidrivers", "csistoragecapacities"]
   verbs: ["*"]
 - apiGroups: ["snapshot.storage.k8s.io"]
   resources: ["volumesnapshotclasses", "volumesnapshots", "volumesnapshotcontents", "volumesnapshotcontents/status"]
   verbs: ["*"]
 - apiGroups: ["longhorn.io"]
-  resources: ["volumes", "volumes/status", "engines", "engines/status", "replicas", "replicas/status", "settings", "settings/status",
+  resources: ["volumes", "volumes/status", "enginefrontends", "enginefrontends/status", "engines", "engines/status", "replicas", "replicas/status", "settings", "settings/status",
               "engineimages", "engineimages/status", "nodes", "nodes/status", "instancemanagers", "instancemanagers/status",
               "sharemanagers", "sharemanagers/status", "backingimages", "backingimages/status",
               "backingimagemanagers", "backingimagemanagers/status", "backingimagedatasources", "backingimagedatasources/status",
               "backuptargets", "backuptargets/status", "backupvolumes", "backupvolumes/status", "backups", "backups/status",
               "recurringjobs", "recurringjobs/status", "orphans", "orphans/status", "snapshots", "snapshots/status",
               "supportbundles", "supportbundles/status", "systembackups", "systembackups/status", "systemrestores", "systemrestores/status",
-              "volumeattachments", "volumeattachments/status", "backupbackingimages", "backupbackingimages/status"]
+              "volumeattachments", "volumeattachments/status", "backupbackingimages", "backupbackingimages/status",
+              "shards", "shards/status", "shardgroups", "shardgroups/status"]
   verbs: ["*"]
 - apiGroups: ["coordination.k8s.io"]
   resources: ["leases"]
@@ -4110,10 +5421,10 @@ metadata:
   name: longhorn-bind
   labels:
     app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.10.1
+    helm.sh/chart: longhorn-1.12.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.10.1
+    app.kubernetes.io/version: v1.12.1
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -4130,10 +5441,10 @@ metadata:
   name: longhorn-support-bundle
   labels:
     app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.10.1
+    helm.sh/chart: longhorn-1.12.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.10.1
+    app.kubernetes.io/version: v1.12.1
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -4151,10 +5462,10 @@ metadata:
   namespace: longhorn-system
   labels:
     app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.10.1
+    helm.sh/chart: longhorn-1.12.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.10.1
+    app.kubernetes.io/version: v1.12.1
 rules:
 - apiGroups: [""]
   resources: ["pods", "pods/log", "events", "secrets", "services", "endpoints", "configmaps", "serviceaccounts", "persistentvolumeclaims", "persistentvolumeclaims/status"]
@@ -4199,10 +5510,10 @@ kind: Service
 metadata:
   labels:
     app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.10.1
+    helm.sh/chart: longhorn-1.12.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.10.1
+    app.kubernetes.io/version: v1.12.1
     app: longhorn-manager
   name: longhorn-backend
   namespace: longhorn-system
@@ -4221,10 +5532,10 @@ apiVersion: v1
 metadata:
   labels:
     app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.10.1
+    helm.sh/chart: longhorn-1.12.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.10.1
+    app.kubernetes.io/version: v1.12.1
     app: longhorn-ui
   name: longhorn-frontend
   namespace: longhorn-system
@@ -4244,10 +5555,10 @@ kind: Service
 metadata:
   labels:
     app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.10.1
+    helm.sh/chart: longhorn-1.12.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.10.1
+    app.kubernetes.io/version: v1.12.1
     app: longhorn-admission-webhook
   name: longhorn-admission-webhook
   namespace: longhorn-system
@@ -4266,10 +5577,10 @@ kind: Service
 metadata:
   labels:
     app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.10.1
+    helm.sh/chart: longhorn-1.12.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.10.1
+    app.kubernetes.io/version: v1.12.1
     app: longhorn-recovery-backend
   name: longhorn-recovery-backend
   namespace: longhorn-system
@@ -4288,10 +5599,10 @@ kind: DaemonSet
 metadata:
   labels:
     app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.10.1
+    helm.sh/chart: longhorn-1.12.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.10.1
+    app.kubernetes.io/version: v1.12.1
     app: longhorn-manager
   name: longhorn-manager
   namespace: longhorn-system
@@ -4303,34 +5614,35 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: longhorn
-        helm.sh/chart: longhorn-1.10.1
+        helm.sh/chart: longhorn-1.12.1
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/instance: longhorn
-        app.kubernetes.io/version: v1.10.1
+        app.kubernetes.io/version: v1.12.1
         app: longhorn-manager
     spec:
       containers:
       - name: longhorn-manager
-        image: longhornio/longhorn-manager:v1.10.1
+        image: docker.io/longhornio/longhorn-manager:v1.12.1
         imagePullPolicy: IfNotPresent
         securityContext:
           privileged: true
         command:
         - longhorn-manager
         - -d
+        - -j
         - daemon
         - --engine-image
-        - "longhornio/longhorn-engine:v1.10.1"
+        - "docker.io/longhornio/longhorn-engine:v1.12.1"
         - --instance-manager-image
-        - "longhornio/longhorn-instance-manager:v1.10.1"
+        - "docker.io/longhornio/longhorn-instance-manager:v1.12.1"
         - --share-manager-image
-        - "longhornio/longhorn-share-manager:v1.10.1"
+        - "docker.io/longhornio/longhorn-share-manager:v1.12.1"
         - --backing-image-manager-image
-        - "longhornio/backing-image-manager:v1.10.1"
+        - "docker.io/longhornio/backing-image-manager:v1.12.1"
         - --support-bundle-manager-image
-        - "longhornio/support-bundle-kit:v0.0.71"
+        - "docker.io/longhornio/support-bundle-kit:v0.0.92"
         - --manager-image
-        - "longhornio/longhorn-manager:v1.10.1"
+        - "docker.io/longhornio/longhorn-manager:v1.12.1"
         - --service-account
         - longhorn-service-account
         ports:
@@ -4379,9 +5691,12 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: spec.nodeName
+        - name: LONGHORN_DISTRO
+          value: "longhorn"
+        
       - name: pre-pull-share-manager-image
         imagePullPolicy: IfNotPresent
-        image: longhornio/longhorn-share-manager:v1.10.1
+        image: docker.io/longhornio/longhorn-share-manager:v1.12.1
         command: ["sh", "-c", "echo share-manager image pulled && sleep infinity"]
       volumes:
       - name: boot
@@ -4407,7 +5722,7 @@ spec:
       serviceAccountName: longhorn-service-account
   updateStrategy:
     rollingUpdate:
-      maxUnavailable: "100%"
+      maxUnavailable: 100%
 ---
 # Source: longhorn/templates/deployment-driver.yaml
 apiVersion: apps/v1
@@ -4417,10 +5732,10 @@ metadata:
   namespace: longhorn-system
   labels:
     app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.10.1
+    helm.sh/chart: longhorn-1.12.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.10.1
+    app.kubernetes.io/version: v1.12.1
 spec:
   replicas: 1
   selector:
@@ -4430,26 +5745,26 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: longhorn
-        helm.sh/chart: longhorn-1.10.1
+        helm.sh/chart: longhorn-1.12.1
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/instance: longhorn
-        app.kubernetes.io/version: v1.10.1
+        app.kubernetes.io/version: v1.12.1
         app: longhorn-driver-deployer
     spec:
       initContainers:
         - name: wait-longhorn-manager
-          image: longhornio/longhorn-manager:v1.10.1
+          image: docker.io/longhornio/longhorn-manager:v1.12.1
           command: ['sh', '-c', 'while [ $(curl -m 1 -s -o /dev/null -w "%{http_code}" http://longhorn-backend:9500/v1) != "200" ]; do echo waiting; sleep 2; done']
       containers:
         - name: longhorn-driver-deployer
-          image: longhornio/longhorn-manager:v1.10.1
+          image: docker.io/longhornio/longhorn-manager:v1.12.1
           imagePullPolicy: IfNotPresent
           command:
           - longhorn-manager
           - -d
           - deploy-driver
           - --manager-image
-          - "longhornio/longhorn-manager:v1.10.1"
+          - "docker.io/longhornio/longhorn-manager:v1.12.1"
           - --manager-url
           - http://longhorn-backend:9500/v1
           env:
@@ -4466,17 +5781,26 @@ spec:
               fieldRef:
                 fieldPath: spec.serviceAccountName
           - name: CSI_ATTACHER_IMAGE
-            value: "longhornio/csi-attacher:v4.10.0-20251030"
+            value: "docker.io/longhornio/csi-attacher:v4.12.0"
           - name: CSI_PROVISIONER_IMAGE
-            value: "longhornio/csi-provisioner:v5.3.0-20251030"
+            value: "docker.io/longhornio/csi-provisioner:v5.3.0"
           - name: CSI_NODE_DRIVER_REGISTRAR_IMAGE
-            value: "longhornio/csi-node-driver-registrar:v2.15.0-20251030"
+            value: "docker.io/longhornio/csi-node-driver-registrar:v2.17.0"
           - name: CSI_RESIZER_IMAGE
-            value: "longhornio/csi-resizer:v1.14.0-20251030"
+            value: "docker.io/longhornio/csi-resizer:v2.2.1"
           - name: CSI_SNAPSHOTTER_IMAGE
-            value: "longhornio/csi-snapshotter:v8.4.0-20251030"
+            value: "docker.io/longhornio/csi-snapshotter:v8.6.0"
           - name: CSI_LIVENESS_PROBE_IMAGE
-            value: "longhornio/livenessprobe:v2.17.0-20251030"
+            value: "docker.io/longhornio/livenessprobe:v2.19.0"
+          - name: CSI_ATTACHER_REPLICA_COUNT
+            value: "1"
+          - name: CSI_PROVISIONER_REPLICA_COUNT
+            value: "1"
+          - name: CSI_RESIZER_REPLICA_COUNT
+            value: "1"
+          - name: CSI_SNAPSHOTTER_REPLICA_COUNT
+            value: "1"
+          
       priorityClassName: "longhorn-critical"
       serviceAccountName: longhorn-service-account
       securityContext:
@@ -4488,10 +5812,10 @@ kind: Deployment
 metadata:
   labels:
     app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.10.1
+    helm.sh/chart: longhorn-1.12.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.10.1
+    app.kubernetes.io/version: v1.12.1
     app: longhorn-ui
   name: longhorn-ui
   namespace: longhorn-system
@@ -4504,10 +5828,10 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: longhorn
-        helm.sh/chart: longhorn-1.10.1
+        helm.sh/chart: longhorn-1.12.1
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/instance: longhorn
-        app.kubernetes.io/version: v1.10.1
+        app.kubernetes.io/version: v1.12.1
         app: longhorn-ui
     spec:
       serviceAccountName: longhorn-ui-service-account
@@ -4525,7 +5849,7 @@ spec:
             weight: 1
       containers:
       - name: longhorn-ui
-        image: longhornio/longhorn-ui:v1.10.1
+        image: docker.io/longhornio/longhorn-ui:v1.12.1
         imagePullPolicy: IfNotPresent
         volumeMounts:
         - name: nginx-cache
@@ -4542,6 +5866,7 @@ spec:
             value: "http://longhorn-backend:9500"
           - name: LONGHORN_UI_PORT
             value: "8000"
+          
       volumes:
       - emptyDir: {}
         name: nginx-cache
@@ -4559,10 +5884,10 @@ metadata:
   namespace: longhorn-system
   labels:
     app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.10.1
+    helm.sh/chart: longhorn-1.12.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.10.1
+    app.kubernetes.io/version: v1.12.1
     app: longhorn-ingress
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
@@ -4580,6 +5905,10 @@ spec:
               name: longhorn-frontend
               port:
                 number: 80
+  tls:
+  - hosts:
+    - longhorn.home.arpa
+    secretName: wildcard-home-arpa
 ---
 # Source: longhorn/templates/validate-psp-install.yaml
 #
@@ -4595,10 +5924,10 @@ metadata:
   namespace: longhorn-system
   labels:
     app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.10.1
+    helm.sh/chart: longhorn-1.12.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.10.1
+    app.kubernetes.io/version: v1.12.1
 spec:
   activeDeadlineSeconds: 900
   backoffLimit: 1
@@ -4607,14 +5936,14 @@ spec:
       name: longhorn-post-upgrade
       labels:
         app.kubernetes.io/name: longhorn
-        helm.sh/chart: longhorn-1.10.1
+        helm.sh/chart: longhorn-1.12.1
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/instance: longhorn
-        app.kubernetes.io/version: v1.10.1
+        app.kubernetes.io/version: v1.12.1
     spec:
       containers:
       - name: longhorn-post-upgrade
-        image: longhornio/longhorn-manager:v1.10.1
+        image: docker.io/longhornio/longhorn-manager:v1.12.1
         imagePullPolicy: IfNotPresent
         command:
         - longhorn-manager
@@ -4624,6 +5953,7 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
+        
       restartPolicy: OnFailure
       priorityClassName: "longhorn-critical"
       serviceAccountName: longhorn-service-account
@@ -4639,10 +5969,10 @@ metadata:
   namespace: longhorn-system
   labels:
     app.kubernetes.io/name: longhorn
-    helm.sh/chart: longhorn-1.10.1
+    helm.sh/chart: longhorn-1.12.1
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: longhorn
-    app.kubernetes.io/version: v1.10.1
+    app.kubernetes.io/version: v1.12.1
 spec:
   activeDeadlineSeconds: 900
   backoffLimit: 1
@@ -4651,14 +5981,14 @@ spec:
       name: longhorn-uninstall
       labels:
         app.kubernetes.io/name: longhorn
-        helm.sh/chart: longhorn-1.10.1
+        helm.sh/chart: longhorn-1.12.1
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/instance: longhorn
-        app.kubernetes.io/version: v1.10.1
+        app.kubernetes.io/version: v1.12.1
     spec:
       containers:
       - name: longhorn-uninstall
-        image: longhornio/longhorn-manager:v1.10.1
+        image: docker.io/longhornio/longhorn-manager:v1.12.1
         imagePullPolicy: IfNotPresent
         command:
         - longhorn-manager
@@ -4669,6 +5999,7 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
+        
       restartPolicy: Never
       priorityClassName: "longhorn-critical"
       serviceAccountName: longhorn-service-account

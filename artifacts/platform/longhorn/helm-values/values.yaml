@@ -11,7 +11,14 @@ ingress:
     traefik.ingress.kubernetes.io/router.tls: "true"
 
 persistence:
-  defaultClass: false 
+  defaultClass: true 
+  defaultClassReplicaCount: 1
+  defaultDiskSelector:
+    enable: true
+    selector: "ssd"
+  defaultNodeSelector:
+    enable: true
+    selector: "ssd"
 
 defaultSettings:
   defaultDataPath: "/storage01"
@@ -22,3 +29,17 @@ service:
 preUpgradeChecker:
   jobEnabled: false
   upgradeVersionCheck: false
+
+csi:
+  attacherReplicaCount: 1
+  provisionerReplicaCount: 1
+  resizerReplicaCount: 1
+  snapshotterReplicaCount: 1
+
+longhornManager:
+  log:
+    format: "json"
+
+lonhornDriver:
+  log:
+    format: "json"
