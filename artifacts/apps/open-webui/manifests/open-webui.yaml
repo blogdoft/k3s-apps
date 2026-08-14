@@ -28,7 +28,7 @@ spec:
     - "ReadWriteOnce"
   resources:
     requests:
-      storage: 5Gi
+      storage: 1Gi
   storageClassName: longhorn-fast
 ---
 # Source: open-webui/templates/service.yaml
