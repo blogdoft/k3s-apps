@@ -34,7 +34,7 @@ spec:
 
       containers:
         - name: forgejo
-          image: codeberg.org/forgejo/forgejo:15
+          image: codeberg.org/forgejo/forgejo:16
           imagePullPolicy: IfNotPresent
 
           env:
