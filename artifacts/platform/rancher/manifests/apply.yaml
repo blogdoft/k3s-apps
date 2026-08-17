@@ -6,7 +6,7 @@ metadata:
   name: rancher-critical
   labels: 
     app: rancher
-    chart: rancher-2.13.1
+    chart: rancher-2.15.0
     heritage: Helm
     release: rancher
   annotations:
@@ -22,7 +22,7 @@ metadata:
   name: rancher
   labels:
     app: rancher
-    chart: rancher-2.13.1
+    chart: rancher-2.15.0
     heritage: Helm
     release: rancher
 ---
@@ -33,7 +33,7 @@ metadata:
   name: rancher-config
   labels: 
     app: rancher
-    chart: rancher-2.13.1
+    chart: rancher-2.15.0
     heritage: Helm
     release: rancher
     app.kubernetes.io/part-of: "rancher"
@@ -47,7 +47,7 @@ metadata:
   name: rancher
   labels:
     app: rancher
-    chart: rancher-2.13.1
+    chart: rancher-2.15.0
     heritage: Helm
     release: rancher
 subjects:
@@ -66,7 +66,7 @@ metadata:
   name: rancher
   labels:
     app: rancher
-    chart: rancher-2.13.1
+    chart: rancher-2.15.0
     heritage: Helm
     release: rancher
 spec:
@@ -76,9 +76,29 @@ spec:
     protocol: TCP
     name: http
   - port: 443
-    targetPort: 444
+    targetPort: 443
     protocol: TCP
-    name: https-internal
+    name: https
+  selector:
+    app: rancher
+---
+# Source: rancher/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: rancher-internal
+  labels:
+    app: rancher
+    chart: rancher-2.15.0
+    heritage: Helm
+    release: rancher
+spec:
+  type: ClusterIP
+  ports:
+    - port: 443
+      targetPort: 444
+      protocol: TCP
+      name: https-internal
   selector:
     app: rancher
 ---
@@ -91,7 +111,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "10"
   labels:
     app: rancher
-    chart: rancher-2.13.1
+    chart: rancher-2.15.0
     heritage: Helm
     release: rancher
 spec:
@@ -138,11 +158,15 @@ spec:
           effect: "NoSchedule"
           operator: "Equal"
       containers:
-      - image: "rancher/rancher:v2.13.1"
+      - image: "rancher/rancher:v2.15.0"
         imagePullPolicy: IfNotPresent
         name: rancher
         ports:
         - containerPort: 80
+          protocol: TCP
+        - containerPort: 443
+          protocol: TCP
+        - containerPort: 444
           protocol: TCP
         - containerPort: 6666
           protocol: TCP
@@ -198,20 +222,17 @@ spec:
           defaultMode: 0400
           secretName: tls-ca
 ---
-# Source: rancher/templates/ingress.yaml
+# Source: rancher/templates/ingate/ingress.yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: rancher
   labels:
     app: rancher
-    chart: rancher-2.13.1
+    chart: rancher-2.15.0
     heritage: Helm
     release: rancher
   annotations:
-    nginx.ingress.kubernetes.io/proxy-connect-timeout: "30"
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "1800"
-    nginx.ingress.kubernetes.io/proxy-send-timeout: "1800"
 spec:
   rules:
   - host: rancher.home.arpa  # hostname to access rancher server
@@ -237,7 +258,7 @@ metadata:
   namespace: cattle-system
   labels: 
     app: rancher
-    chart: rancher-2.13.1
+    chart: rancher-2.15.0
     heritage: Helm
     release: rancher
   annotations:
@@ -253,7 +274,7 @@ metadata:
   namespace: cattle-system
   labels: 
     app: rancher
-    chart: rancher-2.13.1
+    chart: rancher-2.15.0
     heritage: Helm
     release: rancher
   annotations:
@@ -283,7 +304,7 @@ metadata:
   namespace: cattle-system
   labels: 
     app: rancher
-    chart: rancher-2.13.1
+    chart: rancher-2.15.0
     heritage: Helm
     release: rancher
   annotations:
@@ -401,7 +422,7 @@ metadata:
   namespace: cattle-system
   labels: 
     app: rancher
-    chart: rancher-2.13.1
+    chart: rancher-2.15.0
     heritage: Helm
     release: rancher
   annotations:
@@ -532,14 +553,6 @@ data:
         '{range .items[?(@.spec.rancherKubernetesEngineConfig)]}{.metadata.name}{"\t"}{.spec.displayName}{"\n"}{end}' \
         "NAME" "DISPLAY NAME"
     
-      detect_resource "nodetemplates.management.cattle.io" "NodeTemplate" \
-        '{range .items[*]}{.metadata.namespace}{"\t"}{.metadata.name}{"\t"}{.spec.displayName}{"\n"}{end}' \
-        "NAMESPACE" "NAME" "DISPLAY NAME"
-    
-      detect_resource "clustertemplates.management.cattle.io" "ClusterTemplate" \
-        '{range .items[*]}{.metadata.namespace}{"\t"}{.metadata.name}{"\t"}{.spec.displayName}{"\n"}{end}' \
-        "NAMESPACE" "NAME" "DISPLAY NAME"
-    
       print_summary
     }
     
@@ -552,7 +565,7 @@ metadata:
   name: rancher-post-delete
   labels: 
     app: rancher
-    chart: rancher-2.13.1
+    chart: rancher-2.15.0
     heritage: Helm
     release: rancher
   annotations:
@@ -598,7 +611,7 @@ metadata:
   name: rancher-pre-upgrade
   labels: 
     app: rancher
-    chart: rancher-2.13.1
+    chart: rancher-2.15.0
     heritage: Helm
     release: rancher
   annotations:
@@ -609,8 +622,6 @@ rules:
   - apiGroups: ["management.cattle.io"]
     resources:
       - "clusters"
-      - "nodetemplates"
-      - "clustertemplates"
     verbs: ["get", "list"]
 ---
 # Source: rancher/templates/post-delete-hook-cluster-role-binding.yaml
@@ -620,7 +631,7 @@ metadata:
   name: rancher-post-delete
   labels: 
     app: rancher
-    chart: rancher-2.13.1
+    chart: rancher-2.15.0
     heritage: Helm
     release: rancher
   annotations:
@@ -643,7 +654,7 @@ metadata:
   name: rancher-pre-upgrade
   labels: 
     app: rancher
-    chart: rancher-2.13.1
+    chart: rancher-2.15.0
     heritage: Helm
     release: rancher
   annotations:
@@ -667,7 +678,7 @@ metadata:
   namespace: cattle-system
   labels: 
     app: rancher
-    chart: rancher-2.13.1
+    chart: rancher-2.15.0
     heritage: Helm
     release: rancher
   annotations:
@@ -681,7 +692,7 @@ spec:
       name: rancher-post-delete
       labels: 
         app: rancher
-        chart: rancher-2.13.1
+        chart: rancher-2.15.0
         heritage: Helm
         release: rancher
     spec:
@@ -689,7 +700,7 @@ spec:
       restartPolicy: OnFailure
       containers:
         - name: rancher-post-delete
-          image: "rancher/shell:v0.6.1"
+          image: "rancher/shell:v0.8.1"
           imagePullPolicy: IfNotPresent
           securityContext:
             runAsUser: 0
@@ -721,7 +732,7 @@ metadata:
   namespace: cattle-system
   labels: 
     app: rancher-pre-upgrade
-    chart: rancher-2.13.1
+    chart: rancher-2.15.0
     heritage: Helm
     release: rancher
   annotations:
@@ -735,7 +746,7 @@ spec:
       name: rancher-pre-upgrade
       labels: 
         app: rancher-pre-upgrade
-        chart: rancher-2.13.1
+        chart: rancher-2.15.0
         heritage: Helm
         release: rancher
     spec:
@@ -743,7 +754,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: rancher-pre-upgrade
-          image: "rancher/shell:v0.6.1"
+          image: "rancher/shell:v0.8.1"
           imagePullPolicy: IfNotPresent
           securityContext:
             runAsUser: 0
