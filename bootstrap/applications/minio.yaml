@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: minio
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"  
+spec:
+  project: platform
+  sources:
+    - repoURL: git@github.com:blogdoft/k3s-apps.git
+      path: artifacts/platform/minio/manifests
+      targetRevision: HEAD
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: minio
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      enabled: true
+    syncOptions:
+      - CreateNamespace=true    

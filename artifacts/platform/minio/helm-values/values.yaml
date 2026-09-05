@@ -1,0 +1,46 @@
+global:
+  defaultStorageClass: "longhorn-fast"
+
+## MinIO root credentials.
+## Secrets must NOT be stored in this repo, so we point to an existingSecret
+## that has to be created manually in the target namespace before deploying:
+##
+##   kubectl create secret generic minio-credentials -n minio \
+##     --from-literal=root-user=<user> \
+##     --from-literal=root-password=<password>
+##
+auth:
+  existingSecret: "minio-credentials"
+  rootUserSecretKey: "root-user"
+  rootPasswordSecretKey: "root-password"
+
+mode: standalone
+
+persistence:
+  enabled: true
+  storageClass: "longhorn-fast"
+  size: 20Gi
+
+## MinIO API (S3) ingress.
+## The wildcard certificate covers "*.home.arpa" (single label only), so the
+## API is exposed on its own single-level host instead of a nested one like
+## "s3.minio.home.arpa" (which the wildcard would NOT match).
+ingress:
+  enabled: true
+  ingressClassName: traefik
+  hostname: minio-api.home.arpa
+  pathType: Prefix
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+
+## MinIO Console (web UI) ingress.
+console:
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    hostname: minio.home.arpa
+    pathType: Prefix
+    annotations:
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+      traefik.ingress.kubernetes.io/router.tls: "true"
