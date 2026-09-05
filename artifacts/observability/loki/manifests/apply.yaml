@@ -54,6 +54,8 @@ data:
     index_gateway:
       mode: simple
     limits_config:
+      ingestion_burst_size_mb: 32
+      ingestion_rate_mb: 16
       max_cache_freshness_per_query: 10m
       query_timeout: 300s
       reject_old_samples: true
@@ -266,7 +268,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: 97be2f874c1dafbdc1583ca5114c5b10e5235286572915e145324ace7ff1b27e
+        checksum/config: fccf0df0d2943e61292ebee4713c3e227cdb512e5d9dbca6717d811f12d3fd5c
         storage/size: "10Gi"
         kubectl.kubernetes.io/default-container: "loki"
       labels:

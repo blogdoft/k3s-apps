@@ -2,13 +2,23 @@
 
 Chart: https://artifacthub.io/packages/helm/prometheus-community/prometheus
 
-Instalação enxuta — chart `prometheus-community/prometheus` puro (não
-`kube-prometheus-stack`), com Alertmanager, node-exporter, kube-state-metrics
-e pushgateway todos desabilitados. Neste stack, o Prometheus serve
-principalmente como backend das métricas RED (rate/error/duration) que o
-**Tempo** gera automaticamente a partir dos traces (metrics-generator —
-ver `artifacts/observability/tempo/readme.md`), não como um monitor de
-infraestrutura do cluster.
+Chart `prometheus-community/prometheus` puro (não `kube-prometheus-stack`),
+com Alertmanager e pushgateway desabilitados. Serve como backend das
+métricas RED (rate/error/duration) que o **Tempo** gera automaticamente a
+partir dos traces (metrics-generator — ver
+`artifacts/observability/tempo/readme.md`) **e** como fonte de métricas de
+infraestrutura (host e pods) para o dashboard "Host & Pod Stats" no Grafana:
+
+- **`prometheus-node-exporter`** (DaemonSet, um pod por nó): métricas de
+  host — CPU, memória, disco, rede, load average (`node_*`).
+- **`kube-state-metrics`**: estado dos objetos Kubernetes — fase do pod,
+  contagem de restarts (`kube_pod_*`).
+- **`kubernetes-nodes-cadvisor`** (scrape job): uso real de CPU/memória por
+  pod/container, via cAdvisor do kubelet (`container_*`).
+
+Ambos os subcharts expõem `prometheus.io/scrape: "true"` no Service, então
+o job `kubernetes-service-endpoints` (descoberta por anotação) os encontra
+automaticamente — sem scrape config manual por serviço.
 
 ## Remote-write receiver
 

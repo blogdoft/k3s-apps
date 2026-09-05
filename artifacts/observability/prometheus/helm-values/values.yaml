@@ -20,12 +20,16 @@ server:
 scrapeConfigs:
   kubernetes-api-servers:
     enabled: false
+  # Habilitados para o dashboard de stats de host (node-exporter, via
+  # kubernetes-nodes) e de pods (cAdvisor, via kubernetes-nodes-cadvisor) +
+  # descoberta por anotação (kubernetes-service-endpoints, pega o Service do
+  # kube-state-metrics automaticamente).
   kubernetes-nodes:
-    enabled: false
+    enabled: true
   kubernetes-nodes-cadvisor:
-    enabled: false
+    enabled: true
   kubernetes-service-endpoints:
-    enabled: false
+    enabled: true
   kubernetes-service-endpoints-slow:
     enabled: false
   kubernetes-services:
@@ -40,9 +44,10 @@ scrapeConfigs:
 
 alertmanager:
   enabled: false
+# Habilitados para o dashboard de stats de host e de pods.
 prometheus-node-exporter:
-  enabled: false
+  enabled: true
 kube-state-metrics:
-  enabled: false
+  enabled: true
 prometheus-pushgateway:
   enabled: false

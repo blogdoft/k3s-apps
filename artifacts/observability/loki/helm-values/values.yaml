@@ -24,6 +24,11 @@ loki:
     reject_old_samples: true
     reject_old_samples_max_age: 168h
     volume_enabled: true
+    # Default (4MB/s, ~6MB burst) é baixo demais para o catch-up inicial do
+    # Alloy lendo o backlog de todos os pods do cluster de uma vez — causou
+    # "ingestion rate limit exceeded" logo no primeiro deploy.
+    ingestion_rate_mb: 16
+    ingestion_burst_size_mb: 32
 
   compactor:
     retention_enabled: true

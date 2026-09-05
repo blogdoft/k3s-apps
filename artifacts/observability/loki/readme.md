@@ -7,6 +7,14 @@ de logs fixada em **3 dias** via `limits_config.retention_period` +
 `compactor.retention_enabled: true` — o compactor apaga os chunks/index
 expirados automaticamente, sem intervenção manual.
 
+## Rate limit de ingestão
+
+`limits_config.ingestion_rate_mb: 16` / `ingestion_burst_size_mb: 32`
+(default do chart é 4MB/s, ~6MB burst). O default se mostrou baixo demais
+logo no primeiro deploy: o Alloy, ao subir, lê o backlog recente de todos os
+pods do cluster de uma vez, gerando um pico que estourava o limite padrão
+("ingestion rate limit exceeded").
+
 ## Renderizar o template
 
 ```sh
