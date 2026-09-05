@@ -1,6 +1,13 @@
 global:
   defaultStorageClass: "longhorn-fast"
 
+## Bitnami moved all versioned image tags out of docker.io/bitnami/* into the
+## free but unmaintained docker.io/bitnamilegacy/* org (Aug 2025 catalog
+## change). Point at bitnamilegacy so the pinned tags below can still be
+## pulled. See https://github.com/bitnami/charts/issues/30850
+image:
+  repository: bitnamilegacy/minio
+
 ## MinIO root credentials.
 ## Secrets must NOT be stored in this repo, so we point to an existingSecret
 ## that has to be created manually in the target namespace before deploying:
@@ -34,8 +41,10 @@ ingress:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
 
-## MinIO Console (web UI) ingress.
+## MinIO Console (web UI).
 console:
+  image:
+    repository: bitnamilegacy/minio-object-browser
   ingress:
     enabled: true
     ingressClassName: traefik
