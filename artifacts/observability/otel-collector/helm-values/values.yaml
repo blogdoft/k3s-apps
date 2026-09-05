@@ -1,0 +1,45 @@
+fullnameOverride: otel-collector
+
+mode: deployment
+replicaCount: 1
+
+image:
+  repository: "ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-k8s"
+command:
+  name: "otelcol-k8s"
+
+# Preset injeta o processor k8sattributes em todos os pipelines e cria o
+# ClusterRole/ClusterRoleBinding necessário automaticamente.
+presets:
+  kubernetesAttributes:
+    enabled: true
+
+config:
+  receivers:
+    jaeger: null
+    zipkin: null
+    prometheus: null
+  exporters:
+    debug: null
+    otlp/tempo:
+      endpoint: tempo.observability.svc.cluster.local:4317
+      tls:
+        insecure: true
+  service:
+    pipelines:
+      traces:
+        receivers: [otlp]
+        # memory_limiter primeiro (proteção OOM), k8s_attributes antes do
+        # batch (enriquece antes de agrupar).
+        processors: [memory_limiter, k8s_attributes, batch]
+        exporters: [otlp/tempo]
+      metrics: null
+      logs: null
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi

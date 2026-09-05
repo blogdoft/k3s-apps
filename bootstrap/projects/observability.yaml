@@ -11,7 +11,7 @@ spec:
     - git@github.com:blogdoft/k3s-apps.git
   destinations:
     - server: https://kubernetes.default.svc
-      namespace: monitoring
+      namespace: observability
 
   # Se você usa kube-prometheus-stack, vai precisar de CRDs/ClusterRoles
   clusterResourceWhitelist:

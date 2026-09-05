@@ -1,0 +1,48 @@
+server:
+  retention: 15d
+  extraArgs:
+    web.enable-remote-write-receiver: null
+  persistentVolume:
+    enabled: true
+    storageClass: longhorn-fast
+    size: 10Gi
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: "1"
+      memory: 1Gi
+
+# Chart quirk: jobs de descoberta k8s vêm de um mapa com enabled:true por
+# padrão. Sobrescrever com lista/{} não remove nada (merge de mapa Helm não
+# limpa chaves default) — precisa desabilitar campo a campo.
+scrapeConfigs:
+  kubernetes-api-servers:
+    enabled: false
+  kubernetes-nodes:
+    enabled: false
+  kubernetes-nodes-cadvisor:
+    enabled: false
+  kubernetes-service-endpoints:
+    enabled: false
+  kubernetes-service-endpoints-slow:
+    enabled: false
+  kubernetes-services:
+    enabled: false
+  kubernetes-pods:
+    enabled: false
+  kubernetes-pods-slow:
+    enabled: false
+  prometheus-pushgateway:
+    enabled: false
+  # "prometheus" (self-scrape) fica habilitado — barato e útil.
+
+alertmanager:
+  enabled: false
+prometheus-node-exporter:
+  enabled: false
+kube-state-metrics:
+  enabled: false
+prometheus-pushgateway:
+  enabled: false
