@@ -1,0 +1,97 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-alerting
+  namespace: observability
+data:
+  rules.yaml: |
+    apiVersion: 1
+    groups:
+      - orgId: 1
+        name: disk-usage-alerts
+        folder: Observability
+        interval: 5m
+        rules:
+          - uid: pvc-usage-80
+            title: "PVC usage >= 80%"
+            condition: C
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  expr: "100 * kubelet_volume_stats_used_bytes / kubelet_volume_stats_capacity_bytes"
+                  instant: true
+                  intervalMs: 60000
+                  maxDataPoints: 1
+                  refId: A
+              - refId: B
+                datasourceUid: __expr__
+                model:
+                  type: reduce
+                  expression: A
+                  reducer: last
+                  refId: B
+              - refId: C
+                datasourceUid: __expr__
+                model:
+                  type: threshold
+                  expression: B
+                  conditions:
+                    - evaluator:
+                        type: gt
+                        params: [80]
+                  refId: C
+            noDataState: NoData
+            execErrState: Error
+            for: 10m
+            labels:
+              severity: warning
+              disk_type: pvc
+            annotations:
+              summary: "PVC {{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }} está com {{ printf \"%.1f\" $values.B.Value }}% de uso"
+              description: "A ocupação do volume {{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }} atingiu ou passou de 80%. Considere aumentar o tamanho do PVC ou reduzir a retenção de dados."
+
+          - uid: host-disk-usage-80
+            title: "Host filesystem usage >= 80%"
+            condition: C
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  expr: "100 - ((node_filesystem_avail_bytes{fstype!~\"tmpfs|overlay|squashfs\"} / node_filesystem_size_bytes{fstype!~\"tmpfs|overlay|squashfs\"}) * 100)"
+                  instant: true
+                  intervalMs: 60000
+                  maxDataPoints: 1
+                  refId: A
+              - refId: B
+                datasourceUid: __expr__
+                model:
+                  type: reduce
+                  expression: A
+                  reducer: last
+                  refId: B
+              - refId: C
+                datasourceUid: __expr__
+                model:
+                  type: threshold
+                  expression: B
+                  conditions:
+                    - evaluator:
+                        type: gt
+                        params: [80]
+                  refId: C
+            noDataState: NoData
+            execErrState: Error
+            for: 10m
+            labels:
+              severity: warning
+              disk_type: host
+            annotations:
+              summary: "Disco {{ $labels.instance }} ({{ $labels.mountpoint }}) está com {{ printf \"%.1f\" $values.B.Value }}% de uso"
+              description: "A ocupação do filesystem {{ $labels.mountpoint }} no host {{ $labels.instance }} atingiu ou passou de 80%."

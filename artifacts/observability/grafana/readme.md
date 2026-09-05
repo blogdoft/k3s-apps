@@ -52,8 +52,31 @@ dashboards), na pasta "Observability" do Grafana:
   `prometheus-node-exporter`) e CPU/memória/restarts/fase por pod (via
   cAdvisor + `kube-state-metrics`) — ver
   `artifacts/observability/prometheus/readme.md`.
+- **Disk Usage**: ocupação (%) de cada PVC do cluster (`kubelet_volume_stats_*`,
+  todos os namespaces, não só `observability`) e de cada filesystem de host
+  (`node_filesystem_*`), com gauge + tendência e limiar visual em 80%.
+
+## Alertas
+
+Provisionados via ConfigMap `grafana-alerting` montado em
+`/etc/grafana/provisioning/alerting/`, grupo `disk-usage-alerts` na pasta
+"Observability":
+
+- **PVC usage >= 80%**: um disparo por `namespace`/`persistentvolumeclaim`
+  que cruzar o limiar (`for: 10m`, evita flapping em picos curtos).
+- **Host filesystem usage >= 80%**: um disparo por `instance`/`mountpoint`.
+
+Ambas usam a política de notificação e o contact point padrão do Grafana
+(`grafana-default-email`) — **sem canal de notificação real configurado**
+(precisa de SMTP, que este cluster não tem). O estado de disparo fica
+visível em Alerting → Alert rules na UI, mas nada é enviado externamente
+ainda. Para notificar de verdade, configure SMTP (`GF_SMTP_*` no Deployment)
+ou adicione um contact point de webhook/Slack via provisioning
+(`/etc/grafana/provisioning/alerting/contactpoints.yaml`).
 
 ## O que não foi configurado / requer ação manual
 
 - **Credenciais admin**: precisam ser criadas manualmente como Secret
   (`grafana-admin`, namespace `observability`) antes do primeiro apply — ver acima.
+- **Notificação real dos alertas**: sem SMTP/webhook/Slack configurado — ver
+  seção Alertas acima.

@@ -411,3 +411,206 @@ data:
       "version": 1,
       "weekStart": ""
     }
+  disk-usage.json: |
+    {
+      "annotations": { "list": [] },
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 0,
+      "id": null,
+      "links": [],
+      "panels": [
+        {
+          "id": 1,
+          "type": "row",
+          "title": "Volumes (PVCs)",
+          "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+          "collapsed": false,
+          "panels": []
+        },
+        {
+          "id": 2,
+          "type": "bargauge",
+          "title": "PVC Usage %",
+          "gridPos": { "h": 9, "w": 12, "x": 0, "y": 1 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "100 * kubelet_volume_stats_used_bytes / kubelet_volume_stats_capacity_bytes",
+              "legendFormat": "{{namespace}}/{{persistentvolumeclaim}}",
+              "instant": true,
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "max": 100,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "yellow", "value": 60 },
+                  { "color": "red", "value": 80 }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "options": { "orientation": "horizontal", "displayMode": "gradient", "showUnfilled": true }
+        },
+        {
+          "id": 3,
+          "type": "timeseries",
+          "title": "PVC Usage % (trend)",
+          "gridPos": { "h": 9, "w": 12, "x": 12, "y": 1 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "100 * kubelet_volume_stats_used_bytes / kubelet_volume_stats_capacity_bytes",
+              "legendFormat": "{{namespace}}/{{persistentvolumeclaim}}",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "max": 100,
+              "min": 0,
+              "custom": { "thresholdsStyle": { "mode": "line" } },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "red", "value": 80 }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "options": {}
+        },
+        {
+          "id": 4,
+          "type": "table",
+          "title": "PVCs — Used / Capacity",
+          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 10 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "kubelet_volume_stats_used_bytes",
+              "format": "table",
+              "instant": true,
+              "refId": "Used"
+            },
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "kubelet_volume_stats_capacity_bytes",
+              "format": "table",
+              "instant": true,
+              "refId": "Capacity"
+            }
+          ],
+          "fieldConfig": { "defaults": { "unit": "bytes" }, "overrides": [] },
+          "options": {}
+        },
+        {
+          "id": 5,
+          "type": "row",
+          "title": "Host Filesystems",
+          "gridPos": { "h": 1, "w": 24, "x": 0, "y": 18 },
+          "collapsed": false,
+          "panels": []
+        },
+        {
+          "id": 6,
+          "type": "bargauge",
+          "title": "Host Filesystem Usage %",
+          "gridPos": { "h": 9, "w": 12, "x": 0, "y": 19 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "100 - ((node_filesystem_avail_bytes{fstype!~\"tmpfs|overlay|squashfs\"} / node_filesystem_size_bytes{fstype!~\"tmpfs|overlay|squashfs\"}) * 100)",
+              "legendFormat": "{{instance}} {{mountpoint}}",
+              "instant": true,
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "max": 100,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "yellow", "value": 60 },
+                  { "color": "red", "value": 80 }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "options": { "orientation": "horizontal", "displayMode": "gradient", "showUnfilled": true }
+        },
+        {
+          "id": 7,
+          "type": "timeseries",
+          "title": "Host Filesystem Usage % (trend)",
+          "gridPos": { "h": 9, "w": 12, "x": 12, "y": 19 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "100 - ((node_filesystem_avail_bytes{fstype!~\"tmpfs|overlay|squashfs\"} / node_filesystem_size_bytes{fstype!~\"tmpfs|overlay|squashfs\"}) * 100)",
+              "legendFormat": "{{instance}} {{mountpoint}}",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "max": 100,
+              "min": 0,
+              "custom": { "thresholdsStyle": { "mode": "line" } },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "red", "value": 80 }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "options": {}
+        },
+        {
+          "id": 8,
+          "type": "text",
+          "title": "Alertas",
+          "gridPos": { "h": 4, "w": 24, "x": 0, "y": 28 },
+          "options": {
+            "mode": "markdown",
+            "content": "Alertas provisionados no Grafana (Alerting → Alert rules, pasta \"Observability\"): **PVC usage >= 80%** e **Host filesystem usage >= 80%**, um disparo por volume/mountpoint que cruzar o limite. Sem canal de notificação externo configurado ainda (email/Slack/webhook) — o estado de disparo fica visível na UI do Grafana."
+          }
+        }
+      ],
+      "refresh": "1m",
+      "schemaVersion": 39,
+      "tags": ["observability", "infra", "disk"],
+      "templating": { "list": [] },
+      "time": { "from": "now-6h", "to": "now" },
+      "timepicker": {},
+      "timezone": "",
+      "title": "Disk Usage",
+      "uid": "disk-usage",
+      "version": 1,
+      "weekStart": ""
+    }

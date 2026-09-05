@@ -172,6 +172,9 @@ spec:
             - name: dashboards
               mountPath: /etc/grafana/provisioning/dashboards/json
               readOnly: true
+            - name: alerting
+              mountPath: /etc/grafana/provisioning/alerting
+              readOnly: true
 
       volumes:
         - name: data
@@ -186,6 +189,9 @@ spec:
         - name: dashboards
           configMap:
             name: grafana-dashboards
+        - name: alerting
+          configMap:
+            name: grafana-alerting
 ---
 apiVersion: v1
 kind: Service
