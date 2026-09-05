@@ -1,0 +1,45 @@
+tempo:
+  retention: 72h
+
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: "0.0.0.0:4317"
+        http:
+          endpoint: "0.0.0.0:4318"
+
+  metricsGenerator:
+    enabled: true
+    remoteWriteUrl: "http://prometheus-server.observability.svc.cluster.local:80/api/v1/write"
+    processor:
+      span_metrics:
+        enable_target_info: true
+      service_graphs:
+        wait: 10s
+
+  # Sem isso, metricsGenerator.enabled sozinho renderiza o bloco de config
+  # mas com processors vazio (não faz nada). Este é o switch que ativa os
+  # dois processors de fato.
+  overrides:
+    defaults:
+      metrics_generator:
+        processors:
+          - service-graphs
+          - span-metrics
+
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: "1"
+      memory: 1Gi
+
+persistence:
+  enabled: true
+  storageClassName: longhorn-fast
+  size: 10Gi
+
+serviceMonitor:
+  enabled: false

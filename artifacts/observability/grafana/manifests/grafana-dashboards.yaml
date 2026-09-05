@@ -1,0 +1,216 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-provider
+  namespace: observability
+data:
+  provider.yaml: |
+    apiVersion: 1
+    providers:
+      - name: default
+        orgId: 1
+        folder: "Observability"
+        type: file
+        disableDeletion: false
+        updateIntervalSeconds: 30
+        allowUiUpdates: true
+        options:
+          path: /etc/grafana/provisioning/dashboards/json
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboards
+  namespace: observability
+data:
+  logs-overview.json: |
+    {
+      "annotations": { "list": [] },
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 0,
+      "id": null,
+      "links": [],
+      "panels": [
+        {
+          "id": 1,
+          "type": "timeseries",
+          "title": "Log Volume by Namespace",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+          "datasource": { "type": "loki", "uid": "loki" },
+          "targets": [
+            {
+              "datasource": { "type": "loki", "uid": "loki" },
+              "expr": "sum by (namespace) (count_over_time({namespace=~\".+\"}[$__interval]))",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": { "defaults": {}, "overrides": [] },
+          "options": {}
+        },
+        {
+          "id": 2,
+          "type": "timeseries",
+          "title": "Error-pattern Rate by Namespace",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+          "datasource": { "type": "loki", "uid": "loki" },
+          "targets": [
+            {
+              "datasource": { "type": "loki", "uid": "loki" },
+              "expr": "sum by (namespace) (count_over_time({namespace=~\".+\"} |~ \"(?i)error|exception|panic\" [$__interval]))",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": { "defaults": {}, "overrides": [] },
+          "options": {}
+        },
+        {
+          "id": 3,
+          "type": "timeseries",
+          "title": "Top 10 Pods by Log Volume",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+          "datasource": { "type": "loki", "uid": "loki" },
+          "targets": [
+            {
+              "datasource": { "type": "loki", "uid": "loki" },
+              "expr": "topk(10, sum by (pod) (count_over_time({namespace=~\".+\"}[$__interval])))",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": { "defaults": {}, "overrides": [] },
+          "options": {}
+        },
+        {
+          "id": 4,
+          "type": "text",
+          "title": "Nota",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+          "options": {
+            "mode": "markdown",
+            "content": "**Reinícios de pod**: essa métrica vem tipicamente do `kube-state-metrics`, que não faz parte deste stack (fora de escopo — só logs via Loki/Alloy e traces/RED via Tempo/Prometheus). O painel \"Top 10 Pods by Log Volume\" ao lado serve como substituto aproximado: picos de volume de log por pod costumam coincidir com crashloops/restarts."
+          }
+        }
+      ],
+      "refresh": "30s",
+      "schemaVersion": 39,
+      "tags": ["observability", "logs"],
+      "templating": { "list": [] },
+      "time": { "from": "now-6h", "to": "now" },
+      "timepicker": {},
+      "timezone": "",
+      "title": "Logs Overview",
+      "uid": "logs-overview",
+      "version": 1,
+      "weekStart": ""
+    }
+  apm-service-overview.json: |
+    {
+      "annotations": { "list": [] },
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 0,
+      "id": null,
+      "links": [],
+      "panels": [
+        {
+          "id": 1,
+          "type": "timeseries",
+          "title": "Request Rate",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "sum by (service) (rate(traces_spanmetrics_calls_total{service=~\"$service\"}[5m]))",
+              "legendFormat": "{{service}}",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
+          "options": {}
+        },
+        {
+          "id": 2,
+          "type": "timeseries",
+          "title": "Error Rate %",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "100 * sum by (service) (rate(traces_spanmetrics_calls_total{service=~\"$service\", status_code=\"STATUS_CODE_ERROR\"}[5m])) / sum by (service) (rate(traces_spanmetrics_calls_total{service=~\"$service\"}[5m]))",
+              "legendFormat": "{{service}}",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": { "defaults": { "unit": "percent" }, "overrides": [] },
+          "options": {}
+        },
+        {
+          "id": 3,
+          "type": "timeseries",
+          "title": "Latency P95 / P99",
+          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "histogram_quantile(0.95, sum by (le, service) (rate(traces_spanmetrics_latency_bucket{service=~\"$service\"}[5m])))",
+              "legendFormat": "p95 {{service}}",
+              "refId": "A"
+            },
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "histogram_quantile(0.99, sum by (le, service) (rate(traces_spanmetrics_latency_bucket{service=~\"$service\"}[5m])))",
+              "legendFormat": "p99 {{service}}",
+              "refId": "B"
+            }
+          ],
+          "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] },
+          "options": {}
+        },
+        {
+          "id": 4,
+          "type": "text",
+          "title": "Mapa de serviços",
+          "gridPos": { "h": 4, "w": 24, "x": 0, "y": 16 },
+          "options": {
+            "mode": "markdown",
+            "content": "Para o mapa de dependências entre serviços (service graph), use a aba **Node Graph** do datasource Tempo em **Explore** — não reconstruído aqui como painel estático."
+          }
+        }
+      ],
+      "refresh": "30s",
+      "schemaVersion": 39,
+      "tags": ["observability", "apm"],
+      "templating": {
+        "list": [
+          {
+            "current": {},
+            "datasource": { "type": "prometheus", "uid": "prometheus" },
+            "definition": "label_values(traces_spanmetrics_calls_total, service)",
+            "hide": 0,
+            "includeAll": true,
+            "multi": true,
+            "name": "service",
+            "options": [],
+            "query": {
+              "query": "label_values(traces_spanmetrics_calls_total, service)",
+              "refId": "StandardVariableQuery"
+            },
+            "refresh": 2,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 1,
+            "type": "query"
+          }
+        ]
+      },
+      "time": { "from": "now-6h", "to": "now" },
+      "timepicker": {},
+      "timezone": "",
+      "title": "APM / Service Overview",
+      "uid": "apm-service-overview",
+      "version": 1,
+      "weekStart": ""
+    }
