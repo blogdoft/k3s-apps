@@ -180,11 +180,6 @@ spec:
           value: cattle-system
         - name: CATTLE_PEER_SERVICE
           value: rancher
-        - name: CATTLE_BOOTSTRAP_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: "bootstrap-secret"
-              key: "bootstrapPassword"
         - name: IMPERATIVE_API_DIRECT
           value: "true"
         - name: IMPERATIVE_API_APP_SELECTOR
