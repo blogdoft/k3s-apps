@@ -28,11 +28,23 @@ para acompanhar o diff no git.
 
 O pipeline Alloy (linguagem Alloy/river) faz:
 1. `discovery.kubernetes` descobre todos os pods do cluster.
-2. `discovery.relabel` promove labels internos (`__meta_kubernetes_*`) para
-   `namespace`, `pod`, `container`, `node_name` — sem isso os logs chegariam
-   ao Loki sem nenhum label útil para busca no Grafana Explore.
+2. `discovery.relabel` primeiro **descarta** (`action = "drop"`) os pods dos
+   namespaces de infraestrutura/plataforma que não devem ter logs coletados
+   — ver lista abaixo — e só então promove labels internos
+   (`__meta_kubernetes_*`) para `namespace`, `pod`, `container`, `node_name`
+   nos pods restantes.
 3. `loki.source.kubernetes` faz o tail dos logs via API do Kubernetes.
 4. `loki.write` envia para `http://loki.observability.svc.cluster.local:3100/loki/api/v1/push`.
+
+### Namespaces excluídos da coleta
+
+`argocd`, `longhorn-system`, `minio`, `cattle-*`/`fleet-*` (Rancher —
+inclui `cattle-system`, `cattle-capi-system`, `cattle-fleet-local-system`,
+`cattle-fleet-system`, `cattle-turtles-system`, `fleet-default`,
+`fleet-local`), `redis-server`, `flagr`, `kafka-ui`, `keycloak`, `openbao`.
+
+Para adicionar/remover um namespace da exclusão, edite o regex do primeiro
+`rule { action = "drop" }` em `helm-values/values.yaml` e re-renderize.
 
 ## O que não foi configurado / requer ação manual
 

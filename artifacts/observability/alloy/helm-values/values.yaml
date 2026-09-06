@@ -20,6 +20,16 @@ alloy:
       discovery.relabel "pod_logs" {
         targets = discovery.kubernetes.pods.targets
 
+        // Namespaces excluídos da coleta de logs (infra/plataforma, não
+        // aplicações próprias): argocd, longhorn (longhorn-system), minio,
+        // rancher (cattle-*/fleet-*), redis (redis-server), flagr, kafka-ui,
+        // keycloak, openbao.
+        rule {
+          source_labels = ["__meta_kubernetes_namespace"]
+          regex         = "^(argocd|longhorn-system|minio|cattle-.*|fleet-.*|redis-server|flagr|kafka-ui|keycloak|openbao)$"
+          action        = "drop"
+        }
+
         rule {
           source_labels = ["__meta_kubernetes_namespace"]
           target_label  = "namespace"
