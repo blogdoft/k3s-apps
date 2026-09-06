@@ -46,10 +46,10 @@ data:
       // Namespaces excluídos da coleta de logs (infra/plataforma, não
       // aplicações próprias): argocd, longhorn (longhorn-system), minio,
       // rancher (cattle-*/fleet-*), redis (redis-server), flagr, kafka-ui,
-      // keycloak, openbao.
+      // keycloak, openbao, observability (o próprio stack) e kube-system.
       rule {
         source_labels = ["__meta_kubernetes_namespace"]
-        regex         = "^(argocd|longhorn-system|minio|cattle-.*|fleet-.*|redis-server|flagr|kafka-ui|keycloak|openbao|observability)$"
+        regex         = "^(argocd|longhorn-system|minio|cattle-.*|fleet-.*|redis-server|flagr|kafka-ui|keycloak|openbao|observability|kube-system)$"
         action        = "drop"
       }
     

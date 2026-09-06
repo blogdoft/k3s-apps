@@ -41,7 +41,8 @@ O pipeline Alloy (linguagem Alloy/river) faz:
 `argocd`, `longhorn-system`, `minio`, `cattle-*`/`fleet-*` (Rancher —
 inclui `cattle-system`, `cattle-capi-system`, `cattle-fleet-local-system`,
 `cattle-fleet-system`, `cattle-turtles-system`, `fleet-default`,
-`fleet-local`), `redis-server`, `flagr`, `kafka-ui`, `keycloak`, `openbao`.
+`fleet-local`), `redis-server`, `flagr`, `kafka-ui`, `keycloak`, `openbao`,
+`observability` (o próprio stack de observabilidade) e `kube-system`.
 
 Para adicionar/remover um namespace da exclusão, edite o regex do primeiro
 `rule { action = "drop" }` em `helm-values/values.yaml` e re-renderize.
