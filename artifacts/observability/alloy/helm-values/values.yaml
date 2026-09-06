@@ -26,7 +26,7 @@ alloy:
         // keycloak, openbao.
         rule {
           source_labels = ["__meta_kubernetes_namespace"]
-          regex         = "^(argocd|longhorn-system|minio|cattle-.*|fleet-.*|redis-server|flagr|kafka-ui|keycloak|openbao)$"
+          regex         = "^(argocd|longhorn-system|minio|cattle-.*|fleet-.*|redis-server|flagr|kafka-ui|keycloak|openbao|observability)$"
           action        = "drop"
         }
 
