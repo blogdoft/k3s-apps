@@ -4,8 +4,6 @@ ingress:
   host: longhorn.home.arpa
   path: /
   pathType: Prefix
-  tls: true
-  tlsSecret: wildcard-home-arpa
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
