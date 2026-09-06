@@ -44,9 +44,7 @@ data:
           chunks_directory: /var/loki/chunks
           rules_directory: /var/loki/rules
     compactor:
-      delete_request_cancel_period: 5m
       delete_request_store: filesystem
-      retention_delete_delay: 5m
       retention_enabled: true
     frontend:
       scheduler_address: ""
@@ -270,7 +268,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: 92bcd2a7fbccca5a6cbc5c5752b312b42f7ac1fefb29072ebb8db9fabe879ffa
+        checksum/config: fccf0df0d2943e61292ebee4713c3e227cdb512e5d9dbca6717d811f12d3fd5c
         storage/size: "10Gi"
         kubectl.kubernetes.io/default-container: "loki"
       labels:

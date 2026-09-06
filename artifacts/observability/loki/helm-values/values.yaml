@@ -33,11 +33,6 @@ loki:
   compactor:
     retention_enabled: true
     delete_request_store: filesystem
-    # Temporário: acelera o processamento de um delete request já registrado
-    # (limpeza de logs de namespaces que saíram da coleta do Alloy). Reverter
-    # para os defaults (24h / 2h) depois que o request for processado.
-    delete_request_cancel_period: 5m
-    retention_delete_delay: 5m
 
 singleBinary:
   replicas: 1
