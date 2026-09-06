@@ -46,6 +46,7 @@ data:
     compactor:
       delete_request_cancel_period: 5m
       delete_request_store: filesystem
+      retention_delete_delay: 5m
       retention_enabled: true
     frontend:
       scheduler_address: ""
@@ -269,7 +270,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: 9f194a749aaa72865274a0dcce53e9829158a14b9e4203f26ba7834595dde7bc
+        checksum/config: 92bcd2a7fbccca5a6cbc5c5752b312b42f7ac1fefb29072ebb8db9fabe879ffa
         storage/size: "10Gi"
         kubectl.kubernetes.io/default-container: "loki"
       labels:
