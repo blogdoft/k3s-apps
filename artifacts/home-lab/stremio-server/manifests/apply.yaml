@@ -103,15 +103,8 @@ kind: Ingress
 metadata:
   name: stremio-server
   namespace: stremio
-  annotations:
-    cert-manager.io/cluster-issuer: homelab-ca-cluster-issuer
 spec:
   ingressClassName: traefik
-  tls:
-    - hosts:
-        - stremio.home.arpa
-      secretName: stremio-home-arpa-tls
-
   rules:
     - host: stremio.home.arpa
       http:
