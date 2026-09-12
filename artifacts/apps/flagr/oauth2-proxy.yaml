@@ -28,6 +28,10 @@ spec:
               value: "https://keycloak.home.arpa/realms/k8s"
             - name: OAUTH2_PROXY_SKIP_OIDC_DISCOVERY
               value: "false"
+            - name: OAUTH2_PROXY_SKIP_JWT_BEARER_TOKENS
+              value: "true"
+            - name: OAUTH2_PROXY_OIDC_EXTRA_AUDIENCES
+              value: "account"
             - name: OAUTH2_PROXY_SKIP_CLAIMS_FROM_PROFILE_URL
               value: "true"
             - name: OAUTH2_PROXY_REDIRECT_URL
