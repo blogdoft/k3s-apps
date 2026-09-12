@@ -78,6 +78,7 @@ data:
               processors:
               - service-graphs
               - span-metrics
+              - local-blocks
           per_tenant_override_config: /conf/overrides.yaml
     metrics_generator:
       processor:
@@ -180,7 +181,7 @@ spec:
         app.kubernetes.io/name: tempo
         app.kubernetes.io/instance: tempo
       annotations:
-        checksum/config: 68bec0e65d65cdb7d91107bee82d4e805f970804bb98d4b98a8bf354a4fa493a
+        checksum/config: 7192a0efa8cfd5262492219f09bc372b5c77524c024dde87d606e024380b8792
     spec:
       serviceAccountName: tempo
       automountServiceAccountToken: true

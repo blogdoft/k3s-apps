@@ -16,11 +16,14 @@ dependência de object storage externo). Retenção de traces fixada em
 ## Metrics-generator (a base do APM)
 
 Habilitado (`metricsGenerator.enabled: true`) com os processors
-`service-graphs` e `span-metrics` — **sem esse `overrides.defaults` explícito
-a mais, o generator fica ligado mas sem nenhum processor ativo** (gotcha do
-chart, confirmado renderizando). É isso que transforma traces brutos em
-métricas RED (rate/error/duration) por serviço, enviadas via remote_write
-para `http://prometheus-server.observability.svc.cluster.local:80/api/v1/write`.
+`service-graphs`, `span-metrics` e `local-blocks` — **sem esse
+`overrides.defaults` explícito a mais, o generator fica ligado mas sem nenhum
+processor ativo** (gotcha do chart, confirmado renderizando). Os dois primeiros
+transformam traces brutos em métricas RED (rate/error/duration) por serviço,
+enviadas via remote_write para
+`http://prometheus-server.observability.svc.cluster.local:80/api/v1/write`.
+`local-blocks` habilita as consultas TraceQL metrics usadas pelo Traces
+Drilldown do Grafana.
 
 ## Renderizar o template
 

@@ -27,6 +27,8 @@ tempo:
         processors:
           - service-graphs
           - span-metrics
+          # Necessário para consultas TraceQL metrics no Traces Drilldown.
+          - local-blocks
 
   resources:
     requests:
