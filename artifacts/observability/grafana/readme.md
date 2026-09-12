@@ -48,6 +48,9 @@ dashboards), na pasta "Observability" do Grafana:
   pelo Tempo (ver `artifacts/observability/tempo/readme.md`). Para o mapa de
   dependências entre serviços, use a aba Node Graph do datasource Tempo em
   Explore.
+- **API Request Latency Percentiles**: latência p50, p85 e p95 por serviço e
+  operação/span (normalmente a rota HTTP da API), com filtro por serviço e
+  endpoint e a taxa de requisições como contexto.
 - **Host & Pod Stats**: CPU/memória/disco/rede/load por nó (via
   `prometheus-node-exporter`) e CPU/memória/restarts/fase por pod (via
   cAdvisor + `kube-state-metrics`) — ver

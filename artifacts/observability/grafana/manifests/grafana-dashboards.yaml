@@ -614,3 +614,125 @@ data:
       "version": 1,
       "weekStart": ""
     }
+  api-request-latency-percentiles.json: |
+    {
+      "annotations": { "list": [] },
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 1,
+      "id": null,
+      "links": [],
+      "panels": [
+        {
+          "id": 1,
+          "type": "timeseries",
+          "title": "Latência p50 por API",
+          "description": "Metade das requisições concluiu em até este tempo.",
+          "gridPos": { "h": 9, "w": 8, "x": 0, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "histogram_quantile(0.50, sum by (le, service, span_name) (rate(traces_spanmetrics_latency_bucket{service=~\"$service\", span_name=~\"$span_name\"}[$__rate_interval])))",
+              "legendFormat": "{{service}} · {{span_name}}",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] },
+          "options": {}
+        },
+        {
+          "id": 2,
+          "type": "timeseries",
+          "title": "Latência p85 por API",
+          "description": "85% das requisições concluiu em até este tempo.",
+          "gridPos": { "h": 9, "w": 8, "x": 8, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "histogram_quantile(0.85, sum by (le, service, span_name) (rate(traces_spanmetrics_latency_bucket{service=~\"$service\", span_name=~\"$span_name\"}[$__rate_interval])))",
+              "legendFormat": "{{service}} · {{span_name}}",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] },
+          "options": {}
+        },
+        {
+          "id": 3,
+          "type": "timeseries",
+          "title": "Latência p95 por API",
+          "description": "95% das requisições concluiu em até este tempo; evidencia a cauda de lentidão.",
+          "gridPos": { "h": 9, "w": 8, "x": 16, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "histogram_quantile(0.95, sum by (le, service, span_name) (rate(traces_spanmetrics_latency_bucket{service=~\"$service\", span_name=~\"$span_name\"}[$__rate_interval])))",
+              "legendFormat": "{{service}} · {{span_name}}",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] },
+          "options": {}
+        },
+        {
+          "id": 4,
+          "type": "timeseries",
+          "title": "Taxa de requisições por API",
+          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 9 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "sum by (service, span_name) (rate(traces_spanmetrics_calls_total{service=~\"$service\", span_name=~\"$span_name\"}[$__rate_interval]))",
+              "legendFormat": "{{service}} · {{span_name}}",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
+          "options": {}
+        }
+      ],
+      "refresh": "30s",
+      "schemaVersion": 39,
+      "tags": ["observability", "apm", "api", "latency"],
+      "templating": {
+        "list": [
+          {
+            "current": {},
+            "datasource": { "type": "prometheus", "uid": "prometheus" },
+            "definition": "label_values(traces_spanmetrics_calls_total, service)",
+            "includeAll": true,
+            "multi": true,
+            "name": "service",
+            "options": [],
+            "query": { "query": "label_values(traces_spanmetrics_calls_total, service)", "refId": "StandardVariableQuery" },
+            "refresh": 2,
+            "sort": 1,
+            "type": "query"
+          },
+          {
+            "current": {},
+            "datasource": { "type": "prometheus", "uid": "prometheus" },
+            "definition": "label_values(traces_spanmetrics_calls_total{service=~\"$service\"}, span_name)",
+            "includeAll": true,
+            "multi": true,
+            "name": "span_name",
+            "options": [],
+            "query": { "query": "label_values(traces_spanmetrics_calls_total{service=~\"$service\"}, span_name)", "refId": "StandardVariableQuery" },
+            "refresh": 2,
+            "sort": 1,
+            "type": "query"
+          }
+        ]
+      },
+      "time": { "from": "now-6h", "to": "now" },
+      "timepicker": {},
+      "timezone": "",
+      "title": "API Request Latency Percentiles",
+      "uid": "api-request-latency-percentiles",
+      "version": 1,
+      "weekStart": ""
+    }
