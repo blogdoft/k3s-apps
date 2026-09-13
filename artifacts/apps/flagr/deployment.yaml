@@ -23,6 +23,8 @@ spec:
           name: http
           protocol: TCP
         env:
+        - name: FLAGR_LOGRUS_FORMAT
+          value: "json"
         - name: FLAGR_DB_DBDRIVER
           value: "postgres"
         - name: POSTGRES_USER
