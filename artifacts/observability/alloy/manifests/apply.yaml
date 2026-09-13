@@ -49,7 +49,7 @@ data:
       // keycloak, openbao, observability (o próprio stack) e kube-system.
       rule {
         source_labels = ["__meta_kubernetes_namespace"]
-        regex         = "^(argocd|longhorn-system|minio|cattle-.*|fleet-.*|redis-server|flagr|kafka-ui|keycloak|openbao|observability|kube-system)$"
+        regex         = "^(argocd|longhorn-system|minio|cattle-.*|fleet-.*|redis-server|kafka-ui|keycloak|openbao|observability|kube-system)$"
         action        = "drop"
       }
     
