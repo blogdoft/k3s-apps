@@ -54,6 +54,8 @@ spec:
               key: POSTGRES_DB
         - name: FLAGR_DB_DBCONNECTIONSTR
           value: "host=$(POSTGRES_HOST) port=$(POSTGRES_PORT) user=$(POSTGRES_USER) password=$(POSTGRES_PASSWORD) dbname=$(POSTGRES_DB) sslmode=disable"
+        - name: FLAGR_PROMETHEUS_ENABLED
+          value: "true"
         resources:
           requests:
             memory: "128Mi"
@@ -81,6 +83,10 @@ metadata:
   name: flagr
   labels:
     app: flagr
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "18000"
+    prometheus.io/path: "/metrics"
 spec:
   type: ClusterIP
   ports:
