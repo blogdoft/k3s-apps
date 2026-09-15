@@ -24,10 +24,10 @@ spec:
       namespace: longhorn-system
     - server: https://kubernetes.default.svc
       namespace: minio  
-  # Permite cluster-scoped necessários para infra (ajuste conforme sua stack)
   clusterResourceWhitelist:
     - group: "*"
       kind: "*"
   namespaceResourceWhitelist:
     - group: "*"
       kind: "*"
+      
