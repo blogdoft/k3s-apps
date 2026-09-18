@@ -1605,7 +1605,7 @@
     }, {
       "authenticator" : "webauthn-authenticator",
       "authenticatorFlow" : false,
-      "requirement" : "DISABLED",
+      "requirement" : "ALTERNATIVE",
       "priority" : 40,
       "autheticatorFlow" : false,
       "userSetupAllowed" : false

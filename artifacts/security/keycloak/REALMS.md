@@ -47,3 +47,41 @@ Depois o ArgoCD aplicará o ConfigMap e o Keycloak, em startups futuros, tentar�
 ## Importante (comportamento)
 
 - O import no startup geralmente **não sobrescreve** realms que já existem no banco; ele é pensado para bootstrap.
+
+## Chave USB FIDO2 / PicoKey (WebAuthn como 2FA)
+
+Os exports de `k8s` e `master` deixam o `WebAuthn Authenticator` como
+`ALTERNATIVE` dentro de `Browser - Conditional 2FA`. Assim, uma chave FIDO2,
+como a PicoKey, é um segundo fator opcional: depois de cadastrada, ela pode ser
+usada no lugar do TOTP; usuários sem uma credencial WebAuthn continuam usando a
+senha normalmente. O fluxo passwordless não é habilitado por esta configuração,
+pois ele exige credencial descobrível e verificação do usuário (PIN), que nem
+toda chave USB oferece.
+
+Para cadastrar uma chave para um usuário existente:
+
+1. Acesse o Admin Console em `https://keycloak.home.arpa/admin/` e selecione o
+   realm apropriado (`k8s` para os aplicativos; `master` somente para a conta
+   administrativa).
+2. Em **Authentication > Required actions**, confirme que **Webauthn Register**
+   está habilitado. Os exports já o deixam habilitado, mas não como ação padrão.
+3. Em **Users > <usuário>**, use **Reset actions** e adicione
+   **Webauthn Register**. No próximo login, conecte a PicoKey e confirme o
+   toque (e o PIN, se o navegador/chave o solicitar). Dê um rótulo claro à
+   credencial, por exemplo `PicoKey USB`.
+4. Teste em uma janela anônima: usuário e senha primeiro; depois a chave. Se o
+   usuário também tiver TOTP, use **Try another way** para alternar entre os
+   fatores.
+
+O `RP ID` permanece vazio de propósito: com `KC_HOSTNAME` definido como
+`https://keycloak.home.arpa`, o Keycloak usa `keycloak.home.arpa`. Não acesse o
+Keycloak por IP, por uma URL alternativa ou sem HTTPS durante o cadastro: o
+WebAuthn vincula a credencial ao domínio de origem. Mantenha ao menos uma conta
+administrativa e um método de recuperação testados antes de exigir WebAuthn para
+todos os usuários.
+
+Como a importação de realm só é aplicada no bootstrap, o ajuste dos JSONs não
+altera realms que já existem no PostgreSQL. Para a instalação atual, altere o
+mesmo passo no Admin Console: **Authentication > Flows > Browser > Browser -
+Conditional 2FA > WebAuthn Authenticator > Alternative**. Depois, versionar o
+export atualizado preserva a configuração para recriações futuras.
