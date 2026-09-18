@@ -3,6 +3,20 @@
 Este setup faz o Keycloak iniciar com `--import-realm` e carregar os arquivos JSON presentes em `/opt/keycloak/data/import`.
 No Kubernetes, isso é alimentado pelo ConfigMap `keycloak-realm-import`.
 
+## Tema de login Blog do FT
+
+O tema `blogdoft` é entregue pelo ConfigMap
+`keycloak-blogdoft-login-theme` e montado em
+`/opt/keycloak/themes/blogdoft/login`. Ele estende o tema moderno
+`keycloak.v2`, mantendo os templates e fluxos nativos do Keycloak, e aplica
+o logo oficial, preto, vermelho e tons claros da identidade do Blog do FT.
+
+Os exports versionados já definem `"loginTheme": "blogdoft"`. Como o
+`--import-realm` não atualiza realms já existentes, para aplicar o tema a um
+realm em uso selecione **Blog do FT** em **Realm settings > Themes > Login
+theme** no Admin Console (ou atualize esse atributo pela Admin API). A adição
+do volume reinicia o StatefulSet na primeira sincronização do Argo CD.
+
 ## Como exportar do Keycloak atual
 
 1) Entre no Pod do Keycloak:

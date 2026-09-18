@@ -3,6 +3,7 @@
   "realm" : "k8s",
   "displayName" : "Plataform",
   "displayNameHtml" : "",
+  "loginTheme" : "blogdoft",
   "notBefore" : 0,
   "defaultSignatureAlgorithm" : "RS256",
   "revokeRefreshToken" : false,

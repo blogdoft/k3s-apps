@@ -108,6 +108,9 @@ spec:
             - name: keycloak-realm-import
               mountPath: /opt/keycloak/data/import
               readOnly: true
+            - name: keycloak-blogdoft-login-theme
+              mountPath: /opt/keycloak/themes/blogdoft/login
+              readOnly: true
           ports:
             - name: http
               containerPort: 8080
@@ -145,3 +148,13 @@ spec:
         - name: keycloak-realm-import
           configMap:
             name: keycloak-realm-import
+        - name: keycloak-blogdoft-login-theme
+          configMap:
+            name: keycloak-blogdoft-login-theme
+            items:
+              - key: theme.properties
+                path: theme.properties
+              - key: terminal.css
+                path: resources/css/terminal-v4.css
+              - key: template.ftl
+                path: template.ftl

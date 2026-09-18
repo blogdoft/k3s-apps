@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keycloak-blogdoft-login-theme
+  labels:
+    app: keycloak
+    app.kubernetes.io/component: theme
+    app.kubernetes.io/name: keycloak
+data:
+  theme.properties: |
+    parent=keycloak.v2
+    import=common/keycloak
+    styles=css/terminal-v4.css
+    darkMode=false
+  template.ftl: |
+    <#import "theme-resources.ftl" as themeResourceTags>
+    <#macro registrationLayout bodyClass="" displayInfo=false displayMessage=true displayRequiredFields=false>
+    <!DOCTYPE html>
+    <html lang="${lang}"><head>
+      <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${title!}</title>
+      <#if themeResources?? && themeResources.stylesCommon?has_content><@themeResourceTags.renderStyles themeResources.stylesCommon url.resourcesCommonPath />
+      <#elseif properties.stylesCommon?has_content><#list properties.stylesCommon?split(' ') as style><link href="${url.resourcesCommonPath}/${style}" rel="stylesheet"></#list></#if>
+      <#if themeResources?? && themeResources.styles?has_content><@themeResourceTags.renderStyles themeResources.styles url.resourcesPath />
+      <#elseif properties.styles?has_content><#list properties.styles?split(' ') as style><link href="${url.resourcesPath}/${style}" rel="stylesheet"></#list></#if>
+      <script type="importmap">{"imports":{"rfc4648":"${url.resourcesCommonPath}/vendor/rfc4648/rfc4648.js"}}</script>
+      <#if scripts??><#list scripts as script><script src="${script}" type="text/javascript"></script></#list></#if>
+    </head><body class="terminal-page ${bodyClass}" data-page-id="login-${pageId}">
+      <main class="term"><div class="bar" aria-hidden="true"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span>auth@blogdoft: ~/login</span></div>
+        <div class="terminal-body"><p class="line">Last login: authentication gateway ready</p><p class="line">Session requires authentication.</p>
+          <#if auth?has_content && auth.showUsername() && !auth.showResetCredentials()><div class="attempted-user"><#nested "show-username"></div>
+          <#else><h1 id="kc-page-title">&gt; <#nested "header"></h1></#if>
+          <#if displayMessage && message?has_content && (message.type != 'warning' || !isAppInitiatedAction??)><div class="terminal-message ${message.type}">${kcSanitize(message.summary)?no_esc}</div></#if>
+          <div id="kc-content"><div id="kc-content-wrapper"><#nested "form">
+            <#if auth?has_content && auth.showTryAnotherWayLink()><form id="kc-select-try-another-way-form" action="${url.loginAction}" method="post"><input type="hidden" name="tryAnotherWay" value="on"><p class="hint"><a href="#" onclick="document.forms['kc-select-try-another-way-form'].requestSubmit();return false;">// try another method</a></p></form></#if>
+            <#nested "socialProviders"><#if displayInfo><div id="kc-info" class="hint"><#nested "info"></div></#if>
+          </div></div>
+        </div>
+      </main>
+    </body></html>
+    </#macro>
+  terminal.css: |
+    *{box-sizing:border-box} html,body{min-height:100%}
+    body.terminal-page{align-items:center;background:#0a0e0a;background-image:linear-gradient(rgba(74,222,128,.04) 1px,transparent 1px);background-size:100% 3px;color:#4ade80;display:flex;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;justify-content:center;margin:0;min-height:100vh;padding:24px}
+    .term{background:#0d130d;border:1px solid #1d2b1d;border-radius:12px;box-shadow:0 0 60px rgba(74,222,128,.12);max-width:460px;overflow:hidden;width:100%}
+    .bar{align-items:center;background:#111a11;border-bottom:1px solid #1d2b1d;display:flex;gap:7px;padding:11px 14px}.dot{border-radius:50%;height:11px;width:11px}.r{background:#f87171}.y{background:#fbbf24}.g{background:#34d399}.bar span:last-child{color:#3f513f;font-size:.75rem;letter-spacing:.04em;margin-left:8px}
+    .terminal-body{padding:26px 26px 32px}.line{color:#3f9b57;font-size:.82rem;margin:0 0 6px}#kc-page-title{color:#bbf7d0;font-size:1rem;font-weight:700;margin:14px 0 22px}#kc-page-title::after{animation:blink 1s steps(1) infinite;content:"▌";margin-left:2px}@keyframes blink{50%{opacity:0}}
+    #kc-content label{color:#3f9b57;display:block;font-size:.78rem;margin:0 0 6px}#kc-content label::before{color:#86efac;content:"$ "}
+    #kc-content .pf-v5-c-form-control{background:transparent!important;border:0!important;border-radius:8px!important;box-shadow:none!important;display:block;margin:0 0 18px;overflow:hidden;padding:0!important}#kc-content .pf-v5-c-form-control>input{background:#0a0f0a;border:1px solid #1f3320;border-radius:8px!important;caret-color:#4ade80;color:#bbf7d0;font-family:inherit;font-size:.9rem;margin:0;padding:11px 13px;width:100%}#kc-content input::placeholder{color:#2d4a2f}#kc-content .pf-v5-c-form-control>input:focus{border-color:#4ade80;box-shadow:0 0 0 3px rgba(74,222,128,.12);outline:none}#kc-content input:-webkit-autofill,#kc-content input:-webkit-autofill:hover,#kc-content input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px #0a0f0a inset!important;-webkit-text-fill-color:#bbf7d0!important;caret-color:#4ade80;transition:background-color 9999s ease-out 0s}
+    #kc-content .pf-v5-c-input-group{align-items:stretch;border-radius:8px;display:flex;overflow:hidden}#kc-content .pf-v5-c-input-group__item.pf-m-fill{flex:1}#kc-content .pf-v5-c-input-group .pf-v5-c-form-control{border-radius:8px 0 0 8px!important;margin:0 0 18px}#kc-content .pf-v5-c-input-group .pf-v5-c-form-control>input{border-radius:8px 0 0 8px!important}#kc-content button.pf-m-control{background:#0a0f0a;border:1px solid #1f3320;border-left:0;border-radius:0 8px 8px 0!important;color:#86efac;margin:0 0 18px;padding:0 13px;width:auto}#kc-content button.pf-m-control:hover{background:#111a11;color:#bbf7d0}
+    #kc-content button:not(.pf-m-control),#kc-content input[type="submit"]{background:transparent;border:1px solid #4ade80;border-radius:8px;color:#4ade80;cursor:pointer;font-family:inherit;font-size:.9rem;font-weight:700;letter-spacing:.05em;padding:12px;width:100%}#kc-content button:not(.pf-m-control):hover,#kc-content input[type="submit"]:hover{background:#4ade80;color:#0a0e0a}.hint,.attempted-user{color:#3f513f;font-size:.75rem;margin:18px 0 0}.hint a,#kc-content a{border-bottom:1px dashed #3f9b57;color:#86efac;text-decoration:none}.terminal-message{border:1px solid #3f9b57;color:#bbf7d0;font-size:.78rem;margin:0 0 18px;padding:10px}.terminal-message.error{border-color:#f87171;color:#fca5a5}

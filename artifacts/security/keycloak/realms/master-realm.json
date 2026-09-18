@@ -1,8 +1,9 @@
 {
   "id" : "758255a3-0876-415c-ba96-1968045356a0",
   "realm" : "master",
-  "displayName" : "Keycloak",
-  "displayNameHtml" : "<div class=\"kc-logo-text\"><span>Keycloak</span></div>",
+  "displayName" : "Blog do FT",
+  "displayNameHtml" : "<div class=\"kc-logo-text\"><span>Blog do FT</span></div>",
+  "loginTheme" : "blogdoft",
   "notBefore" : 0,
   "defaultSignatureAlgorithm" : "RS256",
   "revokeRefreshToken" : false,
