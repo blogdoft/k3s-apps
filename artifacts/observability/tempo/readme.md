@@ -25,6 +25,18 @@ enviadas via remote_write para
 `local-blocks` habilita as consultas TraceQL metrics usadas pelo Traces
 Drilldown do Grafana.
 
+## Recursos e probes
+
+Memória: request `1Gi` / limit `2Gi`. Com 1Gi o heap chegava ao limite quando o
+Traces Drilldown disparava consultas TraceQL metrics (`local-blocks`), o
+processo travava e a liveness probe reiniciava o pod (exit 137, sem
+`OOMKilled`), corrompendo blocos do generator na WAL.
+
+`livenessProbe` com `timeoutSeconds: 10` e `failureThreshold: 6` (default do
+chart: 5s / 3), para que uma pausa de GC não vire kill. A readiness mantém o
+default. Um HPA **não** resolve isso: single-binary com storage `local` em PVC
+RWO não escala horizontalmente (cada réplica teria seus próprios blocos).
+
 ## Renderizar o template
 
 ```sh

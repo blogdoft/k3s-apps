@@ -30,13 +30,24 @@ tempo:
           # Necessário para consultas TraceQL metrics no Traces Drilldown.
           - local-blocks
 
+  # Com 1Gi o heap saturava o limite sob a carga de consultas TraceQL metrics
+  # do Traces Drilldown (RSS ~1Gi), o processo travava e a liveness matava o pod.
   resources:
     requests:
       cpu: 200m
-      memory: 512Mi
+      memory: 1Gi
     limits:
       cpu: "1"
-      memory: 1Gi
+      memory: 2Gi
+
+  # Mais tolerante que o default (timeout 5s / 3 falhas): uma pausa de GC ou
+  # uma rajada de consultas não deve virar kill, que ainda corrompe blocos do
+  # generator na WAL. Só timeoutSeconds e failureThreshold mudam; o resto é
+  # mesclado com o default do chart. A readiness segue no default: falhar nela
+  # só tira o pod do Service, não o reinicia.
+  livenessProbe:
+    timeoutSeconds: 10
+    failureThreshold: 6
 
 persistence:
   enabled: true
