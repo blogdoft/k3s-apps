@@ -38,7 +38,7 @@ O pipeline Alloy (linguagem Alloy/river) faz:
 
 ### Namespaces excluídos da coleta
 
-`argocd`, `longhorn-system`, `minio`, `cattle-*`/`fleet-*` (Rancher —
+`argocd`, `longhorn-system`, `garage`, `cattle-*`/`fleet-*` (Rancher —
 inclui `cattle-system`, `cattle-capi-system`, `cattle-fleet-local-system`,
 `cattle-fleet-system`, `cattle-turtles-system`, `fleet-default`,
 `fleet-local`), `redis-server`, `flagr`, `kafka-ui`, `keycloak`, `openbao`,

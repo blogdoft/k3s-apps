@@ -1,0 +1,63 @@
+## Garage em modo nó único (home-lab): um pod, replication_factor = 1.
+## O chart renderiza `--single-node` e força replicationFactor=1 quando
+## garage.singleNode=true.
+garage:
+  singleNode: true
+  dbEngine: "lmdb"
+
+  ## O rpcSecret NÃO fica neste repo. Sem existingRpcSecret, o chart gera um
+  ## valor aleatório a cada `helm template` (lookup não funciona offline), o
+  ## que mudaria o segredo a cada re-render. Criar manualmente — ver readme.md.
+  existingRpcSecret: "garage-rpc"
+
+  s3:
+    api:
+      region: "garage"
+      ## Acesso path-style apenas. Vhost-style exigiria um wildcard de dois
+      ## níveis (*.s3.garage...), que o certificado *.home.arpa não cobre.
+      rootDomain: ".s3.garage.home.arpa"
+
+persistence:
+  enabled: true
+  meta:
+    storageClass: "longhorn-fast"
+    size: 2Gi
+  data:
+    storageClass: "longhorn-fast"
+    size: 20Gi
+
+deployment:
+  kind: StatefulSet
+  replicaCount: 1
+
+## Token da admin API (porta 3903), lido pelo Garage via GARAGE_ADMIN_TOKEN e
+## usado pelo garage-webui. Criado manualmente — ver readme.md.
+environment:
+  - name: GARAGE_ADMIN_TOKEN
+    valueFrom:
+      secretKeyRef:
+        name: garage-admin
+        key: admin-token
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    memory: 1Gi
+
+## API S3. O certificado wildcard *.home.arpa é o default do Traefik (TLSStore),
+## então não há secret de TLS por Ingress.
+ingress:
+  s3:
+    api:
+      enabled: true
+      className: traefik
+      annotations:
+        traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        traefik.ingress.kubernetes.io/router.tls: "true"
+      hosts:
+        - host: garage-api.home.arpa
+          paths:
+            - path: /
+              pathType: Prefix

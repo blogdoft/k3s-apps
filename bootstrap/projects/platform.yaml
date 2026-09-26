@@ -23,7 +23,7 @@ spec:
     - server: https://kubernetes.default.svc
       namespace: longhorn-system
     - server: https://kubernetes.default.svc
-      namespace: minio  
+      namespace: garage
   clusterResourceWhitelist:
     - group: "*"
       kind: "*"

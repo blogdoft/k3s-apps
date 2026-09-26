@@ -2,7 +2,7 @@
 
 Chart: https://artifacthub.io/packages/helm/grafana/loki
 
-Modo single-binary, storage em filesystem, sem dependência do MinIO. Retenção
+Modo single-binary, storage em filesystem, sem dependência de object storage (MinIO/Garage). Retenção
 de logs fixada em **3 dias** via `limits_config.retention_period` +
 `compactor.retention_enabled: true` — o compactor apaga os chunks/index
 expirados automaticamente, sem intervenção manual.

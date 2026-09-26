@@ -1,0 +1,83 @@
+# garage-webui — escrito à mão, NÃO faz parte do chart do Garage.
+# Não é sobrescrito ao re-renderizar manifests/apply.yaml.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: garage-webui
+  namespace: garage
+  labels:
+    app: garage-webui
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: garage-webui
+  template:
+    metadata:
+      labels:
+        app: garage-webui
+    spec:
+      containers:
+        - name: garage-webui
+          image: khairul169/garage-webui:1.1.0
+          ports:
+            - name: http
+              containerPort: 3909
+          env:
+            - name: API_BASE_URL
+              value: "http://garage.garage.svc.cluster.local:3903"
+            - name: S3_ENDPOINT_URL
+              value: "http://garage.garage.svc.cluster.local:3900"
+            - name: S3_REGION
+              value: "garage"
+            - name: API_ADMIN_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: garage-admin
+                  key: admin-token
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 128Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: garage-webui
+  namespace: garage
+  annotations:
+    argocd.argoproj.io/sync-wave: "20"
+spec:
+  selector:
+    app: garage-webui
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: garage-webui
+  namespace: garage
+  annotations:
+    argocd.argoproj.io/sync-wave: "20"
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: garage.home.arpa
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: garage-webui
+                port:
+                  name: http
