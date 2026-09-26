@@ -41,7 +41,7 @@ never reads it.
 ## The Helm pattern (important — most apps use this)
 
 For chart-based apps (alloy, grafana's datasources aren't but most observability apps,
-loki, tempo, prometheus, otel-collector, minio, open-webui, longhorn, rancher, openbao),
+loki, tempo, prometheus, otel-collector, garage, open-webui, longhorn, rancher, openbao),
 this repo does **not** let ArgoCD talk to Helm. Instead, charts are rendered locally into
 plain manifests and only the rendered output is committed and synced:
 
@@ -74,7 +74,7 @@ This repo deliberately holds **no real secret values** for most apps — Secrets
 created manually on the cluster before first apply (see each app's readme.md for the
 exact `kubectl create secret ...` invocation and the keys the manifest expects via
 `secretKeyRef`, e.g. `postgres-credentials` for flagr, `grafana-admin` for grafana,
-`minio-credentials` for minio, `open-webui-database` for open-webui). When adding a new
+`garage-rpc` + `garage-admin` for garage, `open-webui-database` for open-webui). When adding a new
 app that needs credentials, follow this convention (external creation, referenced by name
 in the manifest) rather than committing values — the Redis app is a known exception
 (password inline in the manifest) called out as a documented risk, not a pattern to copy.
@@ -106,7 +106,7 @@ full table of current wave assignments before changing one.
   TLSStore (`artifacts/platform/cert-manager/manifests/20-traefik-tlsstore-default.yaml`),
   so any `*.home.arpa` Ingress gets HTTPS automatically.
 - The wildcard only covers one subdomain level — a host needs a form like
-  `minio-api.home.arpa`, not `s3.minio.home.arpa`.
+  `garage-api.home.arpa`, not `s3.garage.home.arpa`.
 
 ## Commit conventions
 

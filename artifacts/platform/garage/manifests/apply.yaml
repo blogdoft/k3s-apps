@@ -1,0 +1,302 @@
+---
+# Source: garage/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: garage
+  labels:
+    helm.sh/chart: garage-0.10.2
+    app.kubernetes.io/name: garage
+    app.kubernetes.io/instance: garage
+    app.kubernetes.io/version: "v2.4.1"
+    app.kubernetes.io/managed-by: Helm
+---
+# Source: garage/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: garage-config
+data:
+  garage.toml: |-
+    metadata_dir = "/mnt/meta"
+    data_dir = "/mnt/data"
+
+    db_engine = "lmdb"
+
+    block_size = "1048576"
+
+    replication_factor = 1
+    consistency_mode = "consistent"
+
+    compression_level = 1
+
+    rpc_bind_addr = "[::]:3901"
+    # rpc_secret will be populated by the init container from a k8s secret object
+    rpc_secret = "__RPC_SECRET_REPLACE__"
+
+    bootstrap_peers = [ 
+    ]
+  
+    [kubernetes_discovery]
+    namespace = "garage"
+    service_name = "garage"
+    skip_crd = false
+
+    [s3_api]
+    s3_region = "garage"
+    api_bind_addr = "[::]:3900"
+    root_domain = ".s3.garage.home.arpa"
+
+    [s3_web]
+    bind_addr = "[::]:3902"
+    root_domain = ".web.garage.tld"
+    index = "index.html"
+
+    [admin]
+    api_bind_addr = "[::]:3903"
+---
+# Source: garage/templates/clusterrole.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manage-crds-garage-garage
+  labels:
+    helm.sh/chart: garage-0.10.2
+    app.kubernetes.io/name: garage
+    app.kubernetes.io/instance: garage
+    app.kubernetes.io/version: "v2.4.1"
+    app.kubernetes.io/managed-by: Helm
+rules:
+- apiGroups: ["apiextensions.k8s.io"]
+  resources: ["customresourcedefinitions"]
+  verbs: ["get", "list", "watch", "create", "patch"]
+
+- apiGroups: ["deuxfleurs.fr"]
+  resources: ["garagenodes"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+---
+# Source: garage/templates/clusterrole.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: allow-crds-for-garage-garage
+  labels:
+    helm.sh/chart: garage-0.10.2
+    app.kubernetes.io/name: garage
+    app.kubernetes.io/instance: garage
+    app.kubernetes.io/version: "v2.4.1"
+    app.kubernetes.io/managed-by: Helm
+subjects:
+- kind: ServiceAccount
+  name: garage
+  namespace: garage
+roleRef:
+  kind: ClusterRole
+  name: manage-crds-garage-garage
+  apiGroup: rbac.authorization.k8s.io
+---
+# Source: garage/templates/service-headless.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: garage-headless
+  labels:
+    helm.sh/chart: garage-0.10.2
+    app.kubernetes.io/name: garage
+    app.kubernetes.io/instance: garage
+    app.kubernetes.io/version: "v2.4.1"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - port: 3900
+      targetPort: 3900
+      protocol: TCP
+      name: s3-api
+    - port: 3902
+      targetPort: 3902
+      protocol: TCP
+      name: s3-web
+  selector:
+    app.kubernetes.io/name: garage
+    app.kubernetes.io/instance: garage
+---
+# Source: garage/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: garage
+  labels:
+    helm.sh/chart: garage-0.10.2
+    app.kubernetes.io/name: garage
+    app.kubernetes.io/instance: garage
+    app.kubernetes.io/version: "v2.4.1"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3900
+      targetPort: 3900
+      protocol: TCP
+      name: s3-api
+    - port: 3902
+      targetPort: 3902
+      protocol: TCP
+      name: s3-web
+  selector:
+    app.kubernetes.io/name: garage
+    app.kubernetes.io/instance: garage
+---
+# Source: garage/templates/workload.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: garage
+  labels:
+    helm.sh/chart: garage-0.10.2
+    app.kubernetes.io/name: garage
+    app.kubernetes.io/instance: garage
+    app.kubernetes.io/version: "v2.4.1"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: garage
+      app.kubernetes.io/instance: garage
+  replicas: 1
+  serviceName: garage-headless
+  podManagementPolicy: OrderedReady
+  template:
+    metadata:
+      annotations:
+        checksum/config: ed2e7dfa35a94552d7ab501a3fe5366fdad5fc819991e0437e96f9608072f10c
+      labels:
+        helm.sh/chart: garage-0.10.2
+        app.kubernetes.io/name: garage
+        app.kubernetes.io/instance: garage
+        app.kubernetes.io/version: "v2.4.1"
+        app.kubernetes.io/managed-by: Helm
+    spec:
+      serviceAccountName: garage
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+      initContainers:
+        # Copies garage.toml from configmap to temporary etc volume and replaces RPC secret placeholder
+        - name: garage-init
+          image: "busybox:stable"
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-c", "sed \"s/__RPC_SECRET_REPLACE__/$RPC_SECRET/\" /mnt/garage.toml > /mnt/etc/garage.toml"]
+          env:
+            - name: RPC_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: garage-rpc
+                  key: rpcSecret
+          securityContext:
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: true
+          volumeMounts:
+            - name: configmap
+              mountPath: /mnt/garage.toml
+              subPath: garage.toml
+            - name: etc
+              mountPath: /mnt/etc
+      containers:
+        - name: garage
+          securityContext:
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: true
+          image: "dxflrs/amd64_garage:v2.4.1"
+          imagePullPolicy: IfNotPresent
+          command:
+            - /garage
+          args:
+            - server
+            - --single-node
+          ports:
+            - containerPort: 3900
+              name: s3-api
+            - containerPort: 3902
+              name: web-api
+            - containerPort: 3903
+              name: admin
+          env:
+            - name: GARAGE_ADMIN_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  key: admin-token
+                  name: garage-admin
+          volumeMounts:
+            - name: meta
+              mountPath: /mnt/meta
+            - name: data
+              mountPath: /mnt/data
+            - name: etc
+              mountPath: /etc/garage.toml
+              subPath: garage.toml
+          resources:
+            limits:
+              memory: 1Gi
+            requests:
+              cpu: 100m
+              memory: 256Mi
+      volumes:
+        - name: configmap
+          configMap:
+            name: garage-config
+        - name: etc
+          emptyDir: {}
+  volumeClaimTemplates:
+  - metadata:
+      name: meta
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: "longhorn-fast"
+      resources:
+        requests:
+          storage: "2Gi"
+  - metadata:
+      name: data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: "longhorn-fast"
+      resources:
+        requests:
+          storage: "20Gi"
+---
+# Source: garage/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: garage-s3-api
+  labels:
+    helm.sh/chart: garage-0.10.2
+    app.kubernetes.io/name: garage
+    app.kubernetes.io/instance: garage
+    app.kubernetes.io/version: "v2.4.1"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: "garage-api.home.arpa"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: garage
+                port:
+                  number: 3900
