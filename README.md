@@ -65,8 +65,8 @@ The repository deploys and manages:
 * **S3 API:** `https://garage-api.home.arpa/` (path-style)
 * **Web UI (garage-webui):** `https://garage.home.arpa/`
 * Single-node (replication factor 1), backed by `longhorn-fast` PVCs.
-* Requires the `garage-rpc` and `garage-admin` Secrets and a one-time cluster layout
-  assignment after first sync — see `artifacts/platform/garage/readme.md`.
+* Requires the `garage-rpc` and `garage-admin` Secrets created before first sync —
+  see `artifacts/platform/garage/readme.md`.
 
 ### Redis
 

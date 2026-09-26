@@ -42,19 +42,17 @@ helm template garage ./garage/script/helm/garage \
 Repita a cada upgrade (ajustando a tag). `manifests/10-webui.yaml` é escrito à
 mão (garage-webui) e não é afetado pela re-renderização.
 
-## Layout do cluster (passo manual obrigatório)
+## Layout do cluster
 
-Após o primeiro sync o pod sobe, mas não armazena nada até o layout ser
-atribuído:
+Em nó único (`--single-node`) o Garage atribui e aplica o layout sozinho no
+primeiro start (zona `dc1`, capacidade do PVC de dados). Nada a fazer; confira
+com:
 
 ```sh
-kubectl exec -n garage garage-0 -- /garage status        # copie o ID do nó
-kubectl exec -n garage garage-0 -- /garage layout assign -z home -c 20G <ID_DO_NO>
-kubectl exec -n garage garage-0 -- /garage layout apply --version 1
+kubectl exec -n garage garage-0 -- /garage layout show
 ```
 
-`-c` é a capacidade e deve caber no PVC de dados (20Gi). Depois crie bucket e
-chave (pela UI em `garage.home.arpa` ou pelo CLI):
+Depois crie bucket e chave (pela UI em `garage.home.arpa` ou pelo CLI):
 
 ```sh
 kubectl exec -n garage garage-0 -- /garage bucket create <bucket>
@@ -75,11 +73,13 @@ configurado: exigiria um wildcard de dois níveis, que o certificado
 ## O que não foi configurado / requer ação manual
 
 - **Secrets** `garage-rpc` e `garage-admin`: manuais, ver acima.
-- **Layout do cluster**: manual, ver acima.
 - **Sem alta disponibilidade**: nó único, `replication_factor = 1`.
 - **Autenticação do garage-webui**: sem `AUTH_USER_PASS`; a UI só é
   protegida pela rede local. Defina o hash bcrypt se quiser login.
 - **Métricas Prometheus**: desabilitadas (`monitoring.metrics.enabled: false`).
-- **CRD `garagenodes.deuxfleurs.fr`**: criado pelo próprio Garage em runtime
-  (descoberta via Kubernetes) e não é removido ao apagar a Application.
+- **CRD `garagenodes.deuxfleurs.fr`**: o Garage tenta criá-lo em runtime
+  (descoberta via Kubernetes) e loga `Error while publishing node to Kubernetes:
+  404` a cada minuto. É inofensivo em nó único (não afeta S3 nem layout).
+- **Admin API**: exposta como Service `garage-admin-api` (:3903) em
+  `manifests/10-webui.yaml`, pois o chart nessa tag não tem `service.admin`.
 - **Sem migração do MinIO**: os dados antigos não foram copiados.

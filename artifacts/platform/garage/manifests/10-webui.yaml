@@ -27,7 +27,7 @@ spec:
               containerPort: 3909
           env:
             - name: API_BASE_URL
-              value: "http://garage.garage.svc.cluster.local:3903"
+              value: "http://garage-admin-api.garage.svc.cluster.local:3903"
             - name: S3_ENDPOINT_URL
               value: "http://garage.garage.svc.cluster.local:3900"
             - name: S3_REGION
@@ -43,6 +43,24 @@ spec:
               memory: 32Mi
             limits:
               memory: 128Mi
+---
+# Admin API do Garage (:3903). O chart na tag v2.4.1 não tem service.admin, então
+# o Service é declarado aqui. Nó único: sem risco de inconsistência entre nós.
+apiVersion: v1
+kind: Service
+metadata:
+  name: garage-admin-api
+  namespace: garage
+  annotations:
+    argocd.argoproj.io/sync-wave: "20"
+spec:
+  selector:
+    app.kubernetes.io/name: garage
+    app.kubernetes.io/instance: garage
+  ports:
+    - name: admin
+      port: 3903
+      targetPort: 3903
 ---
 apiVersion: v1
 kind: Service
