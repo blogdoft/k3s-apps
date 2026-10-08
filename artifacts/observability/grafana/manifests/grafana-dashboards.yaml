@@ -736,3 +736,521 @@ data:
       "version": 1,
       "weekStart": ""
     }
+  deployment-resources.json: |
+    {
+      "annotations": {
+        "list": []
+      },
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 0,
+      "id": null,
+      "links": [],
+      "panels": [
+        {
+          "id": 1,
+          "type": "text",
+          "title": "Nota",
+          "gridPos": {
+            "h": 3,
+            "w": 24,
+            "x": 0,
+            "y": 0
+          },
+          "options": {
+            "mode": "markdown",
+            "content": "Valores somados por Deployment (todas as réplicas). **Request** = reserva mínima, **Limit** = máximo; **Usage** = CPU (média 5m) e memória (working set) efetivamente consumidas. Clique no cabeçalho de uma coluna para ordenar (maior → menor); shift+clique ordena por várias colunas. Células vazias = request/limit não definido. Percentuais acima de 100% do request ficam em vermelho. Pods de StatefulSet/DaemonSet/Job não aparecem."
+          }
+        },
+        {
+          "id": 2,
+          "type": "table",
+          "title": "Deployments: recursos reservados vs. utilizados",
+          "gridPos": {
+            "h": 24,
+            "w": 24,
+            "x": 0,
+            "y": 3
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "sum by (namespace, deployment) (sum by (namespace, pod) (kube_pod_container_resource_requests{resource=\"cpu\", namespace=~\"$namespace\"}) * on (namespace, pod) group_left (deployment) max by (namespace, pod, deployment) (label_replace(kube_pod_owner{owner_kind=\"ReplicaSet\"}, \"deployment\", \"$1\", \"owner_name\", \"(.+)-[a-z0-9]+\")))",
+              "format": "table",
+              "instant": true,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "sum by (namespace, deployment) (sum by (namespace, pod) (kube_pod_container_resource_limits{resource=\"cpu\", namespace=~\"$namespace\"}) * on (namespace, pod) group_left (deployment) max by (namespace, pod, deployment) (label_replace(kube_pod_owner{owner_kind=\"ReplicaSet\"}, \"deployment\", \"$1\", \"owner_name\", \"(.+)-[a-z0-9]+\")))",
+              "format": "table",
+              "instant": true,
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "sum by (namespace, deployment) (sum by (namespace, pod) (rate(container_cpu_usage_seconds_total{container!=\"\", container!=\"POD\", namespace=~\"$namespace\"}[5m])) * on (namespace, pod) group_left (deployment) max by (namespace, pod, deployment) (label_replace(kube_pod_owner{owner_kind=\"ReplicaSet\"}, \"deployment\", \"$1\", \"owner_name\", \"(.+)-[a-z0-9]+\")))",
+              "format": "table",
+              "instant": true,
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "sum by (namespace, deployment) (sum by (namespace, pod) (kube_pod_container_resource_requests{resource=\"memory\", namespace=~\"$namespace\"}) * on (namespace, pod) group_left (deployment) max by (namespace, pod, deployment) (label_replace(kube_pod_owner{owner_kind=\"ReplicaSet\"}, \"deployment\", \"$1\", \"owner_name\", \"(.+)-[a-z0-9]+\")))",
+              "format": "table",
+              "instant": true,
+              "refId": "D"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "sum by (namespace, deployment) (sum by (namespace, pod) (kube_pod_container_resource_limits{resource=\"memory\", namespace=~\"$namespace\"}) * on (namespace, pod) group_left (deployment) max by (namespace, pod, deployment) (label_replace(kube_pod_owner{owner_kind=\"ReplicaSet\"}, \"deployment\", \"$1\", \"owner_name\", \"(.+)-[a-z0-9]+\")))",
+              "format": "table",
+              "instant": true,
+              "refId": "E"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "sum by (namespace, deployment) (sum by (namespace, pod) (container_memory_working_set_bytes{container!=\"\", container!=\"POD\", namespace=~\"$namespace\"}) * on (namespace, pod) group_left (deployment) max by (namespace, pod, deployment) (label_replace(kube_pod_owner{owner_kind=\"ReplicaSet\"}, \"deployment\", \"$1\", \"owner_name\", \"(.+)-[a-z0-9]+\")))",
+              "format": "table",
+              "instant": true,
+              "refId": "F"
+            }
+          ],
+          "transformations": [
+            {
+              "id": "merge",
+              "options": {}
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "mode": "binary",
+                "binary": {
+                  "left": "Value #C",
+                  "operator": "/",
+                  "right": "Value #A"
+                },
+                "alias": "CPU usage / request",
+                "reduce": {
+                  "reducer": "sum"
+                }
+              }
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "mode": "binary",
+                "binary": {
+                  "left": "Value #C",
+                  "operator": "/",
+                  "right": "Value #B"
+                },
+                "alias": "CPU usage / limit",
+                "reduce": {
+                  "reducer": "sum"
+                }
+              }
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "mode": "binary",
+                "binary": {
+                  "left": "Value #F",
+                  "operator": "/",
+                  "right": "Value #D"
+                },
+                "alias": "Memory usage / request",
+                "reduce": {
+                  "reducer": "sum"
+                }
+              }
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "mode": "binary",
+                "binary": {
+                  "left": "Value #F",
+                  "operator": "/",
+                  "right": "Value #E"
+                },
+                "alias": "Memory usage / limit",
+                "reduce": {
+                  "reducer": "sum"
+                }
+              }
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true
+                },
+                "renameByName": {
+                  "Value #A": "CPU request",
+                  "Value #B": "CPU limit",
+                  "Value #C": "CPU usage",
+                  "Value #D": "Memory request",
+                  "Value #E": "Memory limit",
+                  "Value #F": "Memory usage",
+                  "namespace": "Namespace",
+                  "deployment": "Deployment"
+                },
+                "indexByName": {
+                  "Namespace": 0,
+                  "Deployment": 1,
+                  "CPU request": 2,
+                  "CPU limit": 3,
+                  "CPU usage": 4,
+                  "CPU usage / request": 5,
+                  "CPU usage / limit": 6,
+                  "Memory request": 7,
+                  "Memory limit": 8,
+                  "Memory usage": 9,
+                  "Memory usage / request": 10,
+                  "Memory usage / limit": 11
+                }
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": "auto",
+                "filterable": true
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "CPU request"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "none"
+                  },
+                  {
+                    "id": "decimals",
+                    "value": 3
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "CPU limit"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "none"
+                  },
+                  {
+                    "id": "decimals",
+                    "value": 3
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "CPU usage"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "none"
+                  },
+                  {
+                    "id": "decimals",
+                    "value": 3
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Memory request"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "bytes"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Memory limit"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "bytes"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Memory usage"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "bytes"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "CPU usage / request"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "percentunit"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-text"
+                    }
+                  },
+                  {
+                    "id": "thresholds",
+                    "value": {
+                      "mode": "absolute",
+                      "steps": [
+                        {
+                          "color": "green",
+                          "value": null
+                        },
+                        {
+                          "color": "orange",
+                          "value": 0.8
+                        },
+                        {
+                          "color": "red",
+                          "value": 1
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "id": "decimals",
+                    "value": 0
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Memory usage / request"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "percentunit"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-text"
+                    }
+                  },
+                  {
+                    "id": "thresholds",
+                    "value": {
+                      "mode": "absolute",
+                      "steps": [
+                        {
+                          "color": "green",
+                          "value": null
+                        },
+                        {
+                          "color": "orange",
+                          "value": 0.8
+                        },
+                        {
+                          "color": "red",
+                          "value": 1
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "id": "decimals",
+                    "value": 0
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "CPU usage / limit"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "percentunit"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-text"
+                    }
+                  },
+                  {
+                    "id": "thresholds",
+                    "value": {
+                      "mode": "absolute",
+                      "steps": [
+                        {
+                          "color": "green",
+                          "value": null
+                        },
+                        {
+                          "color": "orange",
+                          "value": 0.8
+                        },
+                        {
+                          "color": "red",
+                          "value": 1
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "id": "decimals",
+                    "value": 0
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Memory usage / limit"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "percentunit"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-text"
+                    }
+                  },
+                  {
+                    "id": "thresholds",
+                    "value": {
+                      "mode": "absolute",
+                      "steps": [
+                        {
+                          "color": "green",
+                          "value": null
+                        },
+                        {
+                          "color": "orange",
+                          "value": 0.8
+                        },
+                        {
+                          "color": "red",
+                          "value": 1
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "id": "decimals",
+                    "value": 0
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "showHeader": true,
+            "cellHeight": "sm",
+            "footer": {
+              "show": false
+            },
+            "sortBy": [
+              {
+                "displayName": "CPU usage",
+                "desc": true
+              }
+            ]
+          }
+        }
+      ],
+      "refresh": "30s",
+      "schemaVersion": 39,
+      "tags": [
+        "observability",
+        "infra"
+      ],
+      "templating": {
+        "list": [
+          {
+            "current": {},
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "definition": "label_values(kube_deployment_spec_replicas, namespace)",
+            "includeAll": true,
+            "multi": true,
+            "name": "namespace",
+            "label": "Namespace",
+            "options": [],
+            "query": {
+              "query": "label_values(kube_deployment_spec_replicas, namespace)",
+              "refId": "StandardVariableQuery"
+            },
+            "refresh": 2,
+            "sort": 1,
+            "type": "query"
+          }
+        ]
+      },
+      "time": {
+        "from": "now-6h",
+        "to": "now"
+      },
+      "timepicker": {},
+      "timezone": "",
+      "title": "Deployment Resources",
+      "uid": "deployment-resources",
+      "version": 1,
+      "weekStart": ""
+    }
