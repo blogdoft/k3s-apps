@@ -59,9 +59,10 @@ dashboards), na pasta "Observability" do Grafana:
   todos os namespaces, não só `observability`) e de cada filesystem de host
   (`node_filesystem_*`), com gauge + tendência e limiar visual em 80%.
 - **Deployment Resources**: tabela com todos os Deployments (filtro por
-  namespace) mostrando CPU/memória reservada (`requests`), máxima (`limits`) e
-  efetivamente usada, mais % de uso sobre request e limit. Ordenável em cada
-  coluna clicando no cabeçalho. Usa `kube-state-metrics` + cAdvisor; o Deployment
+  namespace) comparando o solicitado com o real: CPU/memória `request`,
+  `limit`, média (Avg) e pico (Max) de uso no período selecionado no
+  dashboard, e `% Over Limit` (100 × Max / Limit). Ordenável em cada coluna
+  clicando no cabeçalho. Usa `kube-state-metrics` + cAdvisor; o Deployment
   é derivado do ReplicaSet dono do pod, então StatefulSets/DaemonSets não aparecem.
 
 ## Alertas

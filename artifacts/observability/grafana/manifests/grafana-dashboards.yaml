@@ -759,7 +759,7 @@ data:
           },
           "options": {
             "mode": "markdown",
-            "content": "Comparativo entre o **solicitado** (request, reserva mínima) e o **real** por Deployment, somando todas as réplicas. O real é a **média** (avg) e o **pico** (max) de CPU e memória (working set) dentro do período selecionado no dashboard, amostrados a cada 5m (picos mais curtos que isso podem não aparecer). As colunas \"/ request\" mostram o real como fração do solicitado: acima de 80% fica laranja, acima de 100% vermelho. Clique no cabeçalho para ordenar (maior → menor); shift+clique ordena por várias colunas. Célula vazia = request não definido. Pods de StatefulSet/DaemonSet/Job não aparecem."
+            "content": "Comparativo entre o **solicitado** (Request = reserva mínima, Limit = máximo) e o **real** por Deployment, somando todas as réplicas. O real é a **média** (Avg) e o **pico** (Max) de CPU e memória (working set) dentro do período selecionado no dashboard, amostrados a cada 5m (picos mais curtos que isso podem não aparecer). **% Over Limit** = 100 × Max / Limit, ou seja, quanto do limite o pico chegou a usar: acima de 80% fica laranja, acima de 100% vermelho. Clique no cabeçalho para ordenar (maior → menor); shift+clique ordena por várias colunas. Célula vazia = request/limit não definido. Pods de StatefulSet/DaemonSet/Job não aparecem."
           }
         },
         {
@@ -792,6 +792,16 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
+              "expr": "sum by (namespace, deployment) (sum by (namespace, pod) (kube_pod_container_resource_limits{resource=\"cpu\", namespace=~\"$namespace\"}) * on (namespace, pod) group_left (deployment) max by (namespace, pod, deployment) (label_replace(kube_pod_owner{owner_kind=\"ReplicaSet\"}, \"deployment\", \"$1\", \"owner_name\", \"(.+)-[a-z0-9]+\")))",
+              "format": "table",
+              "instant": true,
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
               "expr": "avg_over_time(sum by (namespace, deployment) (sum by (namespace, pod) (rate(container_cpu_usage_seconds_total{container!=\"\", container!=\"POD\", namespace=~\"$namespace\"}[5m])) * on (namespace, pod) group_left (deployment) max by (namespace, pod, deployment) (label_replace(kube_pod_owner{owner_kind=\"ReplicaSet\"}, \"deployment\", \"$1\", \"owner_name\", \"(.+)-[a-z0-9]+\")))[$__range:5m])",
               "format": "table",
               "instant": true,
@@ -806,6 +816,16 @@ data:
               "format": "table",
               "instant": true,
               "refId": "D"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "sum by (namespace, deployment) (sum by (namespace, pod) (kube_pod_container_resource_limits{resource=\"memory\", namespace=~\"$namespace\"}) * on (namespace, pod) group_left (deployment) max by (namespace, pod, deployment) (label_replace(kube_pod_owner{owner_kind=\"ReplicaSet\"}, \"deployment\", \"$1\", \"owner_name\", \"(.+)-[a-z0-9]+\")))",
+              "format": "table",
+              "instant": true,
+              "refId": "E"
             },
             {
               "datasource": {
@@ -848,41 +868,11 @@ data:
               "options": {
                 "mode": "binary",
                 "binary": {
-                  "left": "Value #C",
-                  "operator": "/",
-                  "right": "Value #A"
-                },
-                "alias": "CPU avg / request",
-                "reduce": {
-                  "reducer": "sum"
-                }
-              }
-            },
-            {
-              "id": "calculateField",
-              "options": {
-                "mode": "binary",
-                "binary": {
                   "left": "Value #G",
                   "operator": "/",
-                  "right": "Value #A"
+                  "right": "Value #B"
                 },
-                "alias": "CPU max / request",
-                "reduce": {
-                  "reducer": "sum"
-                }
-              }
-            },
-            {
-              "id": "calculateField",
-              "options": {
-                "mode": "binary",
-                "binary": {
-                  "left": "Value #F",
-                  "operator": "/",
-                  "right": "Value #D"
-                },
-                "alias": "Memory avg / request",
+                "alias": "CPU % Over Limit",
                 "reduce": {
                   "reducer": "sum"
                 }
@@ -895,9 +885,9 @@ data:
                 "binary": {
                   "left": "Value #H",
                   "operator": "/",
-                  "right": "Value #D"
+                  "right": "Value #E"
                 },
-                "alias": "Memory max / request",
+                "alias": "Mem % Over Limit",
                 "reduce": {
                   "reducer": "sum"
                 }
@@ -910,12 +900,14 @@ data:
                   "Time": true
                 },
                 "renameByName": {
-                  "Value #A": "CPU request",
-                  "Value #C": "CPU avg usage",
-                  "Value #G": "CPU max usage",
-                  "Value #D": "Memory request",
-                  "Value #F": "Memory avg usage",
-                  "Value #H": "Memory max usage",
+                  "Value #A": "CPU Request",
+                  "Value #B": "CPU Limit",
+                  "Value #C": "CPU Avg",
+                  "Value #G": "CPU Max",
+                  "Value #D": "Mem Request",
+                  "Value #E": "Mem Limit",
+                  "Value #F": "Mem Avg",
+                  "Value #H": "Mem Max",
                   "namespace": "Namespace",
                   "deployment": "Deployment"
                 },
@@ -923,15 +915,15 @@ data:
                   "namespace": 0,
                   "deployment": 1,
                   "Value #A": 2,
-                  "Value #C": 3,
-                  "Value #G": 4,
-                  "CPU avg / request": 5,
-                  "CPU max / request": 6,
+                  "Value #B": 3,
+                  "Value #C": 4,
+                  "Value #G": 5,
+                  "CPU % Over Limit": 6,
                   "Value #D": 7,
-                  "Value #F": 8,
-                  "Value #H": 9,
-                  "Memory avg / request": 10,
-                  "Memory max / request": 11
+                  "Value #E": 8,
+                  "Value #F": 9,
+                  "Value #H": 10,
+                  "Mem % Over Limit": 11
                 }
               }
             }
@@ -947,7 +939,7 @@ data:
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "CPU request"
+                  "options": "CPU Request"
                 },
                 "properties": [
                   {
@@ -963,7 +955,7 @@ data:
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "CPU avg usage"
+                  "options": "CPU Limit"
                 },
                 "properties": [
                   {
@@ -979,7 +971,7 @@ data:
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "CPU max usage"
+                  "options": "CPU Avg"
                 },
                 "properties": [
                   {
@@ -995,7 +987,23 @@ data:
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "Memory request"
+                  "options": "CPU Max"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "none"
+                  },
+                  {
+                    "id": "decimals",
+                    "value": 3
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Mem Request"
                 },
                 "properties": [
                   {
@@ -1007,7 +1015,7 @@ data:
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "Memory avg usage"
+                  "options": "Mem Limit"
                 },
                 "properties": [
                   {
@@ -1019,7 +1027,7 @@ data:
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "Memory max usage"
+                  "options": "Mem Avg"
                 },
                 "properties": [
                   {
@@ -1031,7 +1039,19 @@ data:
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "CPU avg / request"
+                  "options": "Mem Max"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "bytes"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "CPU % Over Limit"
                 },
                 "properties": [
                   {
@@ -1098,141 +1118,7 @@ data:
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "CPU max / request"
-                },
-                "properties": [
-                  {
-                    "id": "unit",
-                    "value": "percentunit"
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "color-text"
-                    }
-                  },
-                  {
-                    "id": "thresholds",
-                    "value": {
-                      "mode": "absolute",
-                      "steps": [
-                        {
-                          "color": "green",
-                          "value": null
-                        },
-                        {
-                          "color": "orange",
-                          "value": 0.8
-                        },
-                        {
-                          "color": "red",
-                          "value": 1
-                        }
-                      ]
-                    }
-                  },
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "special",
-                        "options": {
-                          "match": "nan",
-                          "result": {
-                            "text": "",
-                            "index": 0
-                          }
-                        }
-                      },
-                      {
-                        "type": "special",
-                        "options": {
-                          "match": "null+nan",
-                          "result": {
-                            "text": "",
-                            "index": 1
-                          }
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "id": "decimals",
-                    "value": 0
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Memory avg / request"
-                },
-                "properties": [
-                  {
-                    "id": "unit",
-                    "value": "percentunit"
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "color-text"
-                    }
-                  },
-                  {
-                    "id": "thresholds",
-                    "value": {
-                      "mode": "absolute",
-                      "steps": [
-                        {
-                          "color": "green",
-                          "value": null
-                        },
-                        {
-                          "color": "orange",
-                          "value": 0.8
-                        },
-                        {
-                          "color": "red",
-                          "value": 1
-                        }
-                      ]
-                    }
-                  },
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "special",
-                        "options": {
-                          "match": "nan",
-                          "result": {
-                            "text": "",
-                            "index": 0
-                          }
-                        }
-                      },
-                      {
-                        "type": "special",
-                        "options": {
-                          "match": "null+nan",
-                          "result": {
-                            "text": "",
-                            "index": 1
-                          }
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "id": "decimals",
-                    "value": 0
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Memory max / request"
+                  "options": "Mem % Over Limit"
                 },
                 "properties": [
                   {
@@ -1306,7 +1192,7 @@ data:
             },
             "sortBy": [
               {
-                "displayName": "CPU max usage",
+                "displayName": "CPU Max",
                 "desc": true
               }
             ]
