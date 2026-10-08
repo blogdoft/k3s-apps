@@ -15,6 +15,8 @@ metadata:
 spec:
   isCA: true
   commonName: home.arpa Local Root CA
+  duration: 8760h
+  renewBefore: 720h
   secretName: home-arpa-ca
   privateKey:
     algorithm: RSA
