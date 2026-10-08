@@ -124,18 +124,6 @@ spec:
                   name: grafana-admin
                   key: admin-password
 
-            - name: TELEGRAM_BOT_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: grafana-telegram
-                  key: bot-token
-
-            - name: TELEGRAM_CHAT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: grafana-telegram
-                  key: chat-id
-
             - name: GF_SERVER_ROOT_URL
               value: http://grafana.home.arpa
 
@@ -202,8 +190,12 @@ spec:
           configMap:
             name: grafana-dashboards
         - name: alerting
-          configMap:
-            name: grafana-alerting
+          projected:
+            sources:
+              - configMap:
+                  name: grafana-alerting
+              - secret:
+                  name: grafana-alerting-contactpoints
 ---
 apiVersion: v1
 kind: Service

@@ -272,18 +272,6 @@ data:
             annotations:
               summary: "Nó {{ $labels.instance }} está com {{ printf \"%.1f\" $values.B.Value }}% de uso de memória"
               description: "O uso de memória do nó {{ $labels.instance }} está acima de 90% há mais de 5 minutos."
-  contactpoints.yaml: |
-    apiVersion: 1
-    contactPoints:
-      - orgId: 1
-        name: telegram
-        receivers:
-          - uid: telegram-main
-            type: telegram
-            settings:
-              bottoken: "$__env{TELEGRAM_BOT_TOKEN}"
-              chatid: "$__env{TELEGRAM_CHAT_ID}"
-              parse_mode: None
   policies.yaml: |
     apiVersion: 1
     policies:

@@ -80,17 +80,18 @@ CPU de pod acima de 90% do limit do container, e CPU e memória de nó acima de 
 
 ### Notificação (Telegram)
 
-O ConfigMap também provisiona o contact point `telegram` (`contactpoints.yaml`)
-e a política de notificação raiz (`policies.yaml`), que envia todos os alertas
-para ele (agrupa por pasta/alertname, repete a cada 4h). Token e chat id vêm
-do Secret `grafana-telegram`, injetado como env `TELEGRAM_BOT_TOKEN` /
-`TELEGRAM_CHAT_ID` e referenciado via `$__env{...}`. Crie-o antes do apply:
+O ConfigMap provisiona a política de notificação raiz (`policies.yaml`), que
+envia todos os alertas para o contact point `telegram` (agrupa por
+pasta/alertname, repete a cada 4h). O contact point em si (`contactpoints.yaml`)
+**não está neste repo**: vem do Secret `grafana-alerting-contactpoints`, criado
+pelo repo `k3s-experiment` (`observability/install.sh`, com `TELEGRAM_BOT_TOKEN` e
+`TELEGRAM_CHAT_ID` do `.env`). O Deployment monta ConfigMap + Secret juntos em
+`/etc/grafana/provisioning/alerting/` via volume `projected`.
 
-```sh
-kubectl create secret generic grafana-telegram -n observability \
-  --from-literal=bot-token=<token-do-botfather> \
-  --from-literal=chat-id=<chat-id>
-```
+Por que não via `$__env{...}`: o Grafana converte o `chat id` (numérico) em
+número ao expandir a variável, e o contact point do Telegram exige string, o que
+derruba o provisionamento e o pod. Com o valor literal entre aspas no Secret,
+ele permanece string.
 
 Para obter o chat id: envie uma mensagem ao bot (ou adicione-o ao grupo) e
 consulte `https://api.telegram.org/bot<token>/getUpdates`. Em grupos o id é
@@ -100,5 +101,5 @@ negativo. Sem o Secret, o pod do Grafana não inicia.
 
 - **Credenciais admin**: precisam ser criadas manualmente como Secret
   (`grafana-admin`, namespace `observability`) antes do primeiro apply — ver acima.
-- **Secret do Telegram** (`grafana-telegram`): criar manualmente — ver seção
-  Alertas acima.
+- **Secret do Telegram** (`grafana-alerting-contactpoints`): criado pelo
+  `k3s-experiment` — ver seção Alertas acima.
