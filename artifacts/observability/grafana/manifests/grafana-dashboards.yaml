@@ -759,13 +759,13 @@ data:
           },
           "options": {
             "mode": "markdown",
-            "content": "Valores somados por Deployment (todas as réplicas). **Request** = reserva mínima, **Limit** = máximo; **Usage** = CPU (média 5m) e memória (working set) no instante atual; **Max usage** = pico dessas mesmas métricas (amostradas a cada 5m) dentro do período selecionado no dashboard. Clique no cabeçalho de uma coluna para ordenar (maior → menor); shift+clique ordena por várias colunas. Células vazias = request/limit não definido. Percentuais acima de 100% do request ficam em vermelho. Pods de StatefulSet/DaemonSet/Job não aparecem."
+            "content": "Comparativo entre o **solicitado** (request, reserva mínima) e o **real** por Deployment, somando todas as réplicas. O real é a **média** (avg) e o **pico** (max) de CPU e memória (working set) dentro do período selecionado no dashboard, amostrados a cada 5m (picos mais curtos que isso podem não aparecer). As colunas \"/ request\" mostram o real como fração do solicitado: acima de 80% fica laranja, acima de 100% vermelho. Clique no cabeçalho para ordenar (maior → menor); shift+clique ordena por várias colunas. Célula vazia = request não definido. Pods de StatefulSet/DaemonSet/Job não aparecem."
           }
         },
         {
           "id": 2,
           "type": "table",
-          "title": "Deployments: recursos reservados vs. utilizados",
+          "title": "Deployments: solicitado vs. real",
           "gridPos": {
             "h": 24,
             "w": 24,
@@ -792,17 +792,7 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "sum by (namespace, deployment) (sum by (namespace, pod) (kube_pod_container_resource_limits{resource=\"cpu\", namespace=~\"$namespace\"}) * on (namespace, pod) group_left (deployment) max by (namespace, pod, deployment) (label_replace(kube_pod_owner{owner_kind=\"ReplicaSet\"}, \"deployment\", \"$1\", \"owner_name\", \"(.+)-[a-z0-9]+\")))",
-              "format": "table",
-              "instant": true,
-              "refId": "B"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "expr": "sum by (namespace, deployment) (sum by (namespace, pod) (rate(container_cpu_usage_seconds_total{container!=\"\", container!=\"POD\", namespace=~\"$namespace\"}[5m])) * on (namespace, pod) group_left (deployment) max by (namespace, pod, deployment) (label_replace(kube_pod_owner{owner_kind=\"ReplicaSet\"}, \"deployment\", \"$1\", \"owner_name\", \"(.+)-[a-z0-9]+\")))",
+              "expr": "avg_over_time(sum by (namespace, deployment) (sum by (namespace, pod) (rate(container_cpu_usage_seconds_total{container!=\"\", container!=\"POD\", namespace=~\"$namespace\"}[5m])) * on (namespace, pod) group_left (deployment) max by (namespace, pod, deployment) (label_replace(kube_pod_owner{owner_kind=\"ReplicaSet\"}, \"deployment\", \"$1\", \"owner_name\", \"(.+)-[a-z0-9]+\")))[$__range:5m])",
               "format": "table",
               "instant": true,
               "refId": "C"
@@ -822,17 +812,7 @@ data:
                 "type": "prometheus",
                 "uid": "prometheus"
               },
-              "expr": "sum by (namespace, deployment) (sum by (namespace, pod) (kube_pod_container_resource_limits{resource=\"memory\", namespace=~\"$namespace\"}) * on (namespace, pod) group_left (deployment) max by (namespace, pod, deployment) (label_replace(kube_pod_owner{owner_kind=\"ReplicaSet\"}, \"deployment\", \"$1\", \"owner_name\", \"(.+)-[a-z0-9]+\")))",
-              "format": "table",
-              "instant": true,
-              "refId": "E"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "expr": "sum by (namespace, deployment) (sum by (namespace, pod) (container_memory_working_set_bytes{container!=\"\", container!=\"POD\", namespace=~\"$namespace\"}) * on (namespace, pod) group_left (deployment) max by (namespace, pod, deployment) (label_replace(kube_pod_owner{owner_kind=\"ReplicaSet\"}, \"deployment\", \"$1\", \"owner_name\", \"(.+)-[a-z0-9]+\")))",
+              "expr": "avg_over_time(sum by (namespace, deployment) (sum by (namespace, pod) (container_memory_working_set_bytes{container!=\"\", container!=\"POD\", namespace=~\"$namespace\"}) * on (namespace, pod) group_left (deployment) max by (namespace, pod, deployment) (label_replace(kube_pod_owner{owner_kind=\"ReplicaSet\"}, \"deployment\", \"$1\", \"owner_name\", \"(.+)-[a-z0-9]+\")))[$__range:5m])",
               "format": "table",
               "instant": true,
               "refId": "F"
@@ -872,7 +852,7 @@ data:
                   "operator": "/",
                   "right": "Value #A"
                 },
-                "alias": "CPU usage / request",
+                "alias": "CPU avg / request",
                 "reduce": {
                   "reducer": "sum"
                 }
@@ -883,11 +863,11 @@ data:
               "options": {
                 "mode": "binary",
                 "binary": {
-                  "left": "Value #C",
+                  "left": "Value #G",
                   "operator": "/",
-                  "right": "Value #B"
+                  "right": "Value #A"
                 },
-                "alias": "CPU usage / limit",
+                "alias": "CPU max / request",
                 "reduce": {
                   "reducer": "sum"
                 }
@@ -902,7 +882,7 @@ data:
                   "operator": "/",
                   "right": "Value #D"
                 },
-                "alias": "Memory usage / request",
+                "alias": "Memory avg / request",
                 "reduce": {
                   "reducer": "sum"
                 }
@@ -913,11 +893,11 @@ data:
               "options": {
                 "mode": "binary",
                 "binary": {
-                  "left": "Value #F",
+                  "left": "Value #H",
                   "operator": "/",
-                  "right": "Value #E"
+                  "right": "Value #D"
                 },
-                "alias": "Memory usage / limit",
+                "alias": "Memory max / request",
                 "reduce": {
                   "reducer": "sum"
                 }
@@ -931,12 +911,10 @@ data:
                 },
                 "renameByName": {
                   "Value #A": "CPU request",
-                  "Value #B": "CPU limit",
-                  "Value #C": "CPU usage",
-                  "Value #D": "Memory request",
-                  "Value #E": "Memory limit",
-                  "Value #F": "Memory usage",
+                  "Value #C": "CPU avg usage",
                   "Value #G": "CPU max usage",
+                  "Value #D": "Memory request",
+                  "Value #F": "Memory avg usage",
                   "Value #H": "Memory max usage",
                   "namespace": "Namespace",
                   "deployment": "Deployment"
@@ -945,17 +923,15 @@ data:
                   "Namespace": 0,
                   "Deployment": 1,
                   "CPU request": 2,
-                  "CPU limit": 3,
-                  "CPU usage": 4,
-                  "CPU max usage": 5,
-                  "CPU usage / request": 6,
-                  "CPU usage / limit": 7,
-                  "Memory request": 8,
-                  "Memory limit": 9,
-                  "Memory usage": 10,
-                  "Memory max usage": 11,
-                  "Memory usage / request": 12,
-                  "Memory usage / limit": 13
+                  "CPU avg usage": 3,
+                  "CPU max usage": 4,
+                  "CPU avg / request": 5,
+                  "CPU max / request": 6,
+                  "Memory request": 7,
+                  "Memory avg usage": 8,
+                  "Memory max usage": 9,
+                  "Memory avg / request": 10,
+                  "Memory max / request": 11
                 }
               }
             }
@@ -987,23 +963,7 @@ data:
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "CPU limit"
-                },
-                "properties": [
-                  {
-                    "id": "unit",
-                    "value": "none"
-                  },
-                  {
-                    "id": "decimals",
-                    "value": 3
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "CPU usage"
+                  "options": "CPU avg usage"
                 },
                 "properties": [
                   {
@@ -1047,19 +1007,7 @@ data:
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "Memory limit"
-                },
-                "properties": [
-                  {
-                    "id": "unit",
-                    "value": "bytes"
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Memory usage"
+                  "options": "Memory avg usage"
                 },
                 "properties": [
                   {
@@ -1083,7 +1031,7 @@ data:
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "CPU usage / request"
+                  "options": "CPU avg / request"
                 },
                 "properties": [
                   {
@@ -1125,7 +1073,7 @@ data:
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "Memory usage / request"
+                  "options": "CPU max / request"
                 },
                 "properties": [
                   {
@@ -1167,7 +1115,7 @@ data:
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "CPU usage / limit"
+                  "options": "Memory avg / request"
                 },
                 "properties": [
                   {
@@ -1209,7 +1157,7 @@ data:
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "Memory usage / limit"
+                  "options": "Memory max / request"
                 },
                 "properties": [
                   {
@@ -1258,7 +1206,7 @@ data:
             },
             "sortBy": [
               {
-                "displayName": "CPU usage",
+                "displayName": "CPU max usage",
                 "desc": true
               }
             ]
