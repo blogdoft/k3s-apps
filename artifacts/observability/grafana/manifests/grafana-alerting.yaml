@@ -95,3 +95,180 @@ data:
             annotations:
               summary: "Disco {{ $labels.instance }} ({{ $labels.mountpoint }}) está com {{ printf \"%.1f\" $values.B.Value }}% de uso"
               description: "A ocupação do filesystem {{ $labels.mountpoint }} no host {{ $labels.instance }} atingiu ou passou de 80%."
+
+      - orgId: 1
+        name: resource-usage-alerts
+        folder: Observability
+        interval: 1m
+        rules:
+          - uid: pod-memory-limit-90
+            title: "Pod memory >= 90% of limit"
+            condition: C
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  expr: "max by (namespace, pod, container) (container_memory_working_set_bytes{container!=\"\", container!=\"POD\"}) / on (namespace, pod, container) max by (namespace, pod, container) (kube_pod_container_resource_limits{resource=\"memory\"}) * 100"
+                  instant: true
+                  intervalMs: 60000
+                  maxDataPoints: 1
+                  refId: A
+              - refId: B
+                datasourceUid: __expr__
+                model:
+                  type: reduce
+                  expression: A
+                  reducer: last
+                  refId: B
+              - refId: C
+                datasourceUid: __expr__
+                model:
+                  type: threshold
+                  expression: B
+                  conditions:
+                    - evaluator:
+                        type: gt
+                        params: [90]
+                  refId: C
+            noDataState: OK
+            execErrState: Error
+            for: 5m
+            labels:
+              severity: warning
+              resource: memory
+              scope: pod
+            annotations:
+              summary: "Pod {{ $labels.namespace }}/{{ $labels.pod }} ({{ $labels.container }}) está usando {{ printf \"%.1f\" $values.B.Value }}% do limite de memória"
+              description: "O container {{ $labels.container }} do pod {{ $labels.namespace }}/{{ $labels.pod }} está acima de 90% do limite de memória há mais de 5 minutos. Risco de OOMKill; revise os limits."
+
+          - uid: pod-cpu-limit-90
+            title: "Pod CPU >= 90% of limit"
+            condition: C
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  expr: "sum by (namespace, pod, container) (rate(container_cpu_usage_seconds_total{container!=\"\", container!=\"POD\"}[5m])) / on (namespace, pod, container) max by (namespace, pod, container) (kube_pod_container_resource_limits{resource=\"cpu\"}) * 100"
+                  instant: true
+                  intervalMs: 60000
+                  maxDataPoints: 1
+                  refId: A
+              - refId: B
+                datasourceUid: __expr__
+                model:
+                  type: reduce
+                  expression: A
+                  reducer: last
+                  refId: B
+              - refId: C
+                datasourceUid: __expr__
+                model:
+                  type: threshold
+                  expression: B
+                  conditions:
+                    - evaluator:
+                        type: gt
+                        params: [90]
+                  refId: C
+            noDataState: OK
+            execErrState: Error
+            for: 5m
+            labels:
+              severity: warning
+              resource: cpu
+              scope: pod
+            annotations:
+              summary: "Pod {{ $labels.namespace }}/{{ $labels.pod }} ({{ $labels.container }}) está usando {{ printf \"%.1f\" $values.B.Value }}% do limite de CPU"
+              description: "O container {{ $labels.container }} do pod {{ $labels.namespace }}/{{ $labels.pod }} está acima de 90% do limite de CPU há mais de 5 minutos. Há risco de throttling; revise os limits."
+
+          - uid: node-cpu-90
+            title: "Node CPU >= 90%"
+            condition: C
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  expr: "100 - (avg by (instance) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)"
+                  instant: true
+                  intervalMs: 60000
+                  maxDataPoints: 1
+                  refId: A
+              - refId: B
+                datasourceUid: __expr__
+                model:
+                  type: reduce
+                  expression: A
+                  reducer: last
+                  refId: B
+              - refId: C
+                datasourceUid: __expr__
+                model:
+                  type: threshold
+                  expression: B
+                  conditions:
+                    - evaluator:
+                        type: gt
+                        params: [90]
+                  refId: C
+            noDataState: OK
+            execErrState: Error
+            for: 5m
+            labels:
+              severity: warning
+              resource: cpu
+              scope: node
+            annotations:
+              summary: "Nó {{ $labels.instance }} está com {{ printf \"%.1f\" $values.B.Value }}% de uso de CPU"
+              description: "O uso de CPU do nó {{ $labels.instance }} está acima de 90% há mais de 5 minutos."
+
+          - uid: node-memory-90
+            title: "Node memory >= 90%"
+            condition: C
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: prometheus
+                model:
+                  expr: "100 * (1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)"
+                  instant: true
+                  intervalMs: 60000
+                  maxDataPoints: 1
+                  refId: A
+              - refId: B
+                datasourceUid: __expr__
+                model:
+                  type: reduce
+                  expression: A
+                  reducer: last
+                  refId: B
+              - refId: C
+                datasourceUid: __expr__
+                model:
+                  type: threshold
+                  expression: B
+                  conditions:
+                    - evaluator:
+                        type: gt
+                        params: [90]
+                  refId: C
+            noDataState: OK
+            execErrState: Error
+            for: 5m
+            labels:
+              severity: warning
+              resource: memory
+              scope: node
+            annotations:
+              summary: "Nó {{ $labels.instance }} está com {{ printf \"%.1f\" $values.B.Value }}% de uso de memória"
+              description: "O uso de memória do nó {{ $labels.instance }} está acima de 90% há mais de 5 minutos."
