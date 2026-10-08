@@ -60,6 +60,20 @@ kubectl exec -n garage garage-0 -- /garage key create <nome-da-chave>
 kubectl exec -n garage garage-0 -- /garage bucket allow --read --write --owner <bucket> --key <nome-da-chave>
 ```
 
+> **Bucket precisa de alias global para o Browse do webui.** O garage-webui
+> (1.1.0) monta a rota de navegação a partir do alias *global* do bucket. Um
+> bucket com apenas alias local (ex.: criado por uma chave com alias local)
+> mostra `Bad request: Unknown API endpoint: GET /browse/` ao clicar em Browse.
+> Corrija adicionando um alias global (use o ID do bucket, pois o alias local
+> não é resolvido pelo CLI):
+>
+> ```sh
+> kubectl exec -n garage garage-0 -- /garage bucket list
+> kubectl exec -n garage garage-0 -- /garage bucket alias <id-do-bucket> <nome-global>
+> ```
+>
+> O acesso S3 da aplicação pelo alias local da chave não é afetado.
+
 ## Hosts expostos (ingress)
 
 - API S3: `garage-api.home.arpa` (região `garage`, acesso **path-style**)
