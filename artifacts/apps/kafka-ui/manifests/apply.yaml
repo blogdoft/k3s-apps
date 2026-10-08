@@ -49,7 +49,7 @@ spec:
               value: "-Xms128m -Xmx320m"
           resources:
             limits:
-              memory: "512Mi"
+              memory: "536Mi"
             requests:
               memory: "128Mi"
           volumeMounts:

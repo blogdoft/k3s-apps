@@ -138,11 +138,11 @@ spec:
             failureThreshold: 3              
           resources:
             limits:
-              cpu: 2000m
-              memory: 2000Mi
+              cpu: 100m
+              memory: 1090Mi
             requests:
-              cpu: 500m
-              memory: 1700Mi
+              cpu: 100m
+              memory: 1090Mi
 
       volumes:
         - name: keycloak-realm-import

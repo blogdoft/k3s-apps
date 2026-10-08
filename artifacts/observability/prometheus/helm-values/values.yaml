@@ -11,8 +11,8 @@ server:
       cpu: 250m
       memory: 512Mi
     limits:
-      cpu: "1"
-      memory: 1Gi
+      cpu: 258m
+      memory: 1222Mi
 
 # Chart quirk: jobs de descoberta k8s vêm de um mapa com enabled:true por
 # padrão. Sobrescrever com lista/{} não remove nada (merge de mapa Helm não

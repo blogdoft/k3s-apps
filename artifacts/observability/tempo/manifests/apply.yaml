@@ -237,10 +237,10 @@ spec:
             timeoutSeconds: 5
         resources:
           limits:
-            cpu: "1"
-            memory: 2Gi
+            cpu: 124m
+            memory: 1228Mi
           requests:
-            cpu: 200m
+            cpu: 124m
             memory: 1Gi
         env:
         volumeMounts:

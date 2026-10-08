@@ -42,7 +42,7 @@ spec:
               cpu: 10m
               memory: 32Mi
             limits:
-              memory: 128Mi
+              memory: 32Mi
 ---
 # Admin API do Garage (:3903). O chart na tag v2.4.1 não tem service.admin, então
 # o Service é declarado aqui. Nó único: sem risco de inconsistência entre nós.

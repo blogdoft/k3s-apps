@@ -333,11 +333,11 @@ spec:
               mountPath: "/rules"
           resources:
             limits:
-              cpu: "1"
-              memory: 1Gi
+              cpu: 100m
+              memory: 350Mi
             requests:
-              cpu: 200m
-              memory: 512Mi
+              cpu: 100m
+              memory: 350Mi
         - name: loki-sc-rules
           image: docker.io/kiwigrid/k8s-sidecar:2.5.0
           imagePullPolicy: IfNotPresent

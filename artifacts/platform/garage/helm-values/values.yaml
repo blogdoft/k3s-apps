@@ -42,9 +42,9 @@ environment:
 resources:
   requests:
     cpu: 100m
-    memory: 256Mi
+    memory: 50Mi
   limits:
-    memory: 1Gi
+    memory: 500Mi
 
 ## API S3. O certificado wildcard *.home.arpa é o default do Traefik (TLSStore),
 ## então não há secret de TLS por Ingress.

@@ -34,11 +34,11 @@ tempo:
   # do Traces Drilldown (RSS ~1Gi), o processo travava e a liveness matava o pod.
   resources:
     requests:
-      cpu: 200m
+      cpu: 124m
       memory: 1Gi
     limits:
-      cpu: "1"
-      memory: 2Gi
+      cpu: 124m
+      memory: 1228Mi
 
   # Mais tolerante que o default (timeout 5s / 3 falhas): uma pausa de GC ou
   # uma rajada de consultas não deve virar kill, que ainda corrompe blocos do

@@ -42,11 +42,11 @@ singleBinary:
     size: 10Gi
   resources:
     requests:
-      cpu: 200m
-      memory: 512Mi
+      cpu: 100m
+      memory: 350Mi
     limits:
-      cpu: "1"
-      memory: 1Gi
+      cpu: 100m
+      memory: 350Mi
 
 # Sem isso o chart valida e falha: read/write/backend (modo SimpleScalable)
 # default para 3 réplicas cada, mesmo com deploymentMode: SingleBinary.

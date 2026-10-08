@@ -42,8 +42,8 @@ resources:
     memory: 256Mi
 
   limits:
-    cpu: "1"
-    memory: 1Gi
+    cpu: 110m
+    memory: 1155Mi
 
 startupProbe:
   httpGet:

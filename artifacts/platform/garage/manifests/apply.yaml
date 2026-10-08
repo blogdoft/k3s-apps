@@ -245,7 +245,7 @@ spec:
               subPath: garage.toml
           resources:
             limits:
-              memory: 1Gi
+              memory: 500Mi
             requests:
               cpu: 100m
               memory: 256Mi
