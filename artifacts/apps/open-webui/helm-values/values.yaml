@@ -42,7 +42,7 @@ resources:
     memory: 256Mi
 
   limits:
-    cpu: 110m
+    cpu: "1"
     memory: 1155Mi
 
 startupProbe:
