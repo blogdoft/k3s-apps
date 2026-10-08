@@ -920,16 +920,16 @@ data:
                   "deployment": "Deployment"
                 },
                 "indexByName": {
-                  "Namespace": 0,
-                  "Deployment": 1,
-                  "CPU request": 2,
-                  "CPU avg usage": 3,
-                  "CPU max usage": 4,
+                  "namespace": 0,
+                  "deployment": 1,
+                  "Value #A": 2,
+                  "Value #C": 3,
+                  "Value #G": 4,
                   "CPU avg / request": 5,
                   "CPU max / request": 6,
-                  "Memory request": 7,
-                  "Memory avg usage": 8,
-                  "Memory max usage": 9,
+                  "Value #D": 7,
+                  "Value #F": 8,
+                  "Value #H": 9,
                   "Memory avg / request": 10,
                   "Memory max / request": 11
                 }
@@ -1065,6 +1065,31 @@ data:
                     }
                   },
                   {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "special",
+                        "options": {
+                          "match": "nan",
+                          "result": {
+                            "text": "",
+                            "index": 0
+                          }
+                        }
+                      },
+                      {
+                        "type": "special",
+                        "options": {
+                          "match": "null+nan",
+                          "result": {
+                            "text": "",
+                            "index": 1
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
                     "id": "decimals",
                     "value": 0
                   }
@@ -1105,6 +1130,31 @@ data:
                         }
                       ]
                     }
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "special",
+                        "options": {
+                          "match": "nan",
+                          "result": {
+                            "text": "",
+                            "index": 0
+                          }
+                        }
+                      },
+                      {
+                        "type": "special",
+                        "options": {
+                          "match": "null+nan",
+                          "result": {
+                            "text": "",
+                            "index": 1
+                          }
+                        }
+                      }
+                    ]
                   },
                   {
                     "id": "decimals",
@@ -1149,6 +1199,31 @@ data:
                     }
                   },
                   {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "special",
+                        "options": {
+                          "match": "nan",
+                          "result": {
+                            "text": "",
+                            "index": 0
+                          }
+                        }
+                      },
+                      {
+                        "type": "special",
+                        "options": {
+                          "match": "null+nan",
+                          "result": {
+                            "text": "",
+                            "index": 1
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
                     "id": "decimals",
                     "value": 0
                   }
@@ -1189,6 +1264,31 @@ data:
                         }
                       ]
                     }
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "special",
+                        "options": {
+                          "match": "nan",
+                          "result": {
+                            "text": "",
+                            "index": 0
+                          }
+                        }
+                      },
+                      {
+                        "type": "special",
+                        "options": {
+                          "match": "null+nan",
+                          "result": {
+                            "text": "",
+                            "index": 1
+                          }
+                        }
+                      }
+                    ]
                   },
                   {
                     "id": "decimals",
