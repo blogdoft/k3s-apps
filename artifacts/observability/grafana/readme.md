@@ -75,17 +75,30 @@ Provisionados via ConfigMap `grafana-alerting` montado em
   que cruzar o limiar (`for: 10m`, evita flapping em picos curtos).
 - **Host filesystem usage >= 80%**: um disparo por `instance`/`mountpoint`.
 
-Ambas usam a política de notificação e o contact point padrão do Grafana
-(`grafana-default-email`) — **sem canal de notificação real configurado**
-(precisa de SMTP, que este cluster não tem). O estado de disparo fica
-visível em Alerting → Alert rules na UI, mas nada é enviado externamente
-ainda. Para notificar de verdade, configure SMTP (`GF_SMTP_*` no Deployment)
-ou adicione um contact point de webhook/Slack via provisioning
-(`/etc/grafana/provisioning/alerting/contactpoints.yaml`).
+Grupo `resource-usage-alerts` (avaliação a cada 1 min, `for: 5m`): memória e
+CPU de pod acima de 90% do limit do container, e CPU e memória de nó acima de 90%.
+
+### Notificação (Telegram)
+
+O ConfigMap também provisiona o contact point `telegram` (`contactpoints.yaml`)
+e a política de notificação raiz (`policies.yaml`), que envia todos os alertas
+para ele (agrupa por pasta/alertname, repete a cada 4h). Token e chat id vêm
+do Secret `grafana-telegram`, injetado como env `TELEGRAM_BOT_TOKEN` /
+`TELEGRAM_CHAT_ID` e referenciado via `$__env{...}`. Crie-o antes do apply:
+
+```sh
+kubectl create secret generic grafana-telegram -n observability \
+  --from-literal=bot-token=<token-do-botfather> \
+  --from-literal=chat-id=<chat-id>
+```
+
+Para obter o chat id: envie uma mensagem ao bot (ou adicione-o ao grupo) e
+consulte `https://api.telegram.org/bot<token>/getUpdates`. Em grupos o id é
+negativo. Sem o Secret, o pod do Grafana não inicia.
 
 ## O que não foi configurado / requer ação manual
 
 - **Credenciais admin**: precisam ser criadas manualmente como Secret
   (`grafana-admin`, namespace `observability`) antes do primeiro apply — ver acima.
-- **Notificação real dos alertas**: sem SMTP/webhook/Slack configurado — ver
-  seção Alertas acima.
+- **Secret do Telegram** (`grafana-telegram`): criar manualmente — ver seção
+  Alertas acima.
