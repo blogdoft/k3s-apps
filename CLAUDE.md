@@ -121,6 +121,15 @@ full table of current wave assignments before changing one.
   that cert by SNI for the others. For Helm apps, set it in `helm-values/` and re-render.
 - The root CA (`home-arpa-ca`) is 10-year with `rotationPolicy: Never` because it is
   imported by hand into clients; don't shorten it or let it rotate keys.
+- **Reminder — any change that regenerates or replaces the CA** (`home-arpa-ca` secret /
+  issuer in `artifacts/platform/cert-manager`) leaves stale copies of the old CA outside
+  this repo, and the Forgejo runners go offline (`ImagePullBackOff` with
+  `x509: certificate signed by unknown authority`, or `Cannot ping the Forgejo instance
+  server`). After such a change, the bootstrap repo (`k3s-experiment`) steps must also be
+  applied: `playbooks/trust-ca-root.yaml` (nodes' Docker + containerd), re-export
+  `home-arpa-ca.crt`, update local machine trust, and rebuild/push the runner image and
+  redeploy the runners with `forgejo/runner-install.sh`. See "TLS / Registry Trust" in that
+  repo's `CLAUDE.md` for the full list.
 
 ## Commit conventions
 
