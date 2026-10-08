@@ -281,8 +281,8 @@ data:
           - uid: telegram-main
             type: telegram
             settings:
-              bottoken: $__env{TELEGRAM_BOT_TOKEN}
-              chatid: $__env{TELEGRAM_CHAT_ID}
+              bottoken: "$__env{TELEGRAM_BOT_TOKEN}"
+              chatid: "$__env{TELEGRAM_CHAT_ID}"
               parse_mode: None
   policies.yaml: |
     apiVersion: 1
