@@ -27,7 +27,9 @@ ingress:
   enabled: true
   class: traefik
   host: open-webui.home.arpa
-  tls: false
+  annotations:
+    cert-manager.io/cluster-issuer: home-arpa-ca
+  tls: true
 
 extraEnvVars:
   - name: DATABASE_URL

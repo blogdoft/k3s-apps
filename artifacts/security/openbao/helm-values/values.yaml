@@ -26,10 +26,15 @@ server:
     annotations:
       traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
       traefik.ingress.kubernetes.io/router.tls: "true"
+      cert-manager.io/cluster-issuer: home-arpa-ca
     hosts:
       - host: openbao.home.arpa
         paths:
           - /
+    tls:
+      - secretName: openbao-tls
+        hosts:
+          - openbao.home.arpa
 
   dataStorage:
     storageClass: "longhorn-fast"

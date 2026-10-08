@@ -285,10 +285,15 @@ metadata:
     app.kubernetes.io/version: "v2.4.1"
     app.kubernetes.io/managed-by: Helm
   annotations:
+    cert-manager.io/cluster-issuer: home-arpa-ca
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
 spec:
   ingressClassName: traefik
+  tls:
+    - hosts:
+        - "garage-api.home.arpa"
+      secretName: garage-s3-api-tls
   rules:
     - host: "garage-api.home.arpa"
       http:

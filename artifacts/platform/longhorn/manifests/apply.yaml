@@ -5890,6 +5890,7 @@ metadata:
     app.kubernetes.io/version: v1.12.1
     app: longhorn-ingress
   annotations:
+    cert-manager.io/cluster-issuer: "home-arpa-ca"
     traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
     traefik.ingress.kubernetes.io/router.tls: "true"
 spec:
@@ -5905,6 +5906,10 @@ spec:
               name: longhorn-frontend
               port:
                 number: 80
+  tls:
+  - hosts:
+    - longhorn.home.arpa
+    secretName: longhorn-tls
 ---
 # Source: longhorn/templates/validate-psp-install.yaml
 #

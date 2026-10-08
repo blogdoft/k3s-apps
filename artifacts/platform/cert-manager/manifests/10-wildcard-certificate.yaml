@@ -1,12 +1,3 @@
-# Default certificate served by Traefik (see 20-traefik-tlsstore-default.yaml).
-#
-# home.arpa is on the Public Suffix List, so Chromium-based browsers (Edge,
-# Chrome) refuse to match "*.home.arpa" — a wildcard directly under a public
-# suffix — and fail with NET::ERR_CERT_COMMON_NAME_INVALID even when the CA is
-# trusted. Every browser-facing hostname must therefore be listed explicitly.
-# The wildcard stays for non-browser clients (curl, Go, .NET), which accept it.
-#
-# When exposing a new *.home.arpa host, add it here.
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
@@ -18,23 +9,8 @@ spec:
     name: home-arpa-ca
     kind: ClusterIssuer
   dnsNames:
-    - "home.arpa"
     - "*.home.arpa"
-    - "argocd.home.arpa"
-    - "blogdoft.home.arpa"
-    - "code-rag-api.home.arpa"
-    - "flagr.home.arpa"
-    - "forgejo.home.arpa"
-    - "garage.home.arpa"
-    - "garage-api.home.arpa"
-    - "s3.garage.home.arpa"
-    - "grafana.home.arpa"
-    - "kafka-ui.home.arpa"
-    - "kafka-bootstrap.home.arpa"
-    - "keycloak.home.arpa"
-    - "longhorn.home.arpa"
-    - "open-webui.home.arpa"
-    - "openbao.home.arpa"
+    - "home.arpa"
   privateKey:
     algorithm: RSA
     size: 2048

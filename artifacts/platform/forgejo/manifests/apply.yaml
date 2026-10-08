@@ -92,8 +92,13 @@ metadata:
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
+    cert-manager.io/cluster-issuer: home-arpa-ca
 spec:
   ingressClassName: traefik
+  tls:
+    - hosts:
+        - forgejo.home.arpa
+      secretName: forgejo-tls
   rules:
     - host: forgejo.home.arpa
       http:

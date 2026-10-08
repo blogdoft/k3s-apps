@@ -79,10 +79,11 @@ kubectl exec -n garage garage-0 -- /garage bucket allow --read --write --owner <
 - API S3: `garage-api.home.arpa` (região `garage`, acesso **path-style**)
 - Web UI: `garage.home.arpa`
 
-Ambos usam `ingressClassName: traefik` e o TLS default do cluster (wildcard
-`wildcard-home-arpa`). Acesso vhost-style (`<bucket>.s3...`) não foi
-configurado: exigiria um wildcard de dois níveis, que o certificado
-`*.home.arpa` não cobre.
+Ambos usam `ingressClassName: traefik` e a annotation
+`cert-manager.io/cluster-issuer: home-arpa-ca`, que emite um certificado por
+host (secrets `garage-s3-api-tls` e `garage-webui-tls`). Acesso vhost-style
+(`<bucket>.s3...`) não foi configurado: exigiria um certificado wildcard, e
+wildcards sob `home.arpa` não são aceitos pelo Edge/Chrome.
 
 ## O que não foi configurado / requer ação manual
 

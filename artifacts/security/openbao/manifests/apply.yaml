@@ -518,9 +518,14 @@ metadata:
     app.kubernetes.io/instance: openbao
     app.kubernetes.io/managed-by: Helm
   annotations:
+    cert-manager.io/cluster-issuer: home-arpa-ca
     traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
 spec:
+  tls:
+    - hosts:
+        - "openbao.home.arpa"
+      secretName: openbao-tls
   ingressClassName: traefik
   rules:
     - host: "openbao.home.arpa"

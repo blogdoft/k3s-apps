@@ -21,8 +21,13 @@ metadata:
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
+    cert-manager.io/cluster-issuer: home-arpa-ca
 spec:
   ingressClassName: traefik
+  tls:
+  - hosts:
+    - argocd.home.arpa
+    secretName: argocd-tls
   rules:
   - host: argocd.home.arpa
     http:

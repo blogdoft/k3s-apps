@@ -56,6 +56,11 @@ ingress:
       annotations:
         traefik.ingress.kubernetes.io/router.entrypoints: websecure
         traefik.ingress.kubernetes.io/router.tls: "true"
+        cert-manager.io/cluster-issuer: home-arpa-ca
+      tls:
+        - secretName: garage-s3-api-tls
+          hosts:
+            - garage-api.home.arpa
       hosts:
         - host: garage-api.home.arpa
           paths:

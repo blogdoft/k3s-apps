@@ -97,8 +97,13 @@ metadata:
     traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
     traefik.ingress.kubernetes.io/router.middlewares: kafka-ui-redirect-to-https@kubernetescrd
+    cert-manager.io/cluster-issuer: home-arpa-ca
 spec:
   ingressClassName: traefik
+  tls:
+    - hosts:
+        - kafka-ui.home.arpa
+      secretName: kafka-ui-tls
   rules:
     - host: kafka-ui.home.arpa
       http:

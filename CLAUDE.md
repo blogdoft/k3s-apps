@@ -101,15 +101,24 @@ full table of current wave assignments before changing one.
 ## Ingress / TLS conventions
 
 - `ingressClassName: traefik`, hosts are `<app>.home.arpa`.
-- Don't reference a TLS secret per-Ingress: a wildcard cert (`wildcard-home-arpa`,
-  cert-manager, in `kube-system`) is registered as Traefik's cluster-wide default via a
-  TLSStore (`artifacts/platform/cert-manager/manifests/20-traefik-tlsstore-default.yaml`),
-  so any `*.home.arpa` Ingress gets HTTPS automatically.
+- A wildcard cert (`wildcard-home-arpa`, cert-manager, in `kube-system`) is registered
+  as Traefik's cluster-wide default via a TLSStore
+  (`artifacts/platform/cert-manager/manifests/20-traefik-tlsstore-default.yaml`), so any
+  `*.home.arpa` Ingress gets HTTPS — but browsers won't accept it (see next item).
 - `home.arpa` is on the Public Suffix List, so Edge/Chrome reject the `*.home.arpa`
-  wildcard (`ERR_CERT_COMMON_NAME_INVALID`). Every browser-facing host must also be
-  listed explicitly in `dnsNames` of
-  `artifacts/platform/cert-manager/manifests/10-wildcard-certificate.yaml` — add it
-  there whenever you expose a new host.
+  wildcard (`ERR_CERT_COMMON_NAME_INVALID`). The wildcard is only a fallback: every
+  browser-facing Ingress must request its own certificate from cert-manager:
+  ```yaml
+  metadata:
+    annotations:
+      cert-manager.io/cluster-issuer: home-arpa-ca
+  spec:
+    tls:
+      - hosts: [<app>.home.arpa]
+        secretName: <app>-tls
+  ```
+  When several Ingresses share a host, put this on only one of them; Traefik serves
+  that cert by SNI for the others. For Helm apps, set it in `helm-values/` and re-render.
 - The root CA (`home-arpa-ca`) is 10-year with `rotationPolicy: Never` because it is
   imported by hand into clients; don't shorten it or let it rotate keys.
 

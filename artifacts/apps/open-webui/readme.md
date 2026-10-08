@@ -72,9 +72,11 @@ kubectl exec -n open-webui open-webui-0 -- find /app/backend/data/cache -name "*
 
 ## Hosts expostos (ingress)
 
-`open-webui.home.arpa`, `ingressClassName: traefik`, `tls: false` no
-values — usa o certificado wildcard default do cluster via `TLSStore` do
-Traefik, sem precisar referenciar secret de TLS aqui.
+`open-webui.home.arpa`, `ingressClassName: traefik`, `tls: true` no
+values com a annotation `cert-manager.io/cluster-issuer: home-arpa-ca` — o
+cert-manager emite o certificado do host na secret `open-webui-tls` (o
+wildcard `*.home.arpa` não é aceito pelo Edge/Chrome, pois `home.arpa` é
+sufixo público).
 
 ## O que não foi configurado / requer ação manual
 

@@ -169,8 +169,14 @@ metadata:
     app.kubernetes.io/name: open-webui
     app.kubernetes.io/instance: open-webui
     app.kubernetes.io/component: open-webui
+  annotations:
+    cert-manager.io/cluster-issuer: home-arpa-ca
 spec:
   ingressClassName: traefik
+  tls:
+    - hosts:
+      - "open-webui.home.arpa"
+      secretName: open-webui-tls
   rules:
   -
     host: open-webui.home.arpa

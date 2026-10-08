@@ -86,8 +86,13 @@ metadata:
     argocd.argoproj.io/sync-wave: "20"
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
+    cert-manager.io/cluster-issuer: home-arpa-ca
 spec:
   ingressClassName: traefik
+  tls:
+    - hosts:
+        - garage.home.arpa
+      secretName: garage-webui-tls
   rules:
     - host: garage.home.arpa
       http:

@@ -220,9 +220,14 @@ kind: Ingress
 metadata:
   name: grafana
   namespace: observability
+  annotations:
+    cert-manager.io/cluster-issuer: home-arpa-ca
 spec:
   ingressClassName: traefik
-
+  tls:
+    - hosts:
+        - grafana.home.arpa
+      secretName: grafana-tls
   rules:
     - host: grafana.home.arpa
       http:
