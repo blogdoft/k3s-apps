@@ -759,7 +759,7 @@ data:
           },
           "options": {
             "mode": "markdown",
-            "content": "Valores somados por Deployment (todas as réplicas). **Request** = reserva mínima, **Limit** = máximo; **Usage** = CPU (média 5m) e memória (working set) efetivamente consumidas. Clique no cabeçalho de uma coluna para ordenar (maior → menor); shift+clique ordena por várias colunas. Células vazias = request/limit não definido. Percentuais acima de 100% do request ficam em vermelho. Pods de StatefulSet/DaemonSet/Job não aparecem."
+            "content": "Valores somados por Deployment (todas as réplicas). **Request** = reserva mínima, **Limit** = máximo; **Usage** = CPU (média 5m) e memória (working set) no instante atual; **Max usage** = pico dessas mesmas métricas (amostradas a cada 5m) dentro do período selecionado no dashboard. Clique no cabeçalho de uma coluna para ordenar (maior → menor); shift+clique ordena por várias colunas. Células vazias = request/limit não definido. Percentuais acima de 100% do request ficam em vermelho. Pods de StatefulSet/DaemonSet/Job não aparecem."
           }
         },
         {
@@ -836,6 +836,26 @@ data:
               "format": "table",
               "instant": true,
               "refId": "F"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "max_over_time(sum by (namespace, deployment) (sum by (namespace, pod) (rate(container_cpu_usage_seconds_total{container!=\"\", container!=\"POD\", namespace=~\"$namespace\"}[5m])) * on (namespace, pod) group_left (deployment) max by (namespace, pod, deployment) (label_replace(kube_pod_owner{owner_kind=\"ReplicaSet\"}, \"deployment\", \"$1\", \"owner_name\", \"(.+)-[a-z0-9]+\")))[$__range:5m])",
+              "format": "table",
+              "instant": true,
+              "refId": "G"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "max_over_time(sum by (namespace, deployment) (sum by (namespace, pod) (container_memory_working_set_bytes{container!=\"\", container!=\"POD\", namespace=~\"$namespace\"}) * on (namespace, pod) group_left (deployment) max by (namespace, pod, deployment) (label_replace(kube_pod_owner{owner_kind=\"ReplicaSet\"}, \"deployment\", \"$1\", \"owner_name\", \"(.+)-[a-z0-9]+\")))[$__range:5m])",
+              "format": "table",
+              "instant": true,
+              "refId": "H"
             }
           ],
           "transformations": [
@@ -916,6 +936,8 @@ data:
                   "Value #D": "Memory request",
                   "Value #E": "Memory limit",
                   "Value #F": "Memory usage",
+                  "Value #G": "CPU max usage",
+                  "Value #H": "Memory max usage",
                   "namespace": "Namespace",
                   "deployment": "Deployment"
                 },
@@ -925,13 +947,15 @@ data:
                   "CPU request": 2,
                   "CPU limit": 3,
                   "CPU usage": 4,
-                  "CPU usage / request": 5,
-                  "CPU usage / limit": 6,
-                  "Memory request": 7,
-                  "Memory limit": 8,
-                  "Memory usage": 9,
-                  "Memory usage / request": 10,
-                  "Memory usage / limit": 11
+                  "CPU max usage": 5,
+                  "CPU usage / request": 6,
+                  "CPU usage / limit": 7,
+                  "Memory request": 8,
+                  "Memory limit": 9,
+                  "Memory usage": 10,
+                  "Memory max usage": 11,
+                  "Memory usage / request": 12,
+                  "Memory usage / limit": 13
                 }
               }
             }
@@ -995,6 +1019,22 @@ data:
               {
                 "matcher": {
                   "id": "byName",
+                  "options": "CPU max usage"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "none"
+                  },
+                  {
+                    "id": "decimals",
+                    "value": 3
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
                   "options": "Memory request"
                 },
                 "properties": [
@@ -1020,6 +1060,18 @@ data:
                 "matcher": {
                   "id": "byName",
                   "options": "Memory usage"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "bytes"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Memory max usage"
                 },
                 "properties": [
                   {
