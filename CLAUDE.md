@@ -105,8 +105,13 @@ full table of current wave assignments before changing one.
   cert-manager, in `kube-system`) is registered as Traefik's cluster-wide default via a
   TLSStore (`artifacts/platform/cert-manager/manifests/20-traefik-tlsstore-default.yaml`),
   so any `*.home.arpa` Ingress gets HTTPS automatically.
-- The wildcard only covers one subdomain level — a host needs a form like
-  `garage-api.home.arpa`, not `s3.garage.home.arpa`.
+- `home.arpa` is on the Public Suffix List, so Edge/Chrome reject the `*.home.arpa`
+  wildcard (`ERR_CERT_COMMON_NAME_INVALID`). Every browser-facing host must also be
+  listed explicitly in `dnsNames` of
+  `artifacts/platform/cert-manager/manifests/10-wildcard-certificate.yaml` — add it
+  there whenever you expose a new host.
+- The root CA (`home-arpa-ca`) is 10-year with `rotationPolicy: Never` because it is
+  imported by hand into clients; don't shorten it or let it rotate keys.
 
 ## Commit conventions
 

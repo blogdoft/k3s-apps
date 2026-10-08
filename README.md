@@ -97,6 +97,8 @@ Before applying anything from this repository, the cluster must meet the followi
 - ✅ All Ingress resources automatically get TLS without specifying the secret in each namespace
 - ✅ No need to copy the secret across namespaces
 - ✅ Automatic HTTPS for all `*.home.arpa` domains handled by Traefik
+- ⚠️ `home.arpa` is a public suffix, so Edge/Chrome ignore the `*.home.arpa` wildcard. Each host must also be listed explicitly in the certificate's `dnsNames` — add new hosts there.
+- ⚠️ The root CA `home-arpa-ca` is valid for 10 years and never rotates its key. After it is (re)issued, re-import it into clients and re-sync the `rancher` app (its `tls-ca` copy).
 
 ---
 

@@ -7,6 +7,12 @@ spec:
   selfSigned: {}
 ---
 # Local CA certificate (stored as a Secret in the cert-manager namespace)
+#
+# This root has to be imported by hand into every client (browsers/OS trust
+# stores, node containerd, Rancher's tls-ca), so it is long-lived and keeps its
+# key across renewals: cert-manager >= 1.18 defaults to rotationPolicy: Always,
+# which would mint a brand-new CA on every renewal and silently invalidate all
+# of those imports.
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
@@ -15,12 +21,13 @@ metadata:
 spec:
   isCA: true
   commonName: home.arpa Local Root CA
-  duration: 8760h
-  renewBefore: 720h
+  duration: 87600h # 10 years
+  renewBefore: 8760h # 1 year
   secretName: home-arpa-ca
   privateKey:
     algorithm: RSA
     size: 4096
+    rotationPolicy: Never
   issuerRef:
     name: selfsigned-bootstrap
     kind: ClusterIssuer
