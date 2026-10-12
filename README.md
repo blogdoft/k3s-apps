@@ -60,6 +60,12 @@ The repository deploys and manages:
 * Health check endpoint:
   `GET /api/v1/health`
 
+### Immich (photo/video gallery)
+
+* **URL:** `https://immich.home.arpa/`
+* Helm-rendered (chart `immich/immich`); uses an external Postgres (VectorChord) and the shared `redis-server`.
+* Requires the `immich-secrets` Secret (`DB_URL`, `REDIS_PASSWORD`) — see `artifacts/apps/immich/readme.md`.
+
 ### Garage (S3-compatible object storage)
 
 * **S3 API:** `https://garage-api.home.arpa/` (path-style)

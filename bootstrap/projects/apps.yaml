@@ -18,6 +18,8 @@ spec:
       namespace: kafka-ui
     - server: https://kubernetes.default.svc
       namespace: open-webui
+    - server: https://kubernetes.default.svc
+      namespace: immich
   clusterResourceWhitelist:
     - group: "*"
       kind: "*"

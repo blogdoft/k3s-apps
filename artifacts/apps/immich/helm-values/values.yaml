@@ -1,0 +1,85 @@
+controllers:
+  main:
+    containers:
+      main:
+        image:
+          tag: v3.3.1
+        env:
+          REDIS_HOSTNAME: redis-server.redis-server.svc.cluster.local
+          REDIS_PORT: "6379"
+          REDIS_PASSWORD:
+            valueFrom:
+              secretKeyRef:
+                name: immich-secrets
+                key: REDIS_PASSWORD
+          DB_URL:
+            valueFrom:
+              secretKeyRef:
+                name: immich-secrets
+                key: DB_URL
+          IMMICH_MACHINE_LEARNING_URL: http://immich-machine-learning:3003
+
+immich:
+  persistence:
+    library:
+      existingClaim: immich-library
+
+  configuration:
+    ffmpeg:
+      accel: nvenc
+      accelDecode: true
+
+valkey:
+  enabled: false
+
+server:
+  enabled: true
+  controllers:
+    main:
+      pod:
+        runtimeClassName: nvidia
+      containers:
+        main:
+          env:
+            NVIDIA_DRIVER_CAPABILITIES: compute,video,utility
+          resources:
+            limits:
+              nvidia.com/gpu: 1
+  ingress:
+    main:
+      enabled: true
+      className: traefik
+      annotations:
+        cert-manager.io/cluster-issuer: home-arpa-ca
+      hosts:
+        - host: immich.home.arpa
+          paths:
+            - path: /
+              service:
+                identifier: main
+      tls:
+        - hosts: [immich.home.arpa]
+          secretName: immich-tls
+
+machine-learning:
+  enabled: true
+  controllers:
+    main:
+      pod:
+        runtimeClassName: nvidia
+      containers:
+        main:
+          image:
+            tag: v3.3.1-cuda
+          env:
+            NVIDIA_DRIVER_CAPABILITIES: compute,utility
+          resources:
+            limits:
+              nvidia.com/gpu: 1
+  persistence:
+    cache:
+      enabled: true
+      type: persistentVolumeClaim
+      size: 10Gi
+      accessMode: ReadWriteOnce
+      storageClass: longhorn-fast
