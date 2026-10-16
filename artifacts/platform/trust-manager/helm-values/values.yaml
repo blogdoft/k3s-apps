@@ -1,0 +1,12 @@
+crds:
+  enabled: true
+  keep: true
+# O pacote padrão (CAs públicas do Debian) só serve para Bundles com useDefaultCAs;
+# aqui só distribuímos a CA privada home-arpa-ca.
+defaultPackage:
+  enabled: false
+app:
+  trust:
+    # Namespace de onde o trust-manager lê os Secrets/ConfigMaps de origem.
+    # O Secret home-arpa-ca (cert-manager) já está lá.
+    namespace: cert-manager

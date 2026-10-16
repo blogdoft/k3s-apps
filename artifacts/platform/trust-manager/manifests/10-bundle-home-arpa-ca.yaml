@@ -1,0 +1,23 @@
+# Distribui o certificado PÚBLICO da CA raiz (home-arpa-ca) para um ConfigMap em todos os namespaces,
+# para que workloads montem a CA e confiem nos certificados emitidos por ela (por exemplo, um pod .NET
+# que baixa as chaves do Keycloak em https://keycloak.home.arpa). O ConfigMap criado em cada namespace
+# se chama "home-arpa-ca" (o nome do Bundle) e tem a chave "home-arpa-ca.crt".
+#
+# Só a chave tls.crt do Secret é lida: a chave privada (tls.key) nunca sai do namespace cert-manager.
+#
+# O Bundle precisa do CRD instalado pelo chart (apply.yaml), por isso a onda 30 e o SkipDryRun.
+apiVersion: trust.cert-manager.io/v1alpha1
+kind: Bundle
+metadata:
+  name: home-arpa-ca
+  annotations:
+    argocd.argoproj.io/sync-wave: "30"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  sources:
+    - secret:
+        name: home-arpa-ca
+        key: tls.crt
+  target:
+    configMap:
+      key: home-arpa-ca.crt
