@@ -1,0 +1,5 @@
+reloader:
+  # "annotations" grava a anotação de reinício no template do pod. O padrão (env-vars) injeta uma
+  # variável de ambiente no Deployment, o que o ArgoCD (selfHeal) enxergaria como drift.
+  reloadStrategy: annotations
+  watchGlobally: true
