@@ -54,7 +54,8 @@ O `Bundle` fica fora do chart (`10-bundle-home-arpa-ca.yaml`) e **não** é gera
 ## Verificar
 
 ```sh
-kubectl get bundle home-arpa-ca
+# Use o nome completo: o Rancher Fleet também define um recurso "bundles".
+kubectl get bundles.trust.cert-manager.io home-arpa-ca
 kubectl get configmap home-arpa-ca -n code-brain -o jsonpath='{.data.home-arpa-ca\.crt}' | openssl x509 -noout -subject
 ```
 
