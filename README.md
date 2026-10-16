@@ -32,7 +32,7 @@ This repository contains the **complete desired state** (GitOps) of services run
 
 The repository deploys and manages:
 
-- **Platform Services**: cert-manager, Longhorn storage, Rancher, Garage (S3 object storage)
+- **Platform Services**: cert-manager, trust-manager, Reloader, Longhorn storage, Rancher, Garage (S3 object storage)
 - **Security Services**: OpenBao (secrets management), Keycloak (identity provider)
 - **Application Services**: Flagr (feature flags), Kafka UI
 - **Database Services**: Redis
@@ -65,6 +65,17 @@ The repository deploys and manages:
 * **URL:** `https://immich.home.arpa/`
 * Helm-rendered (chart `immich/immich`); uses an external Postgres (VectorChord) and the shared `redis-server`.
 * Requires the `immich-secrets` Secret (`DB_URL`, `REDIS_PASSWORD`) — see `artifacts/apps/immich/readme.md`.
+
+### trust-manager (CA distribution)
+
+* Helm-rendered (chart `jetstack/trust-manager`), runs in `cert-manager`.
+* The `Bundle` `home-arpa-ca` copies only the **public** certificate of the root CA (`tls.crt` of the `home-arpa-ca` Secret) into a ConfigMap named `home-arpa-ca` (key `home-arpa-ca.crt`) in every namespace, so workloads can mount it and trust certificates issued by the cluster CA (e.g. `SSL_CERT_DIR` for .NET).
+* See `artifacts/platform/trust-manager/readme.md`.
+
+### Reloader (restart on config change)
+
+* Helm-rendered (chart `stakater/reloader`), runs in `kube-system`, watches all namespaces with `reloadStrategy: annotations` (compatible with ArgoCD `selfHeal`).
+* Opt in per workload with `reloader.stakater.com/auto: "true"` on the Deployment. See `artifacts/platform/reloader/readme.md`.
 
 ### Garage (S3-compatible object storage)
 
@@ -163,6 +174,8 @@ Their synchronization order is explicitly controlled using sync waves:
 | ----- | ---------------- | ---------------------------------------------------- |
 | `-10` | **rancher**      | Cluster management UI (optional)                     |
 | `0`   | **cert-manager** | TLS certificate management (required for HTTPS)      |
+| `5`   | **trust-manager** | Distributes the `home-arpa-ca` CA to every namespace (needs cert-manager CRDs/CA) |
+| `5`   | **reloader**     | Restarts workloads when their ConfigMaps/Secrets change |
 | `10`  | **longhorn**     | Storage foundation (required by PVCs)                |
 | `10`  | **openbao**      | Secrets management (uses persistent storage)         |
 | `20`  | **redis**        | Stateful workload backed by Longhorn                 |
