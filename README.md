@@ -35,7 +35,7 @@ The repository deploys and manages:
 - **Platform Services**: cert-manager, trust-manager, Reloader, Longhorn storage, Rancher, Garage (S3 object storage)
 - **Security Services**: OpenBao (secrets management), Keycloak (identity provider)
 - **Application Services**: Flagr (feature flags), Kafka UI
-- **Database Services**: Redis
+- **Database Services**: Redis, Kafka (single-node KRaft)
 - **Infrastructure**: TLS certificates, ingress controllers, storage classes
 
 ---
@@ -179,6 +179,7 @@ Their synchronization order is explicitly controlled using sync waves:
 | `10`  | **longhorn**     | Storage foundation (required by PVCs)                |
 | `10`  | **openbao**      | Secrets management (uses persistent storage)         |
 | `20`  | **redis**        | Stateful workload backed by Longhorn                 |
+| `20`  | **kafka**        | Single-node Kafka (KRaft), Longhorn-backed           |
 | `30`  | **keycloak**     | Identity provider (uses database)                    |
 | `40`  | **flagr**        | Feature flags application (with OAuth2 via Keycloak) |
 | `40`  | **kafka-ui**     | Kafka management UI                                  |
