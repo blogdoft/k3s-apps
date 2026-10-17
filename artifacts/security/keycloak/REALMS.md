@@ -33,16 +33,20 @@ do volume reinicia o StatefulSet na primeira sincronização do Argo CD.
 
 Normalmente você terá um ou mais arquivos `*-realm.json`.
 
-## Como versionar no repo
+## Onde ficam os exports (recuperação)
 
-Edite o ConfigMap em [artifacts/security/keycloak/manifests/keycloak-realm-import-configmap.yaml](artifacts/security/keycloak/manifests/keycloak-realm-import-configmap.yaml) e adicione cada export como uma chave nova em `data:`.
+Os exports **não** ficam neste repositório, que é público. A cópia de recuperação vive em
+`k3s-experiment/keycloak/keycloak-export/` (`*-realm.json` e `*-users-0.json`), com todos os segredos
+trocados por variáveis (`${OAUTH2_PROXY_CLIENT_SECRET}`, `${KC_K8S_HMAC_SECRET}`, hashes de senha de
+usuário etc.) definidas no `.env` daquele repositório.
 
-Exemplo:
+O `k3s-experiment/keycloak/install.sh` aplica `envsubst` nesses arquivos e cria o ConfigMap
+`keycloak-realm-import`, que o Keycloak lê em `--import-realm`. Ao exportar de novo (passos acima), troque os
+segredos por variáveis antes de salvar e nunca coloque o JSON bruto no Git.
 
-- `myrealm-realm.json: |`
-- (cole o JSON exportado, mantendo a indentação)
-
-Depois o ArgoCD aplicará o ConfigMap e o Keycloak, em startups futuros, tentará importar os realms.
+Para rotacionar o secret do client `flagr` e o cookie secret do oauth2-proxy, use
+`k3s-experiment/flagr/rotate-oauth-secrets.sh`: ele atualiza o banco do Keycloak, o `.env` e o Secret
+`oauth2-proxy-secrets`, e reinicia os workloads afetados.
 
 ## Importante (comportamento)
 
@@ -83,5 +87,5 @@ todos os usuários.
 Como a importação de realm só é aplicada no bootstrap, o ajuste dos JSONs não
 altera realms que já existem no PostgreSQL. Para a instalação atual, altere o
 mesmo passo no Admin Console: **Authentication > Flows > Browser > Browser -
-Conditional 2FA > WebAuthn Authenticator > Alternative**. Depois, versionar o
-export atualizado preserva a configuração para recriações futuras.
+Conditional 2FA > WebAuthn Authenticator > Alternative**. Depois, atualizar o
+export em `k3s-experiment/keycloak/keycloak-export/` preserva a configuração para recriações futuras.
