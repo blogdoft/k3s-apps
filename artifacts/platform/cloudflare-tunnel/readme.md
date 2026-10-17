@@ -28,7 +28,7 @@ kubectl create secret generic cloudflared-credentials \
   --from-file=credentials.json=$HOME/.cloudflared/<tunnel-id>.json
 ```
 
-O ID do túnel (`96f737df-60b4-4143-9340-931b0f8f28dd`) está no ConfigMap e não é segredo.
+O ID do túnel (`86135bb0-558c-46c8-b4a3-6ac8679cc0d2`) está no ConfigMap e não é segredo.
 
 ## Atualizar a versão
 
