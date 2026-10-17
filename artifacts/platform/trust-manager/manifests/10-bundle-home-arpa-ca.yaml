@@ -1,6 +1,6 @@
 # Distribui o certificado PÚBLICO da CA raiz (home-arpa-ca) para um ConfigMap em todos os namespaces,
 # para que workloads montem a CA e confiem nos certificados emitidos por ela (por exemplo, um pod .NET
-# que baixa as chaves do Keycloak em https://keycloak.home.arpa). O ConfigMap criado em cada namespace
+# que baixa as chaves do Keycloak em https://keycloak.blogdoft.dev). O ConfigMap criado em cada namespace
 # se chama "home-arpa-ca" (o nome do Bundle) e tem a chave "home-arpa-ca.crt".
 #
 # Só a chave tls.crt do Secret é lida: a chave privada (tls.key) nunca sai do namespace cert-manager.

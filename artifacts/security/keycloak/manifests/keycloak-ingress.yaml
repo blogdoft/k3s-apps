@@ -1,30 +1,6 @@
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: keycloak
-  annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
-    traefik.ingress.kubernetes.io/router.tls: "true"
-    cert-manager.io/cluster-issuer: home-arpa-ca
-spec:
-  tls:
-    - hosts:
-        - keycloak.home.arpa
-      secretName: keycloak-tls
-  rules:
-    - host: keycloak.home.arpa
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: keycloak
-                port:
-                  number: 8080
----
 # Public exposure through the Cloudflare Tunnel. Only the OIDC endpoints (/realms) and static assets
-# (/resources) are routed here; the Admin Console is the keycloak-admin Ingress below.
+# (/resources) are routed here; keycloak.blogdoft.dev is the only hostname Keycloak answers on.
+# The Admin Console is the keycloak-admin Ingress below.
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
