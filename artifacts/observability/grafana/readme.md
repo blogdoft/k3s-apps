@@ -18,6 +18,21 @@ kubectl create secret generic grafana-admin -n observability \
 O nome do secret e as chaves (`admin-user` / `admin-password`) já estão
 referenciados no Deployment via `secretKeyRef`.
 
+## Login via Keycloak
+
+O Grafana usa `auth.generic_oauth` contra o realm `k8s` (client `grafana`, PKCE),
+configurado por variáveis `GF_AUTH_GENERIC_OAUTH_*` no Deployment. O client secret
+vem do secret `grafana-oidc` (chave `client-secret`), criado por
+`k3s-experiment/observability/install.sh` a partir de `KC_GRAFANA_CLIENT_SECRET`.
+
+Papéis por grupo do Keycloak: `GrafanaAdmins` → Admin, `GrafanaViewers` → Viewer;
+quem não está em nenhum dos dois é recusado. O login por usuário/senha (`admin`)
+continua habilitado como fallback.
+
+O import do realm só vale em bootstrap: num Keycloak já existente, crie à mão o
+client `grafana` (confidencial, redirect URI `https://grafana.home.arpa/login/generic_oauth`,
+escopo `groups` padrão, secret igual a `KC_GRAFANA_CLIENT_SECRET`) e os dois grupos.
+
 ## Datasources
 
 Provisionados automaticamente via ConfigMap `grafana-datasources` montado em

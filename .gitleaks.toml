@@ -67,3 +67,12 @@ regexes = [
 description = "Known redis inline password"
 targetRules = ["redis-requirepass-literal", "generic-api-key"]
 paths = ['''artifacts/databases/redis/apply\.yaml''']
+
+# GF_AUTH_GENERIC_OAUTH_TOKEN_URL matches the *_TOKEN env rule, but its value is the public Keycloak
+# token endpoint, not a credential. Scoped to this rule, file and URL.
+[[allowlists]]
+description = "Grafana OIDC token endpoint URL"
+condition = "AND"
+targetRules = ["k8s-inline-env-secret"]
+paths = ['''artifacts/observability/grafana/manifests/deployment\.yaml''']
+regexes = ['''https://keycloak\.blogdoft\.dev/realms/k8s/protocol/openid-connect/token''']

@@ -125,7 +125,44 @@ spec:
                   key: admin-password
 
             - name: GF_SERVER_ROOT_URL
-              value: http://grafana.home.arpa
+              value: https://grafana.home.arpa
+
+            - name: GF_AUTH_GENERIC_OAUTH_ENABLED
+              value: "true"
+
+            - name: GF_AUTH_GENERIC_OAUTH_NAME
+              value: Keycloak
+
+            - name: GF_AUTH_GENERIC_OAUTH_CLIENT_ID
+              value: grafana
+
+            - name: GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: grafana-oidc
+                  key: client-secret
+
+            - name: GF_AUTH_GENERIC_OAUTH_SCOPES
+              value: openid profile email groups
+
+            - name: GF_AUTH_GENERIC_OAUTH_USE_PKCE
+              value: "true"
+
+            - name: GF_AUTH_GENERIC_OAUTH_AUTH_URL
+              value: https://keycloak.blogdoft.dev/realms/k8s/protocol/openid-connect/auth
+
+            - name: GF_AUTH_GENERIC_OAUTH_TOKEN_URL
+              value: https://keycloak.blogdoft.dev/realms/k8s/protocol/openid-connect/token
+
+            - name: GF_AUTH_GENERIC_OAUTH_API_URL
+              value: https://keycloak.blogdoft.dev/realms/k8s/protocol/openid-connect/userinfo
+
+            # Members of neither group are refused instead of defaulting to Viewer.
+            - name: GF_AUTH_GENERIC_OAUTH_ROLE_ATTRIBUTE_PATH
+              value: "contains(groups[*], 'GrafanaAdmins') && 'Admin' || contains(groups[*], 'GrafanaViewers') && 'Viewer'"
+
+            - name: GF_AUTH_GENERIC_OAUTH_ROLE_ATTRIBUTE_STRICT
+              value: "true"
 
             - name: GF_ANALYTICS_REPORTING_ENABLED
               value: "false"
