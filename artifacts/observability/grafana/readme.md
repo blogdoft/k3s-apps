@@ -26,8 +26,10 @@ vem do secret `grafana-oidc` (chave `client-secret`), criado por
 `k3s-experiment/observability/install.sh` a partir de `KC_GRAFANA_CLIENT_SECRET`.
 
 Papéis por grupo do Keycloak: `GrafanaAdmins` → Admin, `GrafanaViewers` → Viewer;
-quem não está em nenhum dos dois é recusado. O login por usuário/senha (`admin`)
-continua habilitado como fallback.
+quem não está em nenhum dos dois é recusado. O login por usuário/senha está
+desabilitado (`GF_AUTH_DISABLE_LOGIN_FORM` e `GF_AUTH_BASIC_ENABLED=false`): o Keycloak
+é a única forma de entrar, inclusive na API HTTP. Se o Keycloak ficar indisponível,
+a recuperação é reverter essas duas variáveis.
 
 O import do realm só vale em bootstrap: num Keycloak já existente, crie à mão o
 client `grafana` (confidencial, redirect URI `https://grafana.home.arpa/login/generic_oauth`,
