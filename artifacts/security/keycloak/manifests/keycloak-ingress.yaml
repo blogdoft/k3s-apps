@@ -22,3 +22,38 @@ spec:
                 name: keycloak
                 port:
                   number: 8080
+---
+# Public exposure through the Cloudflare Tunnel. Only the OIDC endpoints (/realms) and static assets
+# (/resources) are routed; the Admin Console (/admin) and the master realm UI stay on keycloak.home.arpa.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: keycloak-public
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-cloudflare-prod
+    external-dns.kubernetes.io/target: 86135bb0-558c-46c8-b4a3-6ac8679cc0d2.cfargotunnel.com
+    external-dns.kubernetes.io/cloudflare-proxied: "true"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - keycloak.blogdoft.dev
+      secretName: keycloak-blogdoft-dev-tls
+  rules:
+    - host: keycloak.blogdoft.dev
+      http:
+        paths:
+          - path: /realms
+            pathType: Prefix
+            backend:
+              service:
+                name: keycloak
+                port:
+                  number: 8080
+          - path: /resources
+            pathType: Prefix
+            backend:
+              service:
+                name: keycloak
+                port:
+                  number: 8080

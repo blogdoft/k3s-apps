@@ -3,7 +3,7 @@ data:
   url: https://argocd.home.arpa
   oidc.config: |
     name: Keycloak
-    issuer: https://keycloak.home.arpa/realms/k8s
+    issuer: https://keycloak.blogdoft.dev/realms/k8s
     clientID: argocd
     enablePKCEAuthentication: true
     clientSecret: $oidc.keycloak.clientSecret

@@ -78,7 +78,9 @@ Para cadastrar uma chave para um usuário existente:
    fatores.
 
 O `RP ID` permanece vazio de propósito: com `KC_HOSTNAME` definido como
-`https://keycloak.home.arpa`, o Keycloak usa `keycloak.home.arpa`. Não acesse o
+`https://keycloak.blogdoft.dev`, o Keycloak usa `keycloak.blogdoft.dev`; credenciais
+registradas antes dessa troca (quando o host era `keycloak.home.arpa`) deixam de valer e
+precisam ser cadastradas de novo. Não acesse o
 Keycloak por IP, por uma URL alternativa ou sem HTTPS durante o cadastro: o
 WebAuthn vincula a credencial ao domínio de origem. Mantenha ao menos uma conta
 administrativa e um método de recuperação testados antes de exigir WebAuthn para
