@@ -13,5 +13,8 @@ data:
       # O Host header original é preservado e o Traefik escolhe o Ingress correto.
       - hostname: "*.blogdoft.dev"
         service: http://traefik.kube-system.svc.cluster.local:80
+      # O wildcard não cobre o domínio raiz (blogdoft.dev).
+      - hostname: "blogdoft.dev"
+        service: http://traefik.kube-system.svc.cluster.local:80
       # Regra obrigatória: qualquer hostname não autorizado recebe 404.
       - service: http_status:404
