@@ -79,6 +79,10 @@ app that needs credentials, follow this convention (external creation, reference
 in the manifest) rather than committing values — the Redis app is a known exception
 (password inline in the manifest) called out as a documented risk, not a pattern to copy.
 
+A gitleaks pre-commit hook (`.githooks/pre-commit`, enabled with `git config core.hooksPath .githooks`,
+config in `.gitleaks.toml`) blocks new secrets in commits. Never bypass it with `--no-verify`; if it flags a
+false positive, add a narrow `[[allowlists]]` entry (rule + path) instead.
+
 ## Sync waves — deployment ordering
 
 Two independent layers of `argocd.argoproj.io/sync-wave` annotations control ordering;

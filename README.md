@@ -294,6 +294,20 @@ This is not recommended. A better approach would be:
 
 Additionally, `ALLOW_EMPTY_PASSWORD="yes"` is set, which is usually unnecessary and can be misleading from a security standpoint.
 
+### Secret scanning (gitleaks pre-commit hook)
+
+Commits are scanned by [gitleaks](https://github.com/gitleaks/gitleaks) through a versioned hook. Enable it once per clone:
+
+```sh
+git config core.hooksPath .githooks
+```
+
+* **Runner:** uses a local `gitleaks` binary if present, otherwise Docker (`ghcr.io/gitleaks/gitleaks`, pinned in `.githooks/pre-commit`).
+* **Rules (`.gitleaks.toml`):** the upstream defaults plus repo-specific ones — Cloudflare API tokens, `cloudflared` `TunnelSecret`, base64 private keys, literal `data:`/`stringData:` values in Secrets, literal `PASSWORD`/`SECRET`/`TOKEN`/`API_KEY` env values (use `secretKeyRef`), `--requirepass` literals, and sensitive files (`.env`, `credentials.json`, kubeconfig, `*.pem`/`*.key`).
+* **Placeholders** such as `<token>` and `${VAR}` are ignored, so readmes and templates stay clean. The only path exception is the documented Redis inline password.
+* **Baseline (`.gitleaks-baseline.json`):** findings already in the history (oauth2-proxy and Keycloak realm secrets, an Open WebUI API key value, the old Redis path) are ignored so the hook only blocks *new* leaks. They are still in Git history and should be rotated.
+* If a finding is a false positive, prefer a narrow `[[allowlists]]` entry in `.gitleaks.toml` (by rule and path) over `git commit --no-verify`.
+
 ---
 
 ## Operations and quick troubleshooting
