@@ -66,12 +66,12 @@ spec:
               value: "true"
             # In this explorative setup, no strict hostname is set.
             # For production environments, set a hostname for a secure setup.
-            # Public issuer (served through the Cloudflare Tunnel). The Admin Console stays on the
-            # internal host: the public Ingress only routes /realms and /resources.
+            # Single host for the issuer and the Admin Console: the console loads keycloak-js against
+            # this URL, and a different admin host makes its 3rd-party cookie check iframe cross-site
+            # (timeout). /admin is only routed on the websecure entrypoint (keycloak-admin Ingress), so
+            # it is reachable from the LAN but not through the Cloudflare Tunnel (port 80).
             - name: KC_HOSTNAME
               value: "https://keycloak.blogdoft.dev"
-            - name: KC_HOSTNAME_ADMIN
-              value: "https://keycloak.home.arpa"
             - name: KC_HOSTNAME_STRICT
               value: "false"
             - name: KC_HEALTH_ENABLED

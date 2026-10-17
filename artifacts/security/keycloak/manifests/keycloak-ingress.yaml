@@ -24,7 +24,7 @@ spec:
                   number: 8080
 ---
 # Public exposure through the Cloudflare Tunnel. Only the OIDC endpoints (/realms) and static assets
-# (/resources) are routed; the Admin Console (/admin) and the master realm UI stay on keycloak.home.arpa.
+# (/resources) are routed here; the Admin Console is the keycloak-admin Ingress below.
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -51,6 +51,30 @@ spec:
                 port:
                   number: 8080
           - path: /resources
+            pathType: Prefix
+            backend:
+              service:
+                name: keycloak
+                port:
+                  number: 8080
+---
+# Admin Console on the issuer host, restricted to the websecure entrypoint. The tunnel only forwards to
+# Traefik's port 80 (web entrypoint), so /admin is unreachable from the internet. LAN clients need
+# keycloak.blogdoft.dev to resolve to the Traefik IP (internal DNS / hosts) to reach it on 443.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: keycloak-admin
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: keycloak.blogdoft.dev
+      http:
+        paths:
+          - path: /admin
             pathType: Prefix
             backend:
               service:

@@ -64,7 +64,7 @@ toda chave USB oferece.
 
 Para cadastrar uma chave para um usuário existente:
 
-1. Acesse o Admin Console em `https://keycloak.home.arpa/admin/` e selecione o
+1. Acesse o Admin Console em `https://keycloak.blogdoft.dev/admin/` (só pela LAN, com o DNS interno apontando `keycloak.blogdoft.dev` para o Traefik) e selecione o
    realm apropriado (`k8s` para os aplicativos; `master` somente para a conta
    administrativa).
 2. Em **Authentication > Required actions**, confirme que **Webauthn Register**
