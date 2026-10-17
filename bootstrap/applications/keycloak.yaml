@@ -25,7 +25,5 @@ spec:
   ignoreDifferences:
     - group: apps
       kind: StatefulSet
-      name: keycloak
-      namespace: keycloak
       jsonPointers:
         - /spec/replicas

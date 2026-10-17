@@ -21,9 +21,14 @@ spec:
       enabled: true
     syncOptions:
       - CreateNamespace=true
+      - RespectIgnoreDifferences=true
   ignoreDifferences:
     - group: admissionregistration.k8s.io
       kind: MutatingWebhookConfiguration
       name: openbao-agent-injector-cfg
       jsonPointers:
         - /webhooks/0/clientConfig/caBundle
+    - group: apps
+      kind: StatefulSet
+      jsonPointers:
+        - /spec/replicas

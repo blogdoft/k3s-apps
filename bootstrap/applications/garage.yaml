@@ -21,3 +21,9 @@ spec:
       enabled: true
     syncOptions:
       - CreateNamespace=true    
+      - RespectIgnoreDifferences=true
+  ignoreDifferences:
+    - group: apps
+      kind: StatefulSet
+      jsonPointers:
+        - /spec/replicas
