@@ -6,6 +6,81 @@ metadata:
 data:
   dynamic_config.yaml: |
     # (vazio) - corresponde ao ./kui/config.yaml atual
+  auth.yaml: |
+    auth:
+      type: OAUTH2
+      oauth2:
+        client:
+          keycloak:
+            provider: keycloak
+            client-name: keycloak
+            clientId: kafka-ui
+            clientSecret: ${OIDC_CLIENT_SECRET}
+            scope: openid
+            issuer-uri: https://keycloak.blogdoft.dev/realms/k8s
+            user-name-attribute: preferred_username
+            redirect-uri: https://kafka-ui.home.arpa/login/oauth2/code/keycloak
+            custom-params:
+              type: oauth
+              roles-field: groups
+    rbac:
+      roles:
+        - name: admins
+          clusters:
+            - local
+          subjects:
+            - provider: oauth
+              type: role
+              value: KafkaUiAdmins
+          permissions:
+            - resource: applicationconfig
+              actions: all
+            - resource: clusterconfig
+              actions: all
+            - resource: topic
+              value: ".*"
+              actions: all
+            - resource: consumer
+              value: ".*"
+              actions: all
+            - resource: schema
+              value: ".*"
+              actions: all
+            - resource: connect
+              value: ".*"
+              actions: all
+            - resource: ksql
+              actions: all
+            - resource: acl
+              actions: all
+            - resource: audit
+              actions: all
+        - name: viewers
+          clusters:
+            - local
+          subjects:
+            - provider: oauth
+              type: role
+              value: KafkaUiViewers
+          permissions:
+            - resource: clusterconfig
+              actions: [ view ]
+            - resource: topic
+              value: ".*"
+              actions: [ view ]
+            - resource: consumer
+              value: ".*"
+              actions: [ view ]
+            - resource: schema
+              value: ".*"
+              actions: [ view ]
+            - resource: connect
+              value: ".*"
+              actions: [ view ]
+            - resource: acl
+              actions: [ view ]
+            - resource: audit
+              actions: [ view ]
 
 ---
 apiVersion: apps/v1
@@ -45,6 +120,13 @@ spec:
               value: "true"
             - name: KAFKA_CLUSTERS_0_AUDIT_CONSOLEAUDITENABLED
               value: "true"
+            - name: SPRING_CONFIG_ADDITIONAL-LOCATION
+              value: /etc/kafkaui/auth.yaml
+            - name: OIDC_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: kafka-ui-oidc
+                  key: client-secret
             - name: JAVA_TOOL_OPTIONS
               value: "-Xms128m -Xmx320m"
           resources:
@@ -56,6 +138,9 @@ spec:
             - name: kafbat-ui-config
               mountPath: /etc/kafkaui/dynamic_config.yaml
               subPath: dynamic_config.yaml
+            - name: kafbat-ui-config
+              mountPath: /etc/kafkaui/auth.yaml
+              subPath: auth.yaml
       volumes:
         - name: kafbat-ui-config
           configMap:
