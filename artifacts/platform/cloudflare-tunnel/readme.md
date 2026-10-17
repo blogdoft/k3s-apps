@@ -45,8 +45,8 @@ curl -I https://immich.blogdoft.dev
 
 ## Cuidados
 
-- Alterar o ConfigMap não reinicia os pods: rode `kubectl rollout restart deploy/cloudflared -n cloudflare-tunnel`
-  (ou anote o Deployment com `reloader.stakater.com/auto: "true"`).
+- O Deployment tem `reloader.stakater.com/auto: "true"`: alterar o ConfigMap ou o Secret reinicia os pods
+  automaticamente (rolling update, sem derrubar o túnel).
 - O tráfego entra em HTTP na porta 80 do Traefik; o TLS público termina na Cloudflare.
 - `manifests/02-networkpolicy.yaml` bloqueia todo ingress e limita o egress a: DNS (CoreDNS), Traefik
   (porta `8000`, o targetPort) e a internet pública na `7844` (borda da Cloudflare). Redes privadas
