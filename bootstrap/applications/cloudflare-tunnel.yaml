@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cloudflare-tunnel
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+spec:
+  project: platform
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cloudflare-tunnel
+  source:
+    repoURL: git@github.com:blogdoft/k3s-apps.git
+    targetRevision: HEAD
+    path: artifacts/platform/cloudflare-tunnel/manifests
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      enabled: true
+    syncOptions:
+      - CreateNamespace=true

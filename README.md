@@ -77,6 +77,12 @@ The repository deploys and manages:
 * Helm-rendered (chart `stakater/reloader`), runs in `kube-system`, watches all namespaces with `reloadStrategy: annotations` (compatible with ArgoCD `selfHeal`).
 * Opt in per workload with `reloader.stakater.com/auto: "true"` on the Deployment. See `artifacts/platform/reloader/readme.md`.
 
+### Cloudflare Tunnel (public exposure)
+
+* Hand-written manifests (`cloudflared` Deployment, 2 replicas, image pinned to `2026.10.1`) in the `cloudflare-tunnel` namespace.
+* Routes `*.blogdoft.dev` to Traefik (`traefik.kube-system:80`); any other hostname gets a 404. An Ingress with a `*.blogdoft.dev` host becomes public (currently only `immich.blogdoft.dev`).
+* Requires the `cloudflared-credentials` Secret (`credentials.json`) created before first sync — see `artifacts/platform/cloudflare-tunnel/readme.md`.
+
 ### Garage (S3-compatible object storage)
 
 * **S3 API:** `https://garage-api.home.arpa/` (path-style)
@@ -176,6 +182,7 @@ Their synchronization order is explicitly controlled using sync waves:
 | `0`   | **cert-manager** | TLS certificate management (required for HTTPS)      |
 | `5`   | **trust-manager** | Distributes the `home-arpa-ca` CA to every namespace (needs cert-manager CRDs/CA) |
 | `5`   | **reloader**     | Restarts workloads when their ConfigMaps/Secrets change |
+| `5`   | **cloudflare-tunnel** | Public ingress tunnel to Traefik (`*.blogdoft.dev`) |
 | `10`  | **longhorn**     | Storage foundation (required by PVCs)                |
 | `10`  | **openbao**      | Secrets management (uses persistent storage)         |
 | `20`  | **redis**        | Stateful workload backed by Longhorn                 |
