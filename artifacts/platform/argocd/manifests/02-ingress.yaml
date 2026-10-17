@@ -21,15 +21,15 @@ metadata:
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
-    cert-manager.io/cluster-issuer: home-arpa-ca
+    cert-manager.io/cluster-issuer: letsencrypt-cloudflare-prod
 spec:
   ingressClassName: traefik
   tls:
   - hosts:
-    - argocd.home.arpa
-    secretName: argocd-tls
+    - argocd.blogdoft.dev
+    secretName: argocd-blogdoft-dev-tls
   rules:
-  - host: argocd.home.arpa
+  - host: argocd.blogdoft.dev
     http:
       paths:
       - pathType: Prefix
