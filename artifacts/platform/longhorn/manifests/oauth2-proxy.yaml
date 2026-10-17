@@ -39,6 +39,8 @@ spec:
               value: "groups"
             - name: OAUTH2_PROXY_ALLOWED_GROUPS
               value: "LonghornAdmins"
+            - name: OAUTH2_PROXY_SKIP_PROVIDER_BUTTON
+              value: "true"
             - name: OAUTH2_PROXY_CODE_CHALLENGE_METHOD
               value: "S256"
             - name: OAUTH2_PROXY_EMAIL_DOMAINS
