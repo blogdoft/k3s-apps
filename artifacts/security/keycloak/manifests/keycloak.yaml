@@ -70,7 +70,7 @@ spec:
             # internal host: the public Ingress only routes /realms and /resources.
             - name: KC_HOSTNAME
               value: "https://keycloak.blogdoft.dev"
-            - name: KC_HOSTNAME_ADMIN_URL
+            - name: KC_HOSTNAME_ADMIN
               value: "https://keycloak.home.arpa"
             - name: KC_HOSTNAME_STRICT
               value: "false"
