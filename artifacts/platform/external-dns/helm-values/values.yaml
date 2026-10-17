@@ -19,7 +19,7 @@ domainFilters:
 
 # Cria registros apenas para Ingress que declaram explicitamente o alvo do túnel.
 extraArgs:
-  - --annotation-filter=external-dns.alpha.kubernetes.io/target
+  - --annotation-filter=external-dns.kubernetes.io/target
   # Registros CNAME e TXT de controle não podem ter o mesmo nome; o prefixo evita o conflito.
   - --txt-prefix=edns-
 

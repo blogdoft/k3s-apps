@@ -9,7 +9,7 @@ Chart: `external-dns/external-dns`, versão `1.23.0` (app `v0.23.0`). Roda no na
 
 - Observa só `Ingress` (`sources: ingress`) e só a zona `blogdoft.dev` (`domainFilters`). Hosts
   `*.home.arpa` nunca são tocados.
-- Só atua em Ingress com a anotação `external-dns.alpha.kubernetes.io/target` (`--annotation-filter`).
+- Só atua em Ingress com a anotação `external-dns.kubernetes.io/target` (`--annotation-filter`).
   Sem ela, o Ingress é ignorado: o CNAME continua sendo uma decisão explícita no Git.
 - Registros criados por ele ganham um TXT de controle (`edns-<nome>`, dono `k3s-home`). Com
   `policy: sync` ele remove apenas o que criou; registros feitos à mão não são alterados nem apagados.
@@ -22,8 +22,8 @@ Anote o Ingress:
 ```yaml
 metadata:
   annotations:
-    external-dns.alpha.kubernetes.io/target: 86135bb0-558c-46c8-b4a3-6ac8679cc0d2.cfargotunnel.com
-    external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
+    external-dns.kubernetes.io/target: 86135bb0-558c-46c8-b4a3-6ac8679cc0d2.cfargotunnel.com
+    external-dns.kubernetes.io/cloudflare-proxied: "true"
 ```
 
 O host também precisa estar sob `*.blogdoft.dev` para o cloudflared encaminhá-lo ao Traefik.

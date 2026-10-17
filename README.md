@@ -86,7 +86,7 @@ The repository deploys and manages:
 ### external-dns (Cloudflare DNS automation)
 
 * Helm-rendered (chart `external-dns/external-dns`), runs in `external-dns`, manages only the `blogdoft.dev` zone.
-* Creates a proxied CNAME to the tunnel for each Ingress annotated with `external-dns.alpha.kubernetes.io/target`, and removes only the records it created.
+* Creates a proxied CNAME to the tunnel for each Ingress annotated with `external-dns.kubernetes.io/target`, and removes only the records it created.
 * Requires the `external-dns-cloudflare` Secret (`api-token`, a dedicated Zone:DNS:Edit token) — see `artifacts/platform/external-dns/readme.md`.
 
 ### Garage (S3-compatible object storage)

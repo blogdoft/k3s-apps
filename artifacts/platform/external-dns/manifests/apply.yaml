@@ -135,7 +135,7 @@ spec:
             - --txt-owner-id=k3s-home
             - --domain-filter=blogdoft.dev
             - --provider=cloudflare
-            - "--annotation-filter=external-dns.alpha.kubernetes.io/target"
+            - "--annotation-filter=external-dns.kubernetes.io/target"
             - "--txt-prefix=edns-"
           ports:
             - name: http
