@@ -1,0 +1,36 @@
+provider:
+  name: cloudflare
+
+env:
+  - name: CF_API_TOKEN
+    valueFrom:
+      secretKeyRef:
+        name: external-dns-cloudflare
+        key: api-token
+
+sources:
+  - ingress
+
+logFormat: json
+
+# Só gerencia a zona pública; os hosts *.home.arpa nunca são tocados.
+domainFilters:
+  - blogdoft.dev
+
+# Cria registros apenas para Ingress que declaram explicitamente o alvo do túnel.
+extraArgs:
+  - --annotation-filter=external-dns.alpha.kubernetes.io/target
+  # Registros CNAME e TXT de controle não podem ter o mesmo nome; o prefixo evita o conflito.
+  - --txt-prefix=edns-
+
+# "sync" remove o registro quando o Ingress some, mas só os que ele mesmo criou (marcados pelo TXT).
+policy: sync
+registry: txt
+txtOwnerId: k3s-home
+
+resources:
+  requests:
+    cpu: 10m
+    memory: 32Mi
+  limits:
+    memory: 64Mi

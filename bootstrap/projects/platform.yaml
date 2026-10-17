@@ -19,6 +19,8 @@ spec:
     - server: https://kubernetes.default.svc
       namespace: cloudflare-tunnel
     - server: https://kubernetes.default.svc
+      namespace: external-dns
+    - server: https://kubernetes.default.svc
       namespace: forgejo
     - server: https://kubernetes.default.svc
       namespace: kube-system
