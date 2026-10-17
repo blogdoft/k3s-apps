@@ -65,6 +65,8 @@ server:
       className: traefik
       annotations:
         cert-manager.io/cluster-issuer: letsencrypt-cloudflare-prod
+        external-dns.alpha.kubernetes.io/target: 86135bb0-558c-46c8-b4a3-6ac8679cc0d2.cfargotunnel.com
+        external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
       hosts:
         - host: immich.blogdoft.dev
           paths:
