@@ -334,7 +334,7 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: immich-server
+  name: immich-server-main
   labels:
     app.kubernetes.io/instance: immich
     app.kubernetes.io/managed-by: Helm
@@ -353,6 +353,38 @@ spec:
       secretName: "immich-tls"
   rules:
     - host: "immich.home.arpa"
+      http:
+        paths:
+          - path: "/"
+            pathType: Prefix
+            backend:
+              service:
+                name: immich-server
+                port:
+                  number: 2283
+---
+# Source: immich/templates/server.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: immich-server-public
+  labels:
+    app.kubernetes.io/instance: immich
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: server
+    app.kubernetes.io/version: v2.6.3
+    helm.sh/chart: immich-0.12.0
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-cloudflare-prod
+  namespace: immich
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - "immich.blogdoft.dev"
+      secretName: "immich-blogdoft-dev-tls"
+  rules:
+    - host: "immich.blogdoft.dev"
       http:
         paths:
           - path: "/"

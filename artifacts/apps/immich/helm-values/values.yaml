@@ -60,6 +60,21 @@ server:
       tls:
         - hosts: [immich.home.arpa]
           secretName: immich-tls
+    public:
+      enabled: true
+      className: traefik
+      annotations:
+        cert-manager.io/cluster-issuer: letsencrypt-cloudflare-prod
+      hosts:
+        - host: immich.blogdoft.dev
+          paths:
+            - path: /
+              service:
+                identifier: main
+      tls:
+        - hosts:
+            - immich.blogdoft.dev
+          secretName: immich-blogdoft-dev-tls          
 
 machine-learning:
   enabled: true
