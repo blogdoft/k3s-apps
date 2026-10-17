@@ -20,6 +20,12 @@ porta 9092 → 9094 do pod). `kafka-bootstrap.home.arpa` precisa resolver para o
 de um nó do cluster, e o `advertised.listeners` externo usa esse mesmo nome. É o
 endereço que o `kafka-ui` já usa.
 
+## Métricas (JMX)
+
+O broker expõe JMX na porta 9997 (registry e RMI na mesma porta), usado pelo `kafka-ui`
+via `kafka-0.kafka-headless.kafka.svc.cluster.local:9997`. Fica só dentro do cluster: não
+está no Service `kafka-external`, pois está sem autenticação/TLS.
+
 ## Não configurado de propósito
 
 - Sem TLS/SASL (PLAINTEXT): restrinja o acesso à LAN.

@@ -82,6 +82,8 @@ spec:
               containerPort: 9093
             - name: external
               containerPort: 9094
+            - name: jmx
+              containerPort: 9997
           env:
             # KRaft single-node: o mesmo processo é broker e controller.
             - name: CLUSTER_ID
@@ -130,6 +132,14 @@ spec:
               value: "67108864"
             - name: KAFKA_HEAP_OPTS
               value: "-Xms384m -Xmx384m"
+            - name: KAFKA_JMX_OPTS
+              value: >-
+                -Dcom.sun.management.jmxremote
+                -Dcom.sun.management.jmxremote.authenticate=false
+                -Dcom.sun.management.jmxremote.ssl=false
+                -Dcom.sun.management.jmxremote.port=9997
+                -Dcom.sun.management.jmxremote.rmi.port=9997
+                -Djava.rmi.server.hostname=kafka-0.kafka-headless.kafka.svc.cluster.local
           readinessProbe:
             tcpSocket:
               port: 9092
