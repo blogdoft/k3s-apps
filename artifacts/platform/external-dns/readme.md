@@ -43,12 +43,20 @@ Em *Zone Resources*, use `Include → Specific zone → blogdoft.dev`. Não reut
 O `cloudflared` CLI não cria API tokens (ele só gerencia túneis), então a criação é pelo painel ou
 pela API da Cloudflare.
 
+O Secret `external-dns-cloudflare` (chave `api-token`) é criado pelo `install.sh` do repositório de
+bootstrap (`k3s-experiment`), a partir do `.env`:
+
 ```sh
-kubectl create namespace external-dns
-kubectl create secret generic external-dns-cloudflare \
-  -n external-dns \
-  --from-literal=api-token='<token>'
+# em k3s-experiment/.env
+export CLOUDFLARE_EXTERNAL_DNS_TOKEN="<token>"
+
+# em k3s-experiment/
+./cloudflare-tunnel/install.sh
 ```
+
+O script cria o namespace `external-dns` (se não existir) e aplica o Secret a partir do template
+`cloudflare-tunnel/external-dns-cloudflare-secret.yaml.template` com `envsubst`. Ele também aplica o
+Secret de credenciais do túnel e pode ser reexecutado sem efeitos colaterais.
 
 ## Renderizar o template
 
@@ -74,4 +82,5 @@ dig +short @1.1.1.1 immich.blogdoft.dev
 ## Cuidados
 
 - O token edita o DNS de `blogdoft.dev`: mantenha o escopo restrito a essa zona.
-- Trocar o Secret reinicia o pod só se o Deployment for anotado com o Reloader; sem isso, reinicie à mão.
+- Trocar o token e reexecutar o `install.sh` não reinicia o pod (o Deployment não usa o Reloader): rode
+  `kubectl rollout restart deploy/external-dns -n external-dns`.
