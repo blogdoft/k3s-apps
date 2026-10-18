@@ -1,0 +1,17 @@
+# Access log JSON do Traefik (k3s) com o país vindo da Cloudflare; alimenta o dashboard "Requests por país".
+apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
+metadata:
+  name: traefik
+  namespace: kube-system
+spec:
+  valuesContent: |-
+    logs:
+      access:
+        enabled: true
+        format: json
+        fields:
+          headers:
+            defaultmode: drop
+            names:
+              CF-IPCountry: keep

@@ -1240,3 +1240,250 @@ data:
       "version": 1,
       "weekStart": ""
     }
+  requests-by-country.json: |
+    {
+      "annotations": {
+        "list": []
+      },
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 0,
+      "id": null,
+      "links": [],
+      "panels": [
+        {
+          "id": 1,
+          "type": "geomap",
+          "title": "Requests públicos por país",
+          "gridPos": {
+            "h": 12,
+            "w": 14,
+            "x": 0,
+            "y": 0
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "loki"
+              },
+              "expr": "sum by (request_CF_IPCountry) (count_over_time({namespace=\"kube-system\", pod=~\"traefik.*\"} |= \"RequestHost\" | json | RequestHost=~\".+\\\\.blogdoft\\\\.dev\" | request_CF_IPCountry != \"\" [$__range]))",
+              "refId": "A",
+              "queryType": "instant",
+              "instant": true,
+              "range": false,
+              "format": "table"
+            }
+          ],
+          "transformations": [],
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "continuous-GrYlRd"
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "view": {
+              "id": "zero",
+              "lat": 0,
+              "lon": 0,
+              "zoom": 1
+            },
+            "controls": {
+              "showZoom": true,
+              "mouseWheelZoom": true,
+              "showAttribution": true
+            },
+            "basemap": {
+              "type": "default",
+              "name": "Layer 0"
+            },
+            "layers": [
+              {
+                "type": "markers",
+                "name": "Requests",
+                "location": {
+                  "mode": "lookup",
+                  "lookup": "request_CF_IPCountry",
+                  "gazetteer": "public/gazetteer/countries.json"
+                },
+                "config": {
+                  "showLegend": true,
+                  "style": {
+                    "size": {
+                      "fixed": 5,
+                      "min": 5,
+                      "max": 30,
+                      "field": "Value"
+                    },
+                    "color": {
+                      "field": "Value",
+                      "fixed": "dark-green"
+                    },
+                    "opacity": 0.6
+                  }
+                }
+              }
+            ],
+            "tooltip": {
+              "mode": "details"
+            }
+          }
+        },
+        {
+          "id": 2,
+          "type": "bargauge",
+          "title": "Top 10 países",
+          "gridPos": {
+            "h": 12,
+            "w": 10,
+            "x": 14,
+            "y": 0
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "loki"
+              },
+              "expr": "topk(10, sum by (request_CF_IPCountry) (count_over_time({namespace=\"kube-system\", pod=~\"traefik.*\"} |= \"RequestHost\" | json | RequestHost=~\".+\\\\.blogdoft\\\\.dev\" | request_CF_IPCountry != \"\" [$__range])))",
+              "refId": "A",
+              "queryType": "instant",
+              "instant": true,
+              "range": false,
+              "legendFormat": "{{request_CF_IPCountry}}"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "continuous-BlPu"
+              },
+              "min": 0
+            },
+            "overrides": []
+          },
+          "options": {
+            "orientation": "horizontal",
+            "displayMode": "gradient",
+            "showUnfilled": true,
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "values": false
+            }
+          }
+        },
+        {
+          "id": 3,
+          "type": "timeseries",
+          "title": "Requests por país ao longo do tempo",
+          "gridPos": {
+            "h": 8,
+            "w": 14,
+            "x": 0,
+            "y": 12
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "loki"
+              },
+              "expr": "sum by (request_CF_IPCountry) (count_over_time({namespace=\"kube-system\", pod=~\"traefik.*\"} |= \"RequestHost\" | json | RequestHost=~\".+\\\\.blogdoft\\\\.dev\" | request_CF_IPCountry != \"\" [$__interval]))",
+              "refId": "A",
+              "queryType": "range",
+              "legendFormat": "{{request_CF_IPCountry}}"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "stacking": {
+                  "mode": "normal"
+                },
+                "fillOpacity": 40
+              }
+            },
+            "overrides": []
+          },
+          "options": {}
+        },
+        {
+          "id": 4,
+          "type": "piechart",
+          "title": "Requests por host",
+          "gridPos": {
+            "h": 8,
+            "w": 10,
+            "x": 14,
+            "y": 12
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "loki"
+              },
+              "expr": "sum by (RequestHost) (count_over_time({namespace=\"kube-system\", pod=~\"traefik.*\"} |= \"RequestHost\" | json | RequestHost=~\".+\\\\.blogdoft\\\\.dev\" | request_CF_IPCountry != \"\" [$__range]))",
+              "refId": "A",
+              "queryType": "instant",
+              "instant": true,
+              "range": false,
+              "legendFormat": "{{RequestHost}}"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "values": false
+            }
+          }
+        }
+      ],
+      "refresh": "1m",
+      "schemaVersion": 39,
+      "tags": [
+        "traefik",
+        "cloudflare",
+        "geo"
+      ],
+      "templating": {
+        "list": []
+      },
+      "time": {
+        "from": "now-24h",
+        "to": "now"
+      },
+      "timepicker": {},
+      "timezone": "",
+      "title": "Requests por país",
+      "uid": "requests-by-country",
+      "version": 1,
+      "weekStart": ""
+    }

@@ -42,10 +42,12 @@ O pipeline Alloy (linguagem Alloy/river) faz:
 inclui `cattle-system`, `cattle-capi-system`, `cattle-fleet-local-system`,
 `cattle-fleet-system`, `cattle-turtles-system`, `fleet-default`,
 `fleet-local`), `redis-server`, `flagr`, `kafka-ui`, `keycloak`, `openbao`,
-`observability` (o próprio stack de observabilidade) e `kube-system`.
+`observability` (o próprio stack de observabilidade) e `kube-system`, exceto o
+pod do Traefik (`app.kubernetes.io/name=traefik`), cujo access log alimenta o
+dashboard "Requests por país".
 
 Para adicionar/remover um namespace da exclusão, edite o regex do primeiro
-`rule { action = "drop" }` em `helm-values/values.yaml` e re-renderize.
+`rule { action = "drop" }` (`kube-system` é tratado por um par de regras à parte) em `helm-values/values.yaml` e re-renderize.
 
 ## O que não foi configurado / requer ação manual
 
