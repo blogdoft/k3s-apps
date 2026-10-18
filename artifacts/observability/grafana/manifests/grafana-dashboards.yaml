@@ -1589,7 +1589,7 @@ data:
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 20
+            "y": 28
           },
           "datasource": {
             "type": "loki",
@@ -1619,6 +1619,107 @@ data:
             "overrides": []
           },
           "options": {}
+        },
+        {
+          "id": 6,
+          "type": "table",
+          "title": "Hosts por país",
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 20
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "loki"
+              },
+              "expr": "sum by (RequestHost, request_Cf_Ipcountry) (count_over_time({namespace=\"kube-system\", pod=~\"traefik.*\"} |= \"RequestHost\" | json | RequestHost=~\".+\\\\.blogdoft\\\\.dev\" | request_Cf_Ipcountry != \"\" [$__range]))",
+              "refId": "A",
+              "queryType": "instant",
+              "instant": true,
+              "range": false,
+              "format": "table"
+            }
+          ],
+          "transformations": [
+            {
+              "id": "labelsToFields",
+              "options": {
+                "mode": "columns"
+              }
+            },
+            {
+              "id": "merge",
+              "options": {}
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true
+                },
+                "renameByName": {
+                  "RequestHost": "Host",
+                  "request_Cf_Ipcountry": "País",
+                  "Value": "Requests"
+                },
+                "indexByName": {
+                  "RequestHost": 0,
+                  "request_Cf_Ipcountry": 1,
+                  "Value": 2
+                }
+              }
+            },
+            {
+              "id": "sortBy",
+              "options": {
+                "sort": [
+                  {
+                    "field": "Host"
+                  },
+                  {
+                    "field": "Requests",
+                    "desc": true
+                  }
+                ]
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "continuous-BlPu"
+              },
+              "min": 0
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Requests"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "gauge",
+                      "mode": "gradient"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "options": {
+            "showHeader": true
+          }
         }
       ],
       "refresh": "1m",
@@ -1639,6 +1740,6 @@ data:
       "timezone": "",
       "title": "Requests por país",
       "uid": "requests-by-country",
-      "version": 2,
+      "version": 3,
       "weekStart": ""
     }
