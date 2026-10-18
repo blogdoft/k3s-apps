@@ -335,8 +335,8 @@ spec:
               mountPath: "/rules"
           resources:
             limits:
-              cpu: 500m
-              memory: 768Mi
+              cpu: 1000m
+              memory: 1536Mi
             requests:
               cpu: 200m
               memory: 512Mi
