@@ -1271,7 +1271,7 @@ data:
                 "type": "loki",
                 "uid": "loki"
               },
-              "expr": "sum by (request_Cf_Ipcountry, request_Cf_Region, request_Cf_Ipcity, request_Cf_Iplatitude, request_Cf_Iplongitude) (count_over_time({namespace=\"kube-system\", pod=~\"traefik.*\"} |= \"RequestHost\" | json | RequestHost=~\".+\\\\.blogdoft\\\\.dev\" | request_Cf_Ipcountry != \"\" [$__range]))",
+              "expr": "sum by (request_Cf_Ipcountry, request_Cf_Region, request_Cf_Ipcity, request_Cf_Iplatitude, request_Cf_Iplongitude) (count_over_time({namespace=\"kube-system\", pod=~\"traefik.*\"} |= \"RequestHost\" | json | RequestHost=~\".+\\\\.blogdoft\\\\.dev\" | request_Cf_Ipcountry != \"\" | request_Cf_Iplatitude != \"\" | request_Cf_Iplongitude != \"\" [$__range]))",
               "refId": "A",
               "queryType": "instant",
               "instant": true,
