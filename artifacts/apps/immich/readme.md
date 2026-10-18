@@ -1,6 +1,6 @@
 # Immich
 
-Chart: https://github.com/immich-app/immich-charts (`immich/immich` 0.12.0, imagens v3.3.1)
+Chart: https://github.com/immich-app/immich-charts (`immich/immich` 0.12.0, imagens v3.3.3)
 
 Galeria de fotos/vídeos. Sobe o server e o machine-learning (reconhecimento
 facial, busca inteligente). Postgres e Redis são **externos ao chart**:
@@ -55,7 +55,7 @@ pasta `nvidia/`, com time-slicing de 4 réplicas). Os pods usam
 `runtimeClassName: nvidia` e pedem `nvidia.com/gpu: 1`; as réplicas
 compartilham os 12 GB de VRAM sem isolamento de memória.
 
-- **Machine learning:** imagem `v3.3.1-cuda`.
+- **Machine learning:** imagem `v3.3.3-cuda`.
 - **Transcodificação:** `ffmpeg.accel: nvenc` com `accelDecode` na
   configuração do Immich (`immich.configuration`). Se o admin salvar outras
   configurações pela UI, confira se o ConfigMap não as sobrescreve.

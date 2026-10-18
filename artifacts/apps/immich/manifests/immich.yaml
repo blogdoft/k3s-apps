@@ -179,7 +179,7 @@ spec:
             value: "6379"
           - name: TRANSFORMERS_CACHE
             value: /cache
-          image: ghcr.io/immich-app/immich-machine-learning:v3.3.1-cuda
+          image: ghcr.io/immich-app/immich-machine-learning:v3.3.3-cuda
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 3
@@ -283,7 +283,7 @@ spec:
                 name: immich-secrets
           - name: REDIS_PORT
             value: "6379"
-          image: ghcr.io/immich-app/immich-server:v3.3.1
+          image: ghcr.io/immich-app/immich-server:v3.3.3
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 3
