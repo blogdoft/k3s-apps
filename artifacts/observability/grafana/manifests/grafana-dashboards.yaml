@@ -1271,7 +1271,7 @@ data:
                 "type": "loki",
                 "uid": "loki"
               },
-              "expr": "sum by (request_CF_IPCountry) (count_over_time({namespace=\"kube-system\", pod=~\"traefik.*\"} |= \"RequestHost\" | json | RequestHost=~\".+\\\\.blogdoft\\\\.dev\" | request_CF_IPCountry != \"\" [$__range]))",
+              "expr": "sum by (request_Cf_Ipcountry) (count_over_time({namespace=\"kube-system\", pod=~\"traefik.*\"} |= \"RequestHost\" | json | RequestHost=~\".+\\\\.blogdoft\\\\.dev\" | request_Cf_Ipcountry != \"\" [$__range]))",
               "refId": "A",
               "queryType": "instant",
               "instant": true,
@@ -1310,7 +1310,7 @@ data:
                 "name": "Requests",
                 "location": {
                   "mode": "lookup",
-                  "lookup": "request_CF_IPCountry",
+                  "lookup": "request_Cf_Ipcountry",
                   "gazetteer": "public/gazetteer/countries.json"
                 },
                 "config": {
@@ -1356,12 +1356,12 @@ data:
                 "type": "loki",
                 "uid": "loki"
               },
-              "expr": "topk(10, sum by (request_CF_IPCountry) (count_over_time({namespace=\"kube-system\", pod=~\"traefik.*\"} |= \"RequestHost\" | json | RequestHost=~\".+\\\\.blogdoft\\\\.dev\" | request_CF_IPCountry != \"\" [$__range])))",
+              "expr": "topk(10, sum by (request_Cf_Ipcountry) (count_over_time({namespace=\"kube-system\", pod=~\"traefik.*\"} |= \"RequestHost\" | json | RequestHost=~\".+\\\\.blogdoft\\\\.dev\" | request_Cf_Ipcountry != \"\" [$__range])))",
               "refId": "A",
               "queryType": "instant",
               "instant": true,
               "range": false,
-              "legendFormat": "{{request_CF_IPCountry}}"
+              "legendFormat": "{{request_Cf_Ipcountry}}"
             }
           ],
           "fieldConfig": {
@@ -1405,10 +1405,10 @@ data:
                 "type": "loki",
                 "uid": "loki"
               },
-              "expr": "sum by (request_CF_IPCountry) (count_over_time({namespace=\"kube-system\", pod=~\"traefik.*\"} |= \"RequestHost\" | json | RequestHost=~\".+\\\\.blogdoft\\\\.dev\" | request_CF_IPCountry != \"\" [$__interval]))",
+              "expr": "sum by (request_Cf_Ipcountry) (count_over_time({namespace=\"kube-system\", pod=~\"traefik.*\"} |= \"RequestHost\" | json | RequestHost=~\".+\\\\.blogdoft\\\\.dev\" | request_Cf_Ipcountry != \"\" [$__interval]))",
               "refId": "A",
               "queryType": "range",
-              "legendFormat": "{{request_CF_IPCountry}}"
+              "legendFormat": "{{request_Cf_Ipcountry}}"
             }
           ],
           "fieldConfig": {
@@ -1444,7 +1444,7 @@ data:
                 "type": "loki",
                 "uid": "loki"
               },
-              "expr": "sum by (RequestHost) (count_over_time({namespace=\"kube-system\", pod=~\"traefik.*\"} |= \"RequestHost\" | json | RequestHost=~\".+\\\\.blogdoft\\\\.dev\" | request_CF_IPCountry != \"\" [$__range]))",
+              "expr": "sum by (RequestHost) (count_over_time({namespace=\"kube-system\", pod=~\"traefik.*\"} |= \"RequestHost\" | json | RequestHost=~\".+\\\\.blogdoft\\\\.dev\" | request_Cf_Ipcountry != \"\" [$__range]))",
               "refId": "A",
               "queryType": "instant",
               "instant": true,
