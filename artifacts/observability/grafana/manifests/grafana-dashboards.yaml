@@ -1254,7 +1254,7 @@ data:
         {
           "id": 1,
           "type": "geomap",
-          "title": "Requests públicos por país",
+          "title": "Requests públicos por cidade",
           "gridPos": {
             "h": 12,
             "w": 14,
@@ -1271,7 +1271,7 @@ data:
                 "type": "loki",
                 "uid": "loki"
               },
-              "expr": "sum by (request_Cf_Ipcountry) (count_over_time({namespace=\"kube-system\", pod=~\"traefik.*\"} |= \"RequestHost\" | json | RequestHost=~\".+\\\\.blogdoft\\\\.dev\" | request_Cf_Ipcountry != \"\" [$__range]))",
+              "expr": "sum by (request_Cf_Ipcountry, request_Cf_Region, request_Cf_Ipcity, request_Cf_Iplatitude, request_Cf_Iplongitude) (count_over_time({namespace=\"kube-system\", pod=~\"traefik.*\"} |= \"RequestHost\" | json | RequestHost=~\".+\\\\.blogdoft\\\\.dev\" | request_Cf_Ipcountry != \"\" [$__range]))",
               "refId": "A",
               "queryType": "instant",
               "instant": true,
@@ -1279,7 +1279,33 @@ data:
               "format": "table"
             }
           ],
-          "transformations": [],
+          "transformations": [
+            {
+              "id": "labelsToFields",
+              "options": {
+                "mode": "columns"
+              }
+            },
+            {
+              "id": "merge",
+              "options": {}
+            },
+            {
+              "id": "convertFieldType",
+              "options": {
+                "conversions": [
+                  {
+                    "targetField": "request_Cf_Iplatitude",
+                    "destinationType": "number"
+                  },
+                  {
+                    "targetField": "request_Cf_Iplongitude",
+                    "destinationType": "number"
+                  }
+                ]
+              }
+            }
+          ],
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1309,9 +1335,9 @@ data:
                 "type": "markers",
                 "name": "Requests",
                 "location": {
-                  "mode": "lookup",
-                  "lookup": "request_Cf_Ipcountry",
-                  "gazetteer": "public/gazetteer/countries.json"
+                  "mode": "coords",
+                  "latitude": "request_Cf_Iplatitude",
+                  "longitude": "request_Cf_Iplongitude"
                 },
                 "config": {
                   "showLegend": true,
@@ -1328,7 +1354,8 @@ data:
                     },
                     "opacity": 0.6
                   }
-                }
+                },
+                "tooltip": true
               }
             ],
             "tooltip": {
@@ -1386,9 +1413,9 @@ data:
           }
         },
         {
-          "id": 3,
-          "type": "timeseries",
-          "title": "Requests por país ao longo do tempo",
+          "id": 5,
+          "type": "table",
+          "title": "Top 20 cidades",
           "gridPos": {
             "h": 8,
             "w": 14,
@@ -1405,24 +1432,66 @@ data:
                 "type": "loki",
                 "uid": "loki"
               },
-              "expr": "sum by (request_Cf_Ipcountry) (count_over_time({namespace=\"kube-system\", pod=~\"traefik.*\"} |= \"RequestHost\" | json | RequestHost=~\".+\\\\.blogdoft\\\\.dev\" | request_Cf_Ipcountry != \"\" [$__interval]))",
+              "expr": "topk(20, sum by (request_Cf_Ipcountry, request_Cf_Region, request_Cf_Ipcity, request_Cf_Iplatitude, request_Cf_Iplongitude) (count_over_time({namespace=\"kube-system\", pod=~\"traefik.*\"} |= \"RequestHost\" | json | RequestHost=~\".+\\\\.blogdoft\\\\.dev\" | request_Cf_Ipcountry != \"\" [$__range])))",
               "refId": "A",
-              "queryType": "range",
-              "legendFormat": "{{request_Cf_Ipcountry}}"
+              "queryType": "instant",
+              "instant": true,
+              "range": false,
+              "format": "table"
+            }
+          ],
+          "transformations": [
+            {
+              "id": "labelsToFields",
+              "options": {
+                "mode": "columns"
+              }
+            },
+            {
+              "id": "merge",
+              "options": {}
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "request_Cf_Iplatitude": true,
+                  "request_Cf_Iplongitude": true
+                },
+                "renameByName": {
+                  "request_Cf_Ipcountry": "País",
+                  "request_Cf_Region": "Região",
+                  "request_Cf_Ipcity": "Cidade",
+                  "Value": "Requests"
+                },
+                "indexByName": {
+                  "request_Cf_Ipcountry": 0,
+                  "request_Cf_Region": 1,
+                  "request_Cf_Ipcity": 2,
+                  "Value": 3
+                }
+              }
+            },
+            {
+              "id": "sortBy",
+              "options": {
+                "sort": [
+                  {
+                    "field": "Requests",
+                    "desc": true
+                  }
+                ]
+              }
             }
           ],
           "fieldConfig": {
-            "defaults": {
-              "custom": {
-                "stacking": {
-                  "mode": "normal"
-                },
-                "fillOpacity": 40
-              }
-            },
+            "defaults": {},
             "overrides": []
           },
-          "options": {}
+          "options": {
+            "showHeader": true
+          }
         },
         {
           "id": 4,
@@ -1464,6 +1533,45 @@ data:
               "values": false
             }
           }
+        },
+        {
+          "id": 3,
+          "type": "timeseries",
+          "title": "Requests por país ao longo do tempo",
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 20
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "loki"
+              },
+              "expr": "sum by (request_Cf_Ipcountry) (count_over_time({namespace=\"kube-system\", pod=~\"traefik.*\"} |= \"RequestHost\" | json | RequestHost=~\".+\\\\.blogdoft\\\\.dev\" | request_Cf_Ipcountry != \"\" [$__interval]))",
+              "refId": "A",
+              "queryType": "range",
+              "legendFormat": "{{request_Cf_Ipcountry}}"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "stacking": {
+                  "mode": "normal"
+                },
+                "fillOpacity": 40
+              }
+            },
+            "overrides": []
+          },
+          "options": {}
         }
       ],
       "refresh": "1m",
@@ -1484,6 +1592,6 @@ data:
       "timezone": "",
       "title": "Requests por país",
       "uid": "requests-by-country",
-      "version": 1,
+      "version": 2,
       "weekStart": ""
     }

@@ -20,9 +20,12 @@ Manifests escritos à mão (não há chart/Helm). Imagem: `cloudflare/cloudflare
 ## Requests por país
 
 `manifests/04-traefik-accesslog.yaml` é um `HelmChartConfig` do Traefik do K3s que liga o access log em JSON
-e mantém só o header `CF-IPCountry` (os demais são descartados, para não registrar cookies/tokens). O Alloy
+e mantém só os headers de localização da Cloudflare (`CF-IPCountry`, `CF-Region`, `CF-IPCity`, `CF-IPLatitude`,
+`CF-IPLongitude`); os demais são descartados, para não registrar cookies/tokens). O Alloy
 coleta o log do pod do Traefik e o dashboard "Requests por país" (Grafana, pasta Observability) agrega por
-país apenas os hosts `*.blogdoft.dev`. Tráfego da LAN (`*.home.arpa`) não tem o header e fica de fora.
+país e cidade apenas os hosts `*.blogdoft.dev`. Tráfego da LAN (`*.home.arpa`) não tem o header e fica de fora.
+Região, cidade e coordenadas exigem o Managed Transform "Add visitor location headers" ativo na zona
+`blogdoft.dev` (Cloudflare → Rules → Settings); sem ele só o país aparece. As coordenadas são aproximadas.
 Alterar o `HelmChartConfig` faz o K3s reinstalar o chart do Traefik (reinício do pod).
 
 ## Secret (criado manualmente, fora do Git)

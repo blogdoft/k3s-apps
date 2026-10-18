@@ -1,4 +1,4 @@
-# Access log JSON do Traefik (k3s) com o país vindo da Cloudflare; alimenta o dashboard "Requests por país".
+# Access log JSON do Traefik (k3s) com a localização vinda da Cloudflare; alimenta o dashboard "Requests por país".
 apiVersion: helm.cattle.io/v1
 kind: HelmChartConfig
 metadata:
@@ -15,3 +15,7 @@ spec:
             defaultmode: drop
             names:
               CF-IPCountry: keep
+              CF-Region: keep
+              CF-IPCity: keep
+              CF-IPLatitude: keep
+              CF-IPLongitude: keep
