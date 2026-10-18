@@ -1301,7 +1301,7 @@ data:
               "showAttribution": true
             },
             "basemap": {
-              "type": "default",
+              "type": "osm-standard",
               "name": "Layer 0"
             },
             "layers": [
