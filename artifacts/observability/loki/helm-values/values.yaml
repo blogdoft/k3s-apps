@@ -20,7 +20,7 @@ loki:
           period: 24h
 
   limits_config:
-    retention_period: 72h
+    retention_period: 168h
     reject_old_samples: true
     reject_old_samples_max_age: 168h
     volume_enabled: true
@@ -29,6 +29,11 @@ loki:
     # "ingestion rate limit exceeded" logo no primeiro deploy.
     ingestion_rate_mb: 16
     ingestion_burst_size_mb: 32
+    # Ranges além da retenção só geram dezenas de sub-queries horárias em
+    # períodos sem dados e saturam o pod (readiness probe estoura timeout).
+    # Pequena folga sobre os 7d para o "now-7d" do Grafana não ser rejeitado.
+    max_query_lookback: 170h
+    max_query_length: 170h
 
   compactor:
     retention_enabled: true
@@ -42,11 +47,11 @@ singleBinary:
     size: 10Gi
   resources:
     requests:
-      cpu: 100m
-      memory: 350Mi
+      cpu: 200m
+      memory: 512Mi
     limits:
-      cpu: 100m
-      memory: 350Mi
+      cpu: 500m
+      memory: 768Mi
 
 # Sem isso o chart valida e falha: read/write/backend (modo SimpleScalable)
 # default para 3 réplicas cada, mesmo com deploymentMode: SingleBinary.

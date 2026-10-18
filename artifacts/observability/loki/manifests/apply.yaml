@@ -57,10 +57,12 @@ data:
       ingestion_burst_size_mb: 32
       ingestion_rate_mb: 16
       max_cache_freshness_per_query: 10m
+      max_query_length: 170h
+      max_query_lookback: 170h
       query_timeout: 300s
       reject_old_samples: true
       reject_old_samples_max_age: 168h
-      retention_period: 72h
+      retention_period: 168h
       split_queries_by_interval: 15m
       volume_enabled: true
     memberlist:
@@ -268,7 +270,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: fccf0df0d2943e61292ebee4713c3e227cdb512e5d9dbca6717d811f12d3fd5c
+        checksum/config: 4a6da74d310bb7536a60b064a05b785b5d543778c7d17f4bffe79e7d11bcff12
         storage/size: "10Gi"
         kubectl.kubernetes.io/default-container: "loki"
       labels:
@@ -333,11 +335,11 @@ spec:
               mountPath: "/rules"
           resources:
             limits:
-              cpu: 100m
-              memory: 350Mi
+              cpu: 500m
+              memory: 768Mi
             requests:
-              cpu: 100m
-              memory: 350Mi
+              cpu: 200m
+              memory: 512Mi
         - name: loki-sc-rules
           image: docker.io/kiwigrid/k8s-sidecar:2.5.0
           imagePullPolicy: IfNotPresent
