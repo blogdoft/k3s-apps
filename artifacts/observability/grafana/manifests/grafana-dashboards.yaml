@@ -1365,8 +1365,8 @@ data:
         },
         {
           "id": 2,
-          "type": "bargauge",
-          "title": "Top 10 países",
+          "type": "table",
+          "title": "Países",
           "gridPos": {
             "h": 12,
             "w": 10,
@@ -1383,12 +1383,12 @@ data:
                 "type": "loki",
                 "uid": "loki"
               },
-              "expr": "topk(10, sum by (request_Cf_Ipcountry) (count_over_time({namespace=\"kube-system\", pod=~\"traefik.*\"} |= \"RequestHost\" | json | RequestHost=~\".+\\\\.blogdoft\\\\.dev\" | request_Cf_Ipcountry != \"\" [$__range])))",
+              "expr": "topk(30, sum by (request_Cf_Ipcountry) (count_over_time({namespace=\"kube-system\", pod=~\"traefik.*\"} |= \"RequestHost\" | json | RequestHost=~\".+\\\\.blogdoft\\\\.dev\" | request_Cf_Ipcountry != \"\" [$__range])))",
               "refId": "A",
               "queryType": "instant",
               "instant": true,
               "range": false,
-              "legendFormat": "{{request_Cf_Ipcountry}}"
+              "format": "table"
             }
           ],
           "fieldConfig": {
@@ -1398,19 +1398,66 @@ data:
               },
               "min": 0
             },
-            "overrides": []
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Requests"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "gauge",
+                      "mode": "gradient"
+                    }
+                  }
+                ]
+              }
+            ]
           },
           "options": {
-            "orientation": "horizontal",
-            "displayMode": "gradient",
-            "showUnfilled": true,
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "values": false
+            "showHeader": true
+          },
+          "transformations": [
+            {
+              "id": "labelsToFields",
+              "options": {
+                "mode": "columns"
+              }
+            },
+            {
+              "id": "merge",
+              "options": {}
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true
+                },
+                "renameByName": {
+                  "request_Cf_Ipcountry": "País",
+                  "Value": "Requests"
+                },
+                "indexByName": {
+                  "request_Cf_Ipcountry": 0,
+                  "Value": 1
+                }
+              }
+            },
+            {
+              "id": "sortBy",
+              "options": {
+                "sort": [
+                  {
+                    "field": "Requests",
+                    "desc": true
+                  }
+                ]
+              }
             }
-          }
+          ]
         },
         {
           "id": 5,
