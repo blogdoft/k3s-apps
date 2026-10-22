@@ -3,7 +3,7 @@ controllers:
     containers:
       main:
         image:
-          tag: v3.3.3
+          tag: v3.3.5
         env:
           REDIS_HOSTNAME: redis-server.redis-server.svc.cluster.local
           REDIS_PORT: "6379"
@@ -87,7 +87,7 @@ machine-learning:
       containers:
         main:
           image:
-            tag: v3.3.3-cuda
+            tag: v3.3.5-cuda
           env:
             NVIDIA_DRIVER_CAPABILITIES: compute,utility
           resources:
