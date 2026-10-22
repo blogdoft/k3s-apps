@@ -4,3 +4,4 @@ resources:
   - keycloak.yaml
   - keycloak-ingress.yaml
   - keycloak-blogdoft-theme.yaml
+  - keycloak-service-management-theme.yaml

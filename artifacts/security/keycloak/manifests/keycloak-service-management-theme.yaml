@@ -1,0 +1,191 @@
+# Login theme of the Arruma isso (service-management) realm. Source of truth: service-management repo,
+# .eng/keycloak/theme/service-management/login - keep both in sync.
+apiVersion: v1
+data:
+  login.css: |
+    /* Visual identity aligned with the web app (Sakai-inspired: emerald primary, system fonts, rounded cards).
+       Tokens mirror the Optimus UI "Aura" preset used by the frontend. */
+    :root {
+        --sm-primary: #10b981;
+        --sm-primary-hover: #059669;
+        --sm-surface: #f8fafc;
+        --sm-card: #ffffff;
+        --sm-text: #0f172a;
+        --sm-muted: #64748b;
+        --sm-border: #cbd5e1;
+        --sm-radius: 12px;
+        --sm-font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    html,
+    body,
+    .pf-v5-c-login,
+    .pf-v5-c-login__container {
+        font-family: var(--sm-font);
+    }
+
+    .pf-v5-c-login {
+        background: var(--sm-surface);
+        background-image: none;
+    }
+
+    /* One rounded card: the gradient lives in the border box and the card color in the padding box, so
+       no inner section (header, body, footer) paints its own square corners outside the radius. */
+    .pf-v5-c-login__main {
+        border: 0.3rem solid transparent;
+        border-radius: 56px;
+        padding: 0;
+        background:
+            linear-gradient(var(--sm-card), var(--sm-card)) padding-box,
+            linear-gradient(180deg, var(--sm-primary) 10%, rgba(33, 150, 243, 0) 30%) border-box;
+        box-shadow: none;
+        overflow: hidden;
+    }
+
+    .pf-v5-c-login__main-header,
+    .pf-v5-c-login__main-body,
+    .pf-v5-c-login__main-footer {
+        background: transparent;
+        border-radius: 0;
+        color: var(--sm-text);
+    }
+
+    .pf-v5-c-login__main-footer-band {
+        border-top: 0;
+    }
+
+    .pf-v5-c-login__main-header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem 1rem;
+    }
+
+    .pf-v5-c-login__main-header-utilities {
+        width: auto;
+    }
+
+    .pf-v5-c-login__main-header-utilities .pf-v5-c-form-control {
+        min-width: 8rem;
+    }
+
+    .pf-v5-c-brand,
+    .pf-v5-c-login__header {
+        color: var(--sm-text);
+    }
+
+    .pf-v5-c-title,
+    .pf-v5-c-login__main-header-desc {
+        color: var(--sm-text);
+        font-family: var(--sm-font);
+    }
+
+    /* PatternFly draws the control border with ::before/::after (plus a 2px bottom line on focus) and an
+       outline on the inner input; both are replaced by a single rounded border on the wrapper. */
+    .pf-v5-c-form-control {
+        --pf-v5-c-form-control--BorderRadius: var(--sm-radius);
+        border: 1px solid var(--sm-border);
+        border-radius: var(--sm-radius);
+        background: var(--sm-card);
+        overflow: hidden;
+    }
+
+    .pf-v5-c-form-control::before,
+    .pf-v5-c-form-control::after {
+        border: 0;
+        content: none;
+    }
+
+    .pf-v5-c-form-control:focus-within {
+        border-color: var(--sm-primary);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--sm-primary) 25%, transparent);
+    }
+
+    .pf-v5-c-form-control input,
+    .pf-v5-c-form-control select {
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        color: var(--sm-text);
+        outline: none;
+        box-shadow: none;
+    }
+
+    /* Password field: the input and the show/hide button share one border, owned by the group. */
+    .pf-v5-c-input-group {
+        border: 1px solid var(--sm-border);
+        border-radius: var(--sm-radius);
+        background: var(--sm-card);
+        overflow: hidden;
+    }
+
+    .pf-v5-c-input-group:focus-within {
+        border-color: var(--sm-primary);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--sm-primary) 25%, transparent);
+    }
+
+    .pf-v5-c-input-group .pf-v5-c-form-control {
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .pf-v5-c-input-group .pf-v5-c-button.pf-m-control {
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        color: var(--sm-muted);
+    }
+
+    .pf-v5-c-button::before,
+    .pf-v5-c-button::after {
+        border: 0;
+    }
+
+    .pf-v5-c-button.pf-m-primary {
+        --pf-v5-c-button--m-primary--BackgroundColor: var(--sm-primary);
+        --pf-v5-c-button--m-primary--hover--BackgroundColor: var(--sm-primary-hover);
+        --pf-v5-c-button--m-primary--active--BackgroundColor: var(--sm-primary-hover);
+        --pf-v5-c-button--m-primary--focus--BackgroundColor: var(--sm-primary-hover);
+        border-radius: 999px;
+    }
+
+    a,
+    .pf-v5-c-button.pf-m-link {
+        color: var(--sm-primary-hover);
+    }
+
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --sm-surface: #09090b;
+            --sm-card: #18181b;
+            --sm-text: #f4f4f5;
+            --sm-muted: #a1a1aa;
+            --sm-border: #3f3f46;
+        }
+    }
+  messages_en.properties: |
+    loginAccountTitle=Sign in to Arruma isso
+    loginTitle=Sign in to Arruma isso
+    registerTitle=Create account
+  messages_pt_BR.properties: |
+    loginAccountTitle=Entrar no Arruma isso
+    loginTitle=Entrar no Arruma isso
+    registerTitle=Criar conta
+    doLogIn=Entrar
+    doRegister=Criar conta
+    doForgotPassword=Esqueci a senha
+  theme.properties: |
+    # Styling only: no business logic, no tenant data, no external resources at runtime.
+    parent=keycloak.v2
+    import=common/keycloak
+    styles=css/login.css
+    locales=pt-BR,en
+kind: ConfigMap
+metadata:
+  name: keycloak-service-management-login-theme
+  labels:
+    app: keycloak
+    app.kubernetes.io/component: theme
+    app.kubernetes.io/name: keycloak

@@ -113,6 +113,9 @@ spec:
             - name: keycloak-blogdoft-login-theme
               mountPath: /opt/keycloak/themes/blogdoft/login
               readOnly: true
+            - name: keycloak-service-management-login-theme
+              mountPath: /opt/keycloak/themes/service-management/login
+              readOnly: true
           ports:
             - name: http
               containerPort: 8080
@@ -160,3 +163,15 @@ spec:
                 path: resources/css/terminal-v4.css
               - key: template.ftl
                 path: template.ftl
+        - name: keycloak-service-management-login-theme
+          configMap:
+            name: keycloak-service-management-login-theme
+            items:
+              - key: theme.properties
+                path: theme.properties
+              - key: login.css
+                path: resources/css/login.css
+              - key: messages_en.properties
+                path: messages/messages_en.properties
+              - key: messages_pt_BR.properties
+                path: messages/messages_pt_BR.properties
