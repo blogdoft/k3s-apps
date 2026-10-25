@@ -116,6 +116,9 @@ spec:
             - name: keycloak-service-management-login-theme
               mountPath: /opt/keycloak/themes/service-management/login
               readOnly: true
+            - name: keycloak-corta-login-theme
+              mountPath: /opt/keycloak/themes/corta/login
+              readOnly: true
           ports:
             - name: http
               containerPort: 8080
@@ -173,5 +176,35 @@ spec:
                 path: resources/css/login.css
               - key: messages_en.properties
                 path: messages/messages_en.properties
+        - name: keycloak-corta-login-theme
+          configMap:
+            name: keycloak-corta-login-theme
+            items:
+              - key: theme.properties
+                path: theme.properties
+              - key: corta.css
+                path: resources/css/corta.css
+              - key: ofl-baloo2.txt
+                path: resources/fonts/OFL-LICENSE-Baloo2.txt
+              - key: ofl-nunito.txt
+                path: resources/fonts/OFL-LICENSE-Nunito.txt
+              - key: baloo700.woff2
+                path: resources/fonts/baloo-2-latin-700-normal.woff2
+              - key: nunito400.woff2
+                path: resources/fonts/nunito-latin-400-normal.woff2
+              - key: nunito600.woff2
+                path: resources/fonts/nunito-latin-600-normal.woff2
+              - key: nunito700.woff2
+                path: resources/fonts/nunito-latin-700-normal.woff2
+              - key: nunito800.woff2
+                path: resources/fonts/nunito-latin-800-normal.woff2
+              - key: icon.svg
+                path: resources/img/corta-icon.svg
+              - key: logo-dark.svg
+                path: resources/img/corta-logo-dark.svg
+              - key: logo.svg
+                path: resources/img/corta-logo.svg
+              - key: favicon.ico
+                path: resources/img/favicon.ico
               - key: messages_pt_BR.properties
                 path: messages/messages_pt_BR.properties
