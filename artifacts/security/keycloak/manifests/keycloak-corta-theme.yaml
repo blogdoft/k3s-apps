@@ -117,6 +117,9 @@ data:
     /* senha: campo e botão de exibir formam uma peça só */
     .pf-v5-c-input-group { gap: 0; }
 
+    /* o tema escuro do PatternFly separa os itens do grupo com uma borda cinza e sobrepõe 1px */
+    .pf-v5-c-input-group > * + * { border-inline-start: 0; margin-inline-start: 0; }
+
     .pf-v5-c-input-group__item.pf-m-fill .pf-v5-c-form-control { border-top-right-radius: 0; border-bottom-right-radius: 0; }
 
     .pf-v5-c-input-group__item.pf-m-fill .pf-v5-c-form-control::before { border-right: 0; border-top-right-radius: 0; border-bottom-right-radius: 0; }
@@ -129,11 +132,22 @@ data:
         box-shadow: inset 0 1px 0 var(--corta-border), inset 0 -1px 0 var(--corta-border), inset -1px 0 0 var(--corta-border);
     }
 
+    .pf-v5-c-input-group:hover .pf-v5-c-form-control::before { border-color: var(--corta-border-hover); }
+
+    .pf-v5-c-input-group:hover .pf-v5-c-button.pf-m-control {
+        box-shadow: inset 0 1px 0 var(--corta-border-hover), inset 0 -1px 0 var(--corta-border-hover), inset -1px 0 0 var(--corta-border-hover);
+    }
+
+    .pf-v5-c-input-group:focus-within .pf-v5-c-form-control::before { border-color: var(--corta-primary); }
+
     .pf-v5-c-input-group:focus-within .pf-v5-c-button.pf-m-control {
         box-shadow: inset 0 1px 0 var(--corta-primary), inset 0 -1px 0 var(--corta-primary), inset -1px 0 0 var(--corta-primary);
     }
 
+    /* o anel de foco envolve o grupo inteiro, não só o campo */
     .pf-v5-c-input-group__item.pf-m-fill .pf-v5-c-form-control:focus-within::before { box-shadow: none; }
+
+    .pf-v5-c-input-group:focus-within { border-radius: 0.75rem; box-shadow: 0 0 0 3px var(--corta-focus-ring); }
 
     .pf-v5-c-button.pf-m-control::after { display: none; }
 
