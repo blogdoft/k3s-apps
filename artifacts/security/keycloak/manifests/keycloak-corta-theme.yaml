@@ -161,6 +161,35 @@ data:
         --pf-v5-c-button--m-primary--active--BackgroundColor: var(--corta-primary-hover);
     }
 
+    /* secundário (ex.: "Sign in with Passkey"): mesmo molde do primário, contornado; --corta-link tem contraste nos dois temas */
+    .pf-v5-c-button.pf-m-secondary {
+        border-radius: 0.75rem;
+        font-weight: 700;
+        min-height: 2.75rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+        color: var(--corta-link);
+        --pf-v5-c-button--m-secondary--Color: var(--corta-link);
+        --pf-v5-c-button--m-secondary--hover--Color: var(--corta-link-hover);
+        --pf-v5-c-button--m-secondary--focus--Color: var(--corta-link-hover);
+        --pf-v5-c-button--m-secondary--active--Color: var(--corta-link-hover);
+        --pf-v5-c-button--m-secondary--BorderColor: var(--corta-link);
+        --pf-v5-c-button--m-secondary--hover--BorderColor: var(--corta-link-hover);
+        --pf-v5-c-button--m-secondary--focus--BorderColor: var(--corta-link-hover);
+        --pf-v5-c-button--m-secondary--active--BorderColor: var(--corta-link-hover);
+    }
+
+    .pf-v5-c-button.pf-m-secondary::after { border-radius: 0.75rem; border-color: var(--corta-link); }
+
+    .pf-v5-c-button.pf-m-secondary:hover, .pf-v5-c-button.pf-m-secondary:focus {
+        background: var(--corta-peach);
+        color: var(--corta-link-hover);
+    }
+
+    .pf-v5-c-button.pf-m-secondary:hover::after, .pf-v5-c-button.pf-m-secondary:focus::after { border-color: var(--corta-link-hover); }
+
     .pf-v5-c-button:focus-visible { outline: 2px solid var(--corta-primary); outline-offset: 2px; }
 
     @media (max-width: 576px) {
