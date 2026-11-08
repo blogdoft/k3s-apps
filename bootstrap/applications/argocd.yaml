@@ -22,6 +22,7 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - RespectIgnoreDifferences=true
+      - ServerSideApply=true
   ignoreDifferences:
     - group: apps
       kind: StatefulSet
