@@ -44,7 +44,7 @@ The repository deploys and manages:
 
 ### VPS cluster (managed from here)
 
-* The VPS k3s cluster (`https://10.77.0.1:6443`, WireGuard only) is registered in this Argo CD and driven by the separate repo `git@github.com:blogdoft/vps-apps.git` through the `vps-bootstrap` Application (project `vps-root`).
+* The VPS k3s cluster (`https://<vpn-vps-ip>:6443`, WireGuard only) is registered in this Argo CD and driven by the separate repo `git@github.com:blogdoft/vps-apps.git` through the `vps-bootstrap` Application (project `vps-root`).
 * Registration steps and RBAC: `artifacts/platform/vps-cluster/readme.md`. The repo is read with a read-only deploy key (Secret `repo-vps-apps`, created with `kubectl`, not stored in Git).
 
 ### Longhorn (distributed storage)
